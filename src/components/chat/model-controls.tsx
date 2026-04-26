@@ -1,0 +1,41 @@
+"use client";
+
+import { Select } from "@/components/ui/select";
+import { modelRegistry } from "@/modules/ai/registry/model-registry";
+import { useChatStore, type RoutingMode } from "@/components/chat/chat-store";
+
+export function ModelControls() {
+  const { routingMode, selectedModel, setRoutingMode, setSelectedModel } = useChatStore();
+
+  return (
+    <div className="grid gap-3 border-b bg-card p-4 md:grid-cols-[1fr_180px]">
+      <label className="grid gap-1 text-sm">
+        <span className="font-medium">Model</span>
+        <Select
+          value={`${selectedModel.provider}:${selectedModel.modelId}`}
+          onChange={(event) => {
+            const [provider, modelId] = event.target.value.split(":");
+            setSelectedModel({ provider, modelId });
+          }}
+        >
+          {modelRegistry.map((model) => (
+            <option key={`${model.provider}:${model.modelId}`} value={`${model.provider}:${model.modelId}`}>
+              {model.displayName}
+            </option>
+          ))}
+        </Select>
+      </label>
+      <label className="grid gap-1 text-sm">
+        <span className="font-medium">Routing</span>
+        <Select
+          value={routingMode}
+          onChange={(event) => setRoutingMode(event.target.value as RoutingMode)}
+        >
+          <option value="manual">Manual</option>
+          <option value="suggest">Suggest</option>
+          <option value="auto">Auto</option>
+        </Select>
+      </label>
+    </div>
+  );
+}
