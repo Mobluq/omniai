@@ -478,3 +478,17 @@ model AuditLog {
   @@index([userId, createdAt])
   @@index([action])
 }
+
+model RateLimitBucket {
+  id           String    @id @default(cuid())
+  keyHash      String    @unique
+  scope        String
+  count        Int       @default(0)
+  resetAt      DateTime
+  blockedUntil DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([scope, resetAt])
+  @@index([blockedUntil])
+}

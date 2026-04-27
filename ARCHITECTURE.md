@@ -74,4 +74,4 @@ The structure is ready to split into services later:
 - billing service
 - usage analytics service
 
-Queues, Redis rate limiting, background embedding jobs, and provider fallback policies can be added without changing the public API shape.
+Queues, Redis-backed rate limiting, background embedding jobs, and provider fallback policies can be added without changing the public API shape. The current limiter is database-backed so the MVP does not depend on process memory.

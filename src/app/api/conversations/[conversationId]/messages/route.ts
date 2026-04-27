@@ -15,7 +15,12 @@ export async function POST(request: NextRequest, context: Context) {
 
   try {
     const user = await requireUser();
-    assertRateLimit({ key: `message:${user.id}:${getClientIp(request)}`, limit: 40, windowMs: 60_000 });
+    await assertRateLimit({
+      scope: "conversation.message",
+      key: `${user.id}:${getClientIp(request)}`,
+      limit: 40,
+      windowMs: 60_000,
+    });
     const { conversationId } = await context.params;
     const body = sendMessageSchema.parse(await request.json());
     const result = await new ChatOrchestrator().sendMessage(user.id, conversationId, body);

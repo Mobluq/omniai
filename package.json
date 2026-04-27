@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "ts-node --project tsconfig.test.json -r tsconfig-paths/register tests/run-tests.ts",
+    "test": "ts-node --project tsconfig.test.json -r ./tests/register-server-only.cjs -r tsconfig-paths/register tests/run-tests.ts",
     "test:vitest": "vitest run --config vitest.config.mjs",
     "test:watch": "vitest --config vitest.config.mjs",
     "format": "prettier --write .",

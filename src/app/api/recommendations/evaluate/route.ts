@@ -12,8 +12,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const user = await requireUser();
-    assertRateLimit({
-      key: `recommendation:${user.id}:${getClientIp(request)}`,
+    await assertRateLimit({
+      scope: "recommendation.evaluate",
+      key: `${user.id}:${getClientIp(request)}`,
       limit: 60,
       windowMs: 60_000,
     });

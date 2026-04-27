@@ -57,4 +57,5 @@ export const signUpSchema = z.object({
   name: z.string().min(2).max(80),
   email: z.string().email().max(255),
   password: z.string().min(10).max(128),
+  inviteCode: z.string().max(128).optional(),
 });

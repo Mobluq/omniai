@@ -4,6 +4,10 @@ import { RecommendationEngine } from "@/modules/ai/recommendation/recommendation
 import { RoutingEngine } from "@/modules/ai/routing/routing-engine";
 
 async function run() {
+  process.env.DATABASE_URL ??= "postgresql://postgres:postgres@localhost:5432/omniai";
+  process.env.NEXTAUTH_SECRET ??= "test-secret";
+  process.env.NEXTAUTH_URL ??= "http://localhost:3000";
+
   const registry = new ModelRegistryService();
   const providers = new Set(registry.list().map((model) => model.provider));
   assert.deepEqual(providers, new Set(["openai", "anthropic", "google", "stability", "mistral"]));

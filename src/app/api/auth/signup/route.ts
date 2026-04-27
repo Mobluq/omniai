@@ -4,13 +4,21 @@ import { signUpSchema } from "@/lib/validators/api-schemas";
 import { assertRateLimit } from "@/lib/security/rate-limit";
 import { getClientIp, getRequestId } from "@/lib/security/request-context";
 import { AuthService } from "@/modules/auth/auth-service";
+import { assertSignupAllowed } from "@/modules/auth/signup-policy";
 
 export async function POST(request: NextRequest) {
   const requestId = getRequestId(request);
 
   try {
-    assertRateLimit({ key: `signup:${getClientIp(request)}`, limit: 10, windowMs: 60_000 });
+    await assertRateLimit({
+      scope: "auth.signup",
+      key: getClientIp(request),
+      limit: 10,
+      windowMs: 60_000,
+      blockDurationMs: 10 * 60_000,
+    });
     const body = signUpSchema.parse(await request.json());
+    assertSignupAllowed(body.inviteCode);
     const result = await new AuthService().signUp(body);
 
     return successResponse(

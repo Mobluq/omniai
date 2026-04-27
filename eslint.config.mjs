@@ -11,6 +11,7 @@ const eslintConfig = [
       "coverage/**",
       "playwright-report/**",
       "dist/**",
+      "tests/register-server-only.cjs",
     ],
   },
 ];

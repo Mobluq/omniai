@@ -51,3 +51,14 @@ ADMIN_WORKSPACE_NAME="OmniAI Admin Workspace"
 ```
 
 Run `npm run db:seed` after migrations. The seed creates or updates the admin user and grants `owner` access to an admin workspace.
+
+## Signup policy
+
+Production defaults to invite-only if `SIGNUP_MODE` is not set:
+
+```bash
+SIGNUP_MODE="invite"
+SIGNUP_INVITE_CODE="generated-private-code"
+```
+
+Use `SIGNUP_MODE="public"` only when email verification, abuse controls, and billing limits are ready.

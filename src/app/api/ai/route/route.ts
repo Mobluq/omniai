@@ -12,7 +12,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const user = await requireUser();
-    assertRateLimit({ key: `route:${user.id}:${getClientIp(request)}`, limit: 40, windowMs: 60_000 });
+    await assertRateLimit({
+      scope: "ai.route",
+      key: `${user.id}:${getClientIp(request)}`,
+      limit: 40,
+      windowMs: 60_000,
+    });
     const body = routeRequestSchema.parse(await request.json());
     await assertWorkspaceAccess(user.id, body.workspaceId, "member");
 

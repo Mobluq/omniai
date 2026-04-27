@@ -1,5 +1,10 @@
 import "server-only";
 import { PrismaClient } from "@prisma/client";
+import { getServerEnv } from "@/lib/env/server";
+
+if (process.env.NODE_ENV === "production") {
+  getServerEnv();
+}
 
 const globalForPrisma = globalThis as unknown as {
   prisma?: PrismaClient;

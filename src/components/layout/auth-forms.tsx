@@ -73,6 +73,7 @@ export function SignUpForm() {
         name: String(formData.get("name")),
         email,
         password,
+        inviteCode: String(formData.get("inviteCode") ?? "") || undefined,
       }),
     });
 
@@ -98,6 +99,10 @@ export function SignUpForm() {
       <div className="grid gap-2">
         <Label htmlFor="password">Password</Label>
         <Input id="password" name="password" type="password" autoComplete="new-password" minLength={10} required />
+      </div>
+      <div className="grid gap-2">
+        <Label htmlFor="inviteCode">Invite code</Label>
+        <Input id="inviteCode" name="inviteCode" autoComplete="off" />
       </div>
       {state === "error" ? (
         <p className="text-sm text-destructive">Could not create the account. Check the details and try again.</p>

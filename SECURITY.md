@@ -8,6 +8,10 @@ Provider keys, database credentials, Auth.js secrets, Stripe keys, and Sentry DS
 
 The scaffold uses NextAuth credentials auth with an Auth.js-compatible Prisma schema. OAuth can be added through additional providers without changing the user/workspace model.
 
+Credentials login is protected by database-backed throttling keyed by email and client IP. Failed and successful login attempts are recorded in the audit log with hashed email metadata so investigations do not require storing raw attempted addresses.
+
+Public signup is controlled by `SIGNUP_MODE`. Production defaults to invite-only and requires `SIGNUP_INVITE_CODE` unless signup is explicitly disabled or opened.
+
 ## Authorization and Tenant Isolation
 
 Workspace access is checked through `assertWorkspaceAccess`. Workspace-scoped resources must always verify membership before read or write operations. Core tables include `workspaceId` where tenant isolation is required.
@@ -18,7 +22,7 @@ All route inputs use Zod schemas from `src/lib/validators/api-schemas.ts`. Route
 
 ## Rate Limiting
 
-API routes include an in-memory rate limiter foundation. Production should replace this with Redis, Upstash, or another shared store so limits work across instances.
+API routes use a database-backed limiter in the `RateLimitBucket` table. It stores hashed keys, supports temporary blocking, and runs updates inside serializable transactions so limits work across serverless instances. High-volume production installs can later swap the implementation for Redis, Upstash, or Vercel KV behind the same `assertRateLimit` interface.
 
 ## API Key Handling
 
@@ -36,8 +40,7 @@ The memory service sanitizes external text and wraps retrieved context as untrus
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy`
 - restrictive `Permissions-Policy`
-
-Add a strict Content Security Policy before production launch.
+- `Content-Security-Policy`
 
 ## CSRF
 
