@@ -93,6 +93,21 @@ enum BillingInterval {
   year
 }
 
+enum ProjectStatus {
+  active
+  archived
+}
+
+enum ArtifactType {
+  document
+  image
+  code
+  research
+  proposal
+  prompt
+  other
+}
+
 model User {
   id                  String                @id @default(cuid())
   name                String?
@@ -116,6 +131,8 @@ model User {
   usageLogs           UsageLog[]
   auditLogs           AuditLog[]
   conversationMemory  ConversationMemory[]
+  projects            Project[]
+  artifacts           Artifact[]
 
   @@index([email])
 }
@@ -174,6 +191,8 @@ model Workspace {
   subscriptions      Subscription[]
   auditLogs          AuditLog[]
   conversationMemory ConversationMemory[]
+  projects           Project[]
+  artifacts          Artifact[]
 
   @@index([slug])
 }
@@ -195,6 +214,7 @@ model WorkspaceMember {
 model Conversation {
   id             String      @id @default(cuid())
   workspaceId    String
+  projectId      String?
   createdById    String
   title          String
   activeProvider String?
@@ -204,11 +224,14 @@ model Conversation {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
   workspace      Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project        Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
   createdBy      User        @relation(fields: [createdById], references: [id], onDelete: Restrict)
   messages       Message[]
   memories       ConversationMemory[]
+  artifacts      Artifact[]
 
   @@index([workspaceId, updatedAt])
+  @@index([projectId, updatedAt])
   @@index([createdById])
 }
 
@@ -323,6 +346,7 @@ model UsageLog {
 model KnowledgeSource {
   id          String              @id @default(cuid())
   workspaceId String
+  projectId   String?
   type        KnowledgeSourceType
   title       String
   sourceUri   String?
@@ -330,9 +354,62 @@ model KnowledgeSource {
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
   workspace   Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project     Project?            @relation(fields: [projectId], references: [id], onDelete: SetNull)
   documents   Document[]
 
   @@index([workspaceId, type])
+  @@index([projectId, createdAt])
+}
+
+model Project {
+  id                 String          @id @default(cuid())
+  workspaceId        String
+  createdById        String
+  name               String
+  slug               String
+  description        String?         @db.Text
+  instructions       String?         @db.Text
+  defaultRoutingMode RoutingMode     @default(suggest)
+  defaultProvider    String?
+  defaultModelId     String?
+  status             ProjectStatus   @default(active)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  workspace          Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy          User            @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  conversations      Conversation[]
+  knowledgeSources   KnowledgeSource[]
+  artifacts          Artifact[]
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId, status, updatedAt])
+  @@index([createdById])
+}
+
+model Artifact {
+  id             String       @id @default(cuid())
+  workspaceId    String
+  projectId      String?
+  conversationId String?
+  messageId      String?
+  createdById    String?
+  type           ArtifactType @default(other)
+  title          String
+  content        String       @db.Text
+  provider       String?
+  modelId        String?
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  workspace      Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project        Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  createdBy      User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@index([projectId, createdAt])
+  @@index([conversationId])
+  @@index([messageId])
 }
 
 model Document {

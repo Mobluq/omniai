@@ -76,6 +76,9 @@ The scaffold includes:
 - Multi-tenant workspace schema and authorization checks
 - Conversation and message storage
 - Persistent chat history with selectable conversations
+- Project workspaces with instructions, knowledge, conversations, and artifacts
+- Knowledge source ingestion for notes, URLs, and file text
+- Automatic artifact capture for valuable generated outputs
 - Server-side provider connection settings with encrypted workspace API keys
 - Isolated provider adapters with live-call paths and safe no-key fallbacks
 - Model registry with capability metadata
@@ -84,4 +87,4 @@ The scaffold includes:
 - Memory/knowledge architecture prepared for vector search
 - Usage logs, billing models, audit logs, and settings structure
 
-See `ARCHITECTURE.md`, `SECURITY.md`, `ENVIRONMENT.md`, `API.md`, and `DEPLOYMENT.md` for more detail.
+See `UX_FLOW.md`, `ARCHITECTURE.md`, `SECURITY.md`, `ENVIRONMENT.md`, `API.md`, and `DEPLOYMENT.md` for more detail.

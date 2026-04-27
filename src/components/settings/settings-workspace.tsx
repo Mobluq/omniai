@@ -53,6 +53,7 @@ export function SettingsWorkspace() {
   const [retentionDays, setRetentionDays] = useState(365);
   const [memoryEnabled, setMemoryEnabled] = useState(true);
   const [savingProvider, setSavingProvider] = useState<string | null>(null);
+  const [testingProvider, setTestingProvider] = useState<string | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [notice, setNotice] = useState<string | null>(null);
@@ -163,6 +164,30 @@ export function SettingsWorkspace() {
     setSavingSettings(false);
   }
 
+  async function testProvider(provider: ProviderConnection) {
+    if (!workspace) {
+      return;
+    }
+
+    setTestingProvider(provider.provider);
+    setNotice(null);
+    const response = await fetch("/api/providers/test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        workspaceId: workspace.id,
+        provider: provider.provider,
+      }),
+    });
+    const envelope = await parseEnvelope<{
+      configured: boolean;
+      message: string;
+    }>(response);
+
+    setNotice(envelope.success ? envelope.data.message : envelope.error.message);
+    setTestingProvider(null);
+  }
+
   if (status === "loading") {
     return (
       <div className="grid min-h-72 place-items-center rounded-lg border border-dashed">
@@ -265,6 +290,17 @@ export function SettingsWorkspace() {
                         disabled={savingProvider === provider.provider}
                       >
                         Disable
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => testProvider(provider)}
+                        disabled={testingProvider === provider.provider}
+                      >
+                        {testingProvider === provider.provider ? (
+                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                        ) : null}
+                        Test
                       </Button>
                     </div>
                   </CardContent>

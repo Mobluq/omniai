@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
     const body = createConversationSchema.parse(await request.json());
     const conversation = await new ConversationService().create(user.id, {
       workspaceId: body.workspaceId,
+      projectId: body.projectId,
       title: body.title,
       routingMode: body.routingMode,
       provider: body.provider,

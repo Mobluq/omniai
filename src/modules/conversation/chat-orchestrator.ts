@@ -6,6 +6,7 @@ import { MemoryService } from "@/modules/memory/memory-service";
 import { RecommendationEngine } from "@/modules/ai/recommendation/recommendation-engine";
 import { ModelRegistryService } from "@/modules/ai/registry/model-registry";
 import { RoutingEngine } from "@/modules/ai/routing/routing-engine";
+import { ArtifactService } from "@/modules/artifact/artifact-service";
 import { UsageService } from "@/modules/usage/usage-service";
 
 export type SendConversationMessageInput = {
@@ -23,6 +24,7 @@ export class ChatOrchestrator {
   private readonly recommendations = new RecommendationEngine();
   private readonly registry = new ModelRegistryService();
   private readonly routing = new RoutingEngine();
+  private readonly artifacts = new ArtifactService();
   private readonly usage = new UsageService();
 
   async sendMessage(userId: string, conversationId: string, input: SendConversationMessageInput) {
@@ -83,7 +85,21 @@ export class ChatOrchestrator {
       };
     }
 
-    const context = this.memory.prepareContextInjection(await this.memory.retrieveRelevantContext());
+    const projectInstructions = conversation.project?.instructions
+      ? [
+          `Project instructions for "${conversation.project.name}":\n${conversation.project.instructions}`,
+        ]
+      : [];
+    const context = [
+      ...projectInstructions,
+      ...this.memory.prepareContextInjection(
+        await this.memory.retrieveRelevantContext({
+          workspaceId: conversation.workspaceId,
+          projectId: conversation.projectId,
+          query: content,
+        }),
+      ),
+    ];
     const routed = await this.routing.route({
       prompt: content,
       routingMode: input.routingMode,
@@ -110,6 +126,17 @@ export class ChatOrchestrator {
       metadata: {
         routingMode: routed.decision.mode,
       },
+    });
+
+    await this.artifacts.createFromAssistantMessage({
+      userId,
+      workspaceId: conversation.workspaceId,
+      projectId: conversation.projectId,
+      conversationId: conversation.id,
+      messageId: assistantMessage.id,
+      content: assistantMessage.content,
+      provider: assistantMessage.provider,
+      modelId: assistantMessage.modelId,
     });
 
     await prisma.conversation.update({

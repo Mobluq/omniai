@@ -90,6 +90,17 @@ Requires workspace admin access.
 }
 ```
 
+`POST /api/providers/test`
+
+Checks whether a provider has server-side credentials available without exposing keys.
+
+```json
+{
+  "workspaceId": "workspace_id",
+  "provider": "openai"
+}
+```
+
 ## Conversations
 
 `GET /api/conversations?workspaceId=...`
@@ -99,10 +110,77 @@ Requires workspace admin access.
 ```json
 {
   "workspaceId": "workspace_id",
+  "projectId": "project_id",
   "title": "New launch campaign",
   "routingMode": "suggest",
   "provider": "openai",
   "modelId": "openai-chat-primary"
+}
+```
+
+## Projects
+
+`GET /api/projects?workspaceId=...`
+
+Returns active projects with conversation, knowledge, and artifact counts.
+
+`POST /api/projects`
+
+```json
+{
+  "workspaceId": "workspace_id",
+  "name": "Fintech launch",
+  "description": "Workspace for launch strategy, design, and GTM assets.",
+  "instructions": "Use concise executive language.",
+  "defaultRoutingMode": "suggest"
+}
+```
+
+`GET /api/projects/:id`
+
+Returns project details, recent conversations, knowledge sources, and artifacts.
+
+`PATCH /api/projects/:id`
+
+Updates project metadata and routing defaults.
+
+`DELETE /api/projects/:id`
+
+Archives a project.
+
+## Knowledge
+
+`GET /api/knowledge?workspaceId=...&projectId=...`
+
+Returns workspace or project-scoped knowledge sources.
+
+`POST /api/knowledge`
+
+```json
+{
+  "workspaceId": "workspace_id",
+  "projectId": "project_id",
+  "type": "note",
+  "title": "Brand rules",
+  "content": "Use a calm enterprise tone."
+}
+```
+
+## Artifacts
+
+`GET /api/artifacts?workspaceId=...&projectId=...`
+
+Returns generated or manually saved artifacts.
+
+`POST /api/artifacts`
+
+```json
+{
+  "workspaceId": "workspace_id",
+  "projectId": "project_id",
+  "type": "proposal",
+  "title": "Enterprise proposal",
+  "content": "..."
 }
 ```
 

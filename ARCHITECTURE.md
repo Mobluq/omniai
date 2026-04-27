@@ -16,12 +16,14 @@ Next.js UI
 
 - `auth`: signup foundation and Auth.js/NextAuth configuration
 - `workspace`: multi-tenant workspace creation, listing, membership checks
+- `project`: project-level working contexts with instructions, routing defaults, knowledge, conversations, and artifacts
 - `conversation`: conversation and message persistence plus chat orchestration
 - `ai/providers`: shared provider interface and isolated adapters
 - `ai/registry`: central model capability registry
 - `ai/recommendation`: rule-based intent classification and model scoring
 - `ai/routing`: manual, suggest, and auto route decisions
-- `memory`: text sanitization, chunking, retrieval, and context injection boundary
+- `knowledge` / `memory`: text sanitization, chunking, retrieval, and context injection boundary
+- `artifact`: durable generated outputs such as images, code, research, proposals, and long documents
 - `usage`: request, token, model, provider, and cost metering
 - `billing`: Stripe-ready plan/subscription models
 - `audit`: audit event persistence

@@ -9,6 +9,7 @@ export const createWorkspaceSchema = z.object({
 
 export const createConversationSchema = z.object({
   workspaceId: z.string().min(1),
+  projectId: z.string().min(1).optional(),
   title: z.string().min(1).max(120).optional(),
   routingMode: routingModeSchema.default("suggest"),
   modelId: z.string().min(1).optional(),
@@ -53,11 +54,57 @@ export const providerConfigurationSchema = z.object({
   isEnabled: z.boolean(),
 });
 
+export const providerTestSchema = z.object({
+  workspaceId: z.string().min(1),
+  provider: providerIdSchema,
+});
+
 export const settingsUpdateSchema = z.object({
   defaultRoutingMode: routingModeSchema.optional(),
   defaultModelId: z.string().min(1).optional(),
   memoryEnabled: z.boolean().optional(),
   dataRetentionDays: z.number().int().min(1).max(3650).optional(),
+});
+
+export const createProjectSchema = z.object({
+  workspaceId: z.string().min(1),
+  name: z.string().min(2).max(100),
+  description: z.string().max(2000).optional(),
+  instructions: z.string().max(8000).optional(),
+  defaultRoutingMode: routingModeSchema.default("suggest"),
+  defaultProvider: z.string().min(1).optional(),
+  defaultModelId: z.string().min(1).optional(),
+});
+
+export const updateProjectSchema = z.object({
+  name: z.string().min(2).max(100).optional(),
+  description: z.string().max(2000).optional(),
+  instructions: z.string().max(8000).optional(),
+  defaultRoutingMode: routingModeSchema.optional(),
+  defaultProvider: z.string().min(1).nullable().optional(),
+  defaultModelId: z.string().min(1).nullable().optional(),
+  status: z.enum(["active", "archived"]).optional(),
+});
+
+export const createKnowledgeSourceSchema = z.object({
+  workspaceId: z.string().min(1),
+  projectId: z.string().min(1).optional(),
+  type: z.enum(["note", "url", "file"]).default("note"),
+  title: z.string().min(2).max(160),
+  sourceUri: z.string().url().optional(),
+  content: z.string().min(1).max(100000),
+});
+
+export const createArtifactSchema = z.object({
+  workspaceId: z.string().min(1),
+  projectId: z.string().min(1).optional(),
+  conversationId: z.string().min(1).optional(),
+  messageId: z.string().min(1).optional(),
+  type: z.enum(["document", "image", "code", "research", "proposal", "prompt", "other"]).default("other"),
+  title: z.string().min(2).max(160),
+  content: z.string().min(1).max(100000),
+  provider: z.string().min(1).optional(),
+  modelId: z.string().min(1).optional(),
 });
 
 export const signUpSchema = z.object({

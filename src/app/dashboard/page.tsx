@@ -11,6 +11,9 @@ import { UsageService } from "@/modules/usage/usage-service";
 import { WorkspaceService } from "@/modules/workspace/workspace-service";
 import { ConversationService } from "@/modules/conversation/conversation-service";
 import { ProviderConfigurationService } from "@/modules/ai/providers/provider-config-service";
+import { ProjectService } from "@/modules/project/project-service";
+import { KnowledgeService } from "@/modules/knowledge/knowledge-service";
+import { ArtifactService } from "@/modules/artifact/artifact-service";
 
 function formatDate(value: Date) {
   return new Intl.DateTimeFormat("en", {
@@ -37,6 +40,9 @@ export default async function DashboardPage() {
   const providers = workspace
     ? await new ProviderConfigurationService().listWorkspaceConnections(user.id, workspace.id)
     : [];
+  const projects = workspace ? await new ProjectService().list(user.id, workspace.id) : [];
+  const knowledgeSources = workspace ? await new KnowledgeService().list(user.id, workspace.id) : [];
+  const artifacts = workspace ? await new ArtifactService().list(user.id, workspace.id) : [];
 
   return (
     <AppShell>
@@ -125,6 +131,36 @@ export default async function DashboardPage() {
                   </div>
                 );
               })}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader>
+              <CardTitle>Projects</CardTitle>
+              <CardDescription>Active workspaces for focused AI tasks.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-semibold">{projects.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Knowledge sources</CardTitle>
+              <CardDescription>Reusable context available to the router.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-semibold">{knowledgeSources.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Artifacts</CardTitle>
+              <CardDescription>Saved outputs generated from work sessions.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-semibold">{artifacts.length}</p>
             </CardContent>
           </Card>
         </div>

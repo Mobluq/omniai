@@ -117,6 +117,7 @@ function MessageContent({ content }: { content: string }) {
 export function ChatWorkspace() {
   const { routingMode, selectedModel, setRoutingMode, setSelectedModel } = useChatStore();
   const [workspace, setWorkspace] = useState<{ id: string; name: string } | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [conversations, setConversations] = useState<ConversationListItem[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -177,7 +178,7 @@ export function ChatWorkspace() {
     setStatus("idle");
   }
 
-  async function createConversation(workspaceId = workspace?.id) {
+  async function createConversation(workspaceId = workspace?.id, activeProjectId = projectId) {
     if (!workspaceId) {
       return;
     }
@@ -189,6 +190,7 @@ export function ChatWorkspace() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         workspaceId,
+        projectId: activeProjectId ?? undefined,
         title: "New conversation",
         routingMode,
         provider: selectedModel.provider,
@@ -242,11 +244,14 @@ export function ChatWorkspace() {
       }
 
       const activeWorkspace = workspaceEnvelope.data.workspaces[0];
+      const requestedProjectId =
+        typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("projectId");
       if (cancelled) {
         return;
       }
 
       setWorkspace(activeWorkspace);
+      setProjectId(requestedProjectId);
       const list = await refreshConversations(activeWorkspace.id);
 
       if (cancelled) {
@@ -261,7 +266,7 @@ export function ChatWorkspace() {
       if (initialConversation) {
         await openConversation(initialConversation.id);
       } else {
-        await createConversation(activeWorkspace.id);
+        await createConversation(activeWorkspace.id, requestedProjectId);
       }
     }
 

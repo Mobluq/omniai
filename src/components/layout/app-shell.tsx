@@ -1,11 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Bot, LayoutDashboard, MessageSquare, Settings } from "lucide-react";
+import { Bot, Boxes, Brain, FileStack, LayoutDashboard, MessageSquare, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/projects", label: "Projects", icon: Boxes },
   { href: "/chat", label: "Chat", icon: MessageSquare },
+  { href: "/knowledge", label: "Knowledge", icon: Brain },
+  { href: "/artifacts", label: "Artifacts", icon: FileStack },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 

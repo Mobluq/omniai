@@ -5,6 +5,7 @@ import { assertWorkspaceAccess } from "@/lib/security/workspace-authorization";
 
 export type CreateConversationInput = {
   workspaceId: string;
+  projectId?: string;
   title?: string;
   routingMode: RoutingMode;
   provider?: string;
@@ -59,6 +60,7 @@ export class ConversationService {
     return prisma.conversation.create({
       data: {
         workspaceId: input.workspaceId,
+        projectId: input.projectId,
         createdById: userId,
         title: input.title ?? "New conversation",
         routingMode: input.routingMode,
@@ -79,6 +81,7 @@ export class ConversationService {
         },
       },
       include: {
+        project: true,
         messages: {
           orderBy: { createdAt: "asc" },
         },
