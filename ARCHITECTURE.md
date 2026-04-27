@@ -25,6 +25,7 @@ Next.js UI
 - `ai/routing`: manual, suggest, and auto route decisions
 - `knowledge` / `memory`: text sanitization, chunking, retrieval, and context injection boundary
 - `artifact`: durable generated outputs such as images, code, research, proposals, and long documents
+- `notification`: in-app notification inbox for security, usage, provider, billing, routing, workspace, and system events
 - `usage`: request, token, model, provider, and cost metering
 - `billing`: Stripe-ready plan/subscription models
 - `audit`: audit event persistence
@@ -79,6 +80,10 @@ Suggestion approval routes the already-stored user message, so accepting or reje
 ## Memory Layer
 
 The schema supports knowledge sources, documents, chunks, embeddings, and conversation memories. The service sanitizes external content and frames retrieved snippets as untrusted context to reduce prompt injection risk.
+
+## Notifications
+
+Notifications are persisted in PostgreSQL and surfaced in two places: the header bell for immediate review and `/notifications` for filtering, read state, and archiving. Notifications are user-scoped with optional workspace context. Security and provider configuration events create notifications today; usage, billing, provider incident, and routing notifications can be added behind the same service without changing the UI contract.
 
 ## Scalability
 

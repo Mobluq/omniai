@@ -170,6 +170,29 @@ Checks whether a provider has server-side credentials available without exposing
 }
 ```
 
+Provider changes create in-app notifications for the acting user and workspace.
+
+## Notifications
+
+Notifications are delivered to the header bell and `/notifications` inbox. They are stored server-side and can represent security, usage, provider, billing, routing, workspace, or system events.
+
+`GET /api/notifications?limit=20&unreadOnly=false`
+
+Returns the current user's notification inbox and unread count.
+
+`PATCH /api/notifications`
+
+Marks all current-user notifications as read.
+
+`PATCH /api/notifications/:id`
+
+```json
+{
+  "read": true,
+  "archived": false
+}
+```
+
 ## Conversations
 
 `GET /api/conversations?workspaceId=...`

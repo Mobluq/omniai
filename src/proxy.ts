@@ -13,6 +13,7 @@ export const config = {
     "/projects/:path*",
     "/knowledge/:path*",
     "/artifacts/:path*",
+    "/notifications/:path*",
     "/usage/:path*",
     "/routing/:path*",
     "/account/:path*",

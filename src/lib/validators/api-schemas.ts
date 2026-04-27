@@ -96,6 +96,17 @@ export const changePasswordSchema = z.object({
   newPassword: z.string().min(10).max(128),
 });
 
+export const notificationListQuerySchema = z.object({
+  workspaceId: z.string().min(1).optional(),
+  unreadOnly: z.coerce.boolean().default(false),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+});
+
+export const notificationUpdateSchema = z.object({
+  read: z.boolean().optional(),
+  archived: z.boolean().optional(),
+});
+
 export const createProjectSchema = z.object({
   workspaceId: z.string().min(1),
   name: z.string().min(2).max(100),

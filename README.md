@@ -78,6 +78,7 @@ The scaffold includes:
 - Conversation and message storage
 - Persistent chat history with selectable conversations
 - Account profile, notification preferences, and sign-in security surfaces
+- In-app notification bell and inbox for security, provider, workspace, usage, billing, and routing events
 - Project workspaces with instructions, knowledge, conversations, and artifacts
 - Knowledge source ingestion for notes, URLs, and file text
 - Automatic artifact capture for valuable generated outputs

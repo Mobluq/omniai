@@ -60,6 +60,28 @@ export class AuthService {
         },
       });
 
+      await tx.notification.create({
+        data: {
+          userId: user.id,
+          workspaceId: workspace.id,
+          type: "system",
+          title: "Welcome to OmniAI",
+          body: "Your workspace is ready. Connect providers, create projects, and start routing AI work from chat.",
+          actionUrl: "/settings",
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          userId: user.id,
+          workspaceId: workspace.id,
+          type: "workspace",
+          title: "Personal workspace created",
+          body: `${workspace.name} is ready for conversations, projects, knowledge, and artifacts.`,
+          actionUrl: "/dashboard",
+        },
+      });
+
       return { user, workspace };
     });
   }

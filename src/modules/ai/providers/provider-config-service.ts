@@ -148,7 +148,7 @@ export class ProviderConfigurationService {
       ...new Set(registryModels.flatMap((model) => model.capabilities)),
     ] as ModelCapability[];
 
-    return prisma.aIProviderConfig.upsert({
+    const config = await prisma.aIProviderConfig.upsert({
       where: {
         workspaceId_provider: {
           workspaceId: input.workspaceId,
@@ -174,6 +174,25 @@ export class ProviderConfigurationService {
         encryptedApiKey: input.apiKey?.trim() ? encryptSecret(input.apiKey.trim()) : undefined,
       },
     });
+
+    await prisma.notification.create({
+      data: {
+        userId,
+        workspaceId: input.workspaceId,
+        type: "provider",
+        title: `${provider.displayName} ${input.isEnabled ? "enabled" : "disabled"}`,
+        body: input.isEnabled
+          ? `${provider.displayName} is available for workspace routing.`
+          : `${provider.displayName} will not be used for workspace routing.`,
+        actionUrl: "/settings",
+        metadata: {
+          provider: input.provider,
+          status: config.status,
+        },
+      },
+    });
+
+    return config;
   }
 
   async getRuntimeConfig(input: {

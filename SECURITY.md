@@ -53,3 +53,5 @@ NextAuth protects its auth flows. For custom mutation endpoints, prefer same-sit
 Audit events are modeled for user, workspace, entity, action, IP address, user agent, and metadata. Sensitive payloads should not be placed in audit metadata.
 
 2FA setup, enable, disable, and login outcomes are included in account security activity.
+
+Security-sensitive account changes also create in-app notifications. Notification bodies must avoid secrets, API keys, raw prompts, and provider payloads.

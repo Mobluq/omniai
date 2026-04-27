@@ -187,6 +187,15 @@ export class AccountService {
           entityId: userId,
         },
       }),
+      prisma.notification.create({
+        data: {
+          userId,
+          type: "security",
+          title: "2FA setup started",
+          body: "Finish setup by entering the six-digit code from your authenticator app.",
+          actionUrl: "/account",
+        },
+      }),
     ]);
 
     return {
@@ -229,6 +238,15 @@ export class AccountService {
           action: "auth.2fa_enabled",
           entityType: "user",
           entityId: userId,
+        },
+      }),
+      prisma.notification.create({
+        data: {
+          userId,
+          type: "security",
+          title: "Two-factor authentication enabled",
+          body: "Your account now requires an authenticator or recovery code after password sign-in.",
+          actionUrl: "/account",
         },
       }),
     ]);
@@ -274,6 +292,15 @@ export class AccountService {
           entityId: userId,
         },
       }),
+      prisma.notification.create({
+        data: {
+          userId,
+          type: "security",
+          title: "Two-factor authentication disabled",
+          body: "2FA was disabled for your account. Re-enable it if this was not intended.",
+          actionUrl: "/account",
+        },
+      }),
     ]);
 
     return { disabled: true };
@@ -308,6 +335,15 @@ export class AccountService {
           action: "auth.password_changed",
           entityType: "user",
           entityId: userId,
+        },
+      }),
+      prisma.notification.create({
+        data: {
+          userId,
+          type: "security",
+          title: "Password changed",
+          body: "Your OmniAI password was updated. Review security activity if this was not you.",
+          actionUrl: "/account",
         },
       }),
     ]);

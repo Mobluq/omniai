@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   Activity,
+  Bell,
   Bot,
   Boxes,
   Brain,
@@ -13,6 +14,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NotificationCenter } from "@/components/notifications/notification-center";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -20,6 +22,7 @@ const navItems = [
   { href: "/chat", label: "Chat", icon: MessageSquare },
   { href: "/knowledge", label: "Knowledge", icon: Brain },
   { href: "/artifacts", label: "Artifacts", icon: FileStack },
+  { href: "/notifications", label: "Notifications", icon: Bell },
   { href: "/usage", label: "Usage", icon: Activity },
   { href: "/routing", label: "Routing", icon: BrainCircuit },
   { href: "/account", label: "Account", icon: UserRound },
@@ -56,9 +59,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             OmniAI
           </Link>
           <div className="hidden text-sm text-muted-foreground lg:block">Multi-model AI workspace</div>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/settings">Workspace</Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <NotificationCenter />
+            <Button asChild variant="outline" size="sm">
+              <Link href="/settings">Workspace</Link>
+            </Button>
+            <Button asChild variant="ghost" size="icon" aria-label="Account">
+              <Link href="/account">
+                <UserRound className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </Button>
+          </div>
         </header>
         <main className="px-4 py-6 lg:px-8">{children}</main>
       </div>
