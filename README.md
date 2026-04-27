@@ -8,6 +8,7 @@ OmniAI is a production-oriented foundation for a multi-model AI orchestration Sa
 - Tailwind CSS with shadcn-style local UI primitives
 - PostgreSQL with Prisma ORM
 - NextAuth credentials foundation with OAuth-ready schema
+- TOTP 2FA foundation with encrypted setup secrets and recovery codes
 - Zod validation for API inputs
 - Provider abstraction for OpenAI/ChatGPT, Anthropic Claude, Google Gemini, Mistral, Stability AI, and Amazon Bedrock
 - Vitest for unit tests and Playwright-ready E2E configuration
@@ -76,15 +77,17 @@ The scaffold includes:
 - Multi-tenant workspace schema and authorization checks
 - Conversation and message storage
 - Persistent chat history with selectable conversations
+- Account profile, notification preferences, and sign-in security surfaces
 - Project workspaces with instructions, knowledge, conversations, and artifacts
 - Knowledge source ingestion for notes, URLs, and file text
 - Automatic artifact capture for valuable generated outputs
 - Server-side provider connection settings with encrypted workspace API keys
 - Isolated provider adapters with live-call paths and safe no-key fallbacks
 - Model registry with capability metadata
-- Rule-based recommendation engine designed for future LLM classification
+- Rule-based recommendation engine with transparent score breakdowns, designed for future LLM classification
 - Manual, suggest, and auto routing foundation
 - Memory/knowledge architecture prepared for vector search
-- Usage logs, billing models, audit logs, and settings structure
+- Usage by provider, model, request type, token estimate, and cost estimate
+- Billing models, audit logs, and settings structure
 
-See `UX_FLOW.md`, `ARCHITECTURE.md`, `SECURITY.md`, `ENVIRONMENT.md`, `API.md`, and `DEPLOYMENT.md` for more detail.
+See `UX_FLOW.md`, `ROUTING_INTELLIGENCE.md`, `ARCHITECTURE.md`, `SECURITY.md`, `ENVIRONMENT.md`, `API.md`, and `DEPLOYMENT.md` for more detail.

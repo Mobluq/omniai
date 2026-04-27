@@ -29,6 +29,8 @@ async function run() {
     currentModelId: "openai-chat-primary",
   });
   assert.equal(imageRecommendation.detectedIntent, "image_generation");
+  assert.deepEqual(imageRecommendation.requiredCapabilities, ["image_generation"]);
+  assert.ok(imageRecommendation.scores[0]?.breakdown.capabilityMatch !== undefined);
   assert.ok(["openai", "stability"].includes(imageRecommendation.recommendedProvider));
   assert.equal(imageRecommendation.shouldAskToSwitch, true);
 

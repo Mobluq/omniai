@@ -33,7 +33,7 @@ export default async function DashboardPage() {
     : [];
   const usage = workspace
     ? await new UsageService().summarize(workspace.id)
-    : { requestCount: 0, costEstimate: 0, byProvider: {} };
+    : { requestCount: 0, costEstimate: 0, byProvider: [] };
   const routingDecisionCount = workspace
     ? await prisma.recommendationLog.count({ where: { workspaceId: workspace.id } })
     : 0;

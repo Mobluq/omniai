@@ -15,6 +15,7 @@ Next.js UI
 ## Core Modules
 
 - `auth`: signup foundation and Auth.js/NextAuth configuration
+- `account`: profile defaults, notification preferences, security overview, and TOTP 2FA setup
 - `workspace`: multi-tenant workspace creation, listing, membership checks
 - `project`: project-level working contexts with instructions, routing defaults, knowledge, conversations, and artifacts
 - `conversation`: conversation and message persistence plus chat orchestration
@@ -47,10 +48,21 @@ The initial engine uses rule-based classification:
 
 1. Classify prompt intent.
 2. Map intent to required capabilities.
-3. Score available models by capability match, quality, speed, cost, preference, and availability.
+3. Score available models by capability match, task-specific quality, context-window fit, speed, cost, preference, and availability.
 4. Return a recommendation with confidence and switch guidance.
 
 The classifier can later be replaced with an LLM classifier behind the same service boundary.
+
+Current scoring weights:
+
+- capability match: 44%
+- task quality: 22%
+- context fit: 10%
+- speed: 10%
+- cost: 8%
+- user/workspace preference: 6%
+
+Recommendation responses include the top model score breakdowns so the UI can explain why a model was selected.
 
 ## Routing Engine
 

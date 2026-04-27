@@ -20,6 +20,7 @@ export function SignInForm() {
     const result = await signIn("credentials", {
       email: String(formData.get("email")),
       password: String(formData.get("password")),
+      oneTimeCode: String(formData.get("oneTimeCode") ?? ""),
       redirect: true,
       callbackUrl: "/dashboard",
     });
@@ -39,8 +40,17 @@ export function SignInForm() {
         <Label htmlFor="password">Password</Label>
         <Input id="password" name="password" type="password" autoComplete="current-password" required />
       </div>
+      <div className="grid gap-2">
+        <Label htmlFor="oneTimeCode">Authenticator code</Label>
+        <Input
+          id="oneTimeCode"
+          name="oneTimeCode"
+          autoComplete="one-time-code"
+          placeholder="Authenticator or recovery code"
+        />
+      </div>
       {state === "error" ? (
-        <p className="text-sm text-destructive">The email or password is incorrect.</p>
+        <p className="text-sm text-destructive">The email, password, or authenticator code is incorrect.</p>
       ) : null}
       <Button type="submit" disabled={state === "loading"}>
         {state === "loading" ? "Signing in..." : "Sign in"}

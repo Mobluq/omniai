@@ -66,6 +66,36 @@ export const settingsUpdateSchema = z.object({
   dataRetentionDays: z.number().int().min(1).max(3650).optional(),
 });
 
+export const updateProfileSchema = z.object({
+  name: z.string().min(2).max(80).optional(),
+  jobTitle: z.string().max(120).nullable().optional(),
+  companyName: z.string().max(120).nullable().optional(),
+  timezone: z.string().min(2).max(80).optional(),
+  locale: z.string().min(2).max(12).optional(),
+  defaultRoutingMode: routingModeSchema.optional(),
+  defaultModelId: z.string().min(1).optional(),
+  memoryEnabled: z.boolean().optional(),
+  dataRetentionDays: z.number().int().min(1).max(3650).optional(),
+});
+
+export const updateNotificationPreferencesSchema = z.object({
+  emailProductUpdates: z.boolean().optional(),
+  emailUsageAlerts: z.boolean().optional(),
+  emailSecurityAlerts: z.boolean().optional(),
+  emailWeeklyDigest: z.boolean().optional(),
+  providerIncidentAlerts: z.boolean().optional(),
+  billingAlerts: z.boolean().optional(),
+});
+
+export const twoFactorTokenSchema = z.object({
+  token: z.string().regex(/^\d{6}$/, "Enter the six-digit authenticator code."),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1).max(128),
+  newPassword: z.string().min(10).max(128),
+});
+
 export const createProjectSchema = z.object({
   workspaceId: z.string().min(1),
   name: z.string().min(2).max(100),

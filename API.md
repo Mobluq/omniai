@@ -41,6 +41,75 @@ Creates a user and personal workspace.
 ```
 
 Sign-in is handled by NextAuth at `/api/auth/[...nextauth]`.
+Credentials sign-in accepts an optional `oneTimeCode` when two-factor authentication is enabled.
+
+## Account
+
+`GET /api/account/profile`
+
+Returns the current user's profile, personal routing defaults, retention preference, and memory preference.
+
+`PATCH /api/account/profile`
+
+```json
+{
+  "name": "Ada Founder",
+  "jobTitle": "Founder",
+  "companyName": "Bantu & Co",
+  "timezone": "Africa/Lagos",
+  "locale": "en",
+  "defaultRoutingMode": "suggest",
+  "defaultModelId": "openai-chat-primary",
+  "memoryEnabled": true,
+  "dataRetentionDays": 365
+}
+```
+
+`GET /api/account/notifications`
+
+`PATCH /api/account/notifications`
+
+```json
+{
+  "emailSecurityAlerts": true,
+  "emailUsageAlerts": true,
+  "providerIncidentAlerts": true,
+  "billingAlerts": true,
+  "emailWeeklyDigest": true,
+  "emailProductUpdates": false
+}
+```
+
+`GET /api/account/security`
+
+Returns 2FA status, active session count, and recent security events.
+
+`POST /api/account/security/2fa/setup`
+
+Generates and stores an encrypted TOTP secret, returning the manual setup key and `otpauth://` URI.
+
+`POST /api/account/security/2fa/verify`
+
+```json
+{ "token": "123456" }
+```
+
+Enables 2FA and returns one-time recovery codes.
+
+`POST /api/account/security/2fa/disable`
+
+```json
+{ "token": "123456" }
+```
+
+`POST /api/account/security/password`
+
+```json
+{
+  "currentPassword": "current-password",
+  "newPassword": "new-long-secure-password"
+}
+```
 
 ## Workspaces
 
@@ -248,6 +317,6 @@ When provider credentials are configured, routing calls the selected provider ad
 
 ## Usage
 
-`GET /api/usage?workspaceId=...`
+`GET /api/usage?workspaceId=...&days=30`
 
-Returns request count, estimated tokens, estimated cost, and provider breakdown.
+Returns request count, success/failure totals, estimated tokens, estimated cost, provider breakdown, model breakdown, request type breakdown, daily rollups, and recent metered requests.

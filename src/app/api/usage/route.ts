@@ -14,8 +14,11 @@ export async function GET(request: NextRequest) {
       throw badRequest("workspaceId is required.");
     }
 
+    const rawDays = Number(request.nextUrl.searchParams.get("days") ?? "30");
+    const days = Number.isFinite(rawDays) ? Math.min(Math.max(Math.trunc(rawDays), 1), 365) : 30;
+
     await assertWorkspaceAccess(user.id, workspaceId);
-    const summary = await new UsageService().summarize(workspaceId);
+    const summary = await new UsageService().summarize(workspaceId, days);
     return successResponse({ summary });
   } catch (error: unknown) {
     return handleApiError(error);

@@ -1,11 +1,14 @@
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { compare } from "bcryptjs";
+import { timingSafeEqual } from "node:crypto";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db/prisma";
 import { getServerEnv } from "@/lib/env/server";
+import { decryptSecret, encryptSecret } from "@/lib/security/encryption";
 import { assertRateLimit, resetRateLimit } from "@/lib/security/rate-limit";
 import { hashSensitiveText } from "@/lib/security/request-context";
+import { verifyTotpToken } from "@/lib/security/totp";
 
 if (process.env.NODE_ENV === "production") {
   getServerEnv();
@@ -59,6 +62,46 @@ async function recordLoginAudit(input: {
     .catch(() => undefined);
 }
 
+function normalizeRecoveryCode(code: string) {
+  return code.toUpperCase().replace(/[^A-Z2-7]/g, "");
+}
+
+function safeStringEqual(left: string, right: string) {
+  const leftBuffer = Buffer.from(left);
+  const rightBuffer = Buffer.from(right);
+
+  return leftBuffer.length === rightBuffer.length && timingSafeEqual(leftBuffer, rightBuffer);
+}
+
+async function consumeRecoveryCode(userId: string, encryptedCodes: string, submittedCode: string) {
+  let recoveryCodes: string[];
+
+  try {
+    recoveryCodes = JSON.parse(decryptSecret(encryptedCodes)) as string[];
+  } catch {
+    return false;
+  }
+
+  const normalizedSubmittedCode = normalizeRecoveryCode(submittedCode);
+  const index = recoveryCodes.findIndex((code) =>
+    safeStringEqual(normalizeRecoveryCode(code), normalizedSubmittedCode),
+  );
+
+  if (index === -1) {
+    return false;
+  }
+
+  const remainingCodes = recoveryCodes.filter((_, currentIndex) => currentIndex !== index);
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      twoFactorRecoveryCodesEncrypted: encryptSecret(JSON.stringify(remainingCodes)),
+    },
+  });
+
+  return true;
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: {
@@ -73,10 +116,12 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
+        oneTimeCode: { label: "Authenticator code", type: "text" },
       },
       async authorize(credentials, request) {
         const email = credentials?.email?.toLowerCase().trim();
         const password = credentials?.password;
+        const oneTimeCode = credentials?.oneTimeCode?.trim();
         const headers = request?.headers;
         const ipAddress = getAuthIp(headers);
         const userAgent = getAuthHeader(headers, "user-agent") ?? "unknown";
@@ -123,6 +168,31 @@ export const authOptions: NextAuthOptions = {
             userAgent,
           });
           return null;
+        }
+
+        if (user.twoFactorEnabled) {
+          const isTotpValid =
+            Boolean(user.twoFactorSecretEncrypted && oneTimeCode) &&
+            verifyTotpToken({
+              secret: decryptSecret(user.twoFactorSecretEncrypted!),
+              token: oneTimeCode!,
+            });
+          const isRecoveryCodeValid =
+            !isTotpValid && user.twoFactorRecoveryCodesEncrypted && oneTimeCode
+              ? await consumeRecoveryCode(user.id, user.twoFactorRecoveryCodesEncrypted, oneTimeCode)
+              : false;
+
+          if (!isTotpValid && !isRecoveryCodeValid) {
+            await recordLoginAudit({
+              action: "auth.login_failed",
+              email,
+              userId: user.id,
+              reason: "invalid_totp",
+              ipAddress,
+              userAgent,
+            });
+            return null;
+          }
         }
 
         await resetRateLimit("auth.login", throttleKey);

@@ -12,6 +12,8 @@ Credentials login is protected by database-backed throttling keyed by email and 
 
 Public signup is controlled by `SIGNUP_MODE`. Production defaults to invite-only and requires `SIGNUP_INVITE_CODE` unless signup is explicitly disabled or opened.
 
+Two-factor authentication uses TOTP. Setup secrets and recovery codes are encrypted at rest with the same secret encryption helper used for provider keys. Sign-in validates the optional authenticator or recovery code only after the password succeeds, consumes recovery codes after use, and records failed 2FA attempts as login failures.
+
 ## Authorization and Tenant Isolation
 
 Workspace access is checked through `assertWorkspaceAccess`. Workspace-scoped resources must always verify membership before read or write operations. Core tables include `workspaceId` where tenant isolation is required.
@@ -49,3 +51,5 @@ NextAuth protects its auth flows. For custom mutation endpoints, prefer same-sit
 ## Audit Logs
 
 Audit events are modeled for user, workspace, entity, action, IP address, user agent, and metadata. Sensitive payloads should not be placed in audit metadata.
+
+2FA setup, enable, disable, and login outcomes are included in account security activity.

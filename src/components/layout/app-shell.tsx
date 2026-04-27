@@ -1,6 +1,17 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Bot, Boxes, Brain, FileStack, LayoutDashboard, MessageSquare, Settings } from "lucide-react";
+import {
+  Activity,
+  Bot,
+  Boxes,
+  Brain,
+  BrainCircuit,
+  FileStack,
+  LayoutDashboard,
+  MessageSquare,
+  Settings,
+  UserRound,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navItems = [
@@ -9,6 +20,9 @@ const navItems = [
   { href: "/chat", label: "Chat", icon: MessageSquare },
   { href: "/knowledge", label: "Knowledge", icon: Brain },
   { href: "/artifacts", label: "Artifacts", icon: FileStack },
+  { href: "/usage", label: "Usage", icon: Activity },
+  { href: "/routing", label: "Routing", icon: BrainCircuit },
+  { href: "/account", label: "Account", icon: UserRound },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -42,8 +56,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             OmniAI
           </Link>
           <div className="hidden text-sm text-muted-foreground lg:block">Multi-model AI workspace</div>
-          <Button variant="outline" size="sm">
-            Workspace
+          <Button asChild variant="outline" size="sm">
+            <Link href="/settings">Workspace</Link>
           </Button>
         </header>
         <main className="px-4 py-6 lg:px-8">{children}</main>

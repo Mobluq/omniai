@@ -11,10 +11,23 @@ export type RecommendationRequest = {
   currentModelId?: string;
   userPreferredProvider?: string;
   allowedProviders?: string[];
+  contextTokenEstimate?: number;
+};
+
+export type RecommendationScoreBreakdown = {
+  capabilityMatch: number;
+  quality: number;
+  contextFit: number;
+  speed: number;
+  cost: number;
+  preference: number;
+  total: number;
 };
 
 export type RecommendationResult = {
   detectedIntent: DetectedIntent;
+  classificationConfidence: number;
+  requiredCapabilities: ModelCapabilityId[];
   recommendedProvider: string;
   recommendedModel: string;
   recommendedModelDisplayName: string;
@@ -24,7 +37,11 @@ export type RecommendationResult = {
   scores: Array<{
     provider: string;
     modelId: string;
+    displayName: string;
     score: number;
+    matchedCapabilities: ModelCapabilityId[];
+    missingCapabilities: ModelCapabilityId[];
+    breakdown: RecommendationScoreBreakdown;
   }>;
 };
 
@@ -64,52 +81,131 @@ export class RecommendationEngine {
       .filter((model) => !allowedProviders || allowedProviders.has(model.provider));
 
     const scored = candidates
-      .map((model) => ({
-        model,
-        score: this.scoreModel(model, classification.requiredCapabilities, request),
-      }))
-      .sort((left, right) => right.score - left.score);
+      .map((model) => this.scoreModel(model, classification.intent, classification.requiredCapabilities, request))
+      .sort((left, right) => right.breakdown.total - left.breakdown.total);
 
     const winner = scored[0]?.model ?? this.registry.getDefaultModel();
+    const winnerScore = scored[0]?.breakdown.total ?? 0.5;
     const currentMatches =
       winner.provider === request.currentProvider && winner.modelId === request.currentModelId;
 
     return {
       detectedIntent: classification.intent,
+      classificationConfidence: classification.confidence,
+      requiredCapabilities: classification.requiredCapabilities,
       recommendedProvider: winner.provider,
       recommendedModel: winner.modelId,
       recommendedModelDisplayName: winner.displayName,
-      confidence: Number(Math.min(0.98, scored[0]?.score ?? 0.5).toFixed(2)),
+      confidence: Number(Math.min(0.98, winnerScore * 0.86 + classification.confidence * 0.14).toFixed(2)),
       reason: `${intentReason[classification.intent]} ${winner.displayName} is currently the best registry match.`,
       shouldAskToSwitch: !currentMatches,
-      scores: scored.slice(0, 5).map(({ model, score }) => ({
+      scores: scored.slice(0, 5).map(({ model, matchedCapabilities, missingCapabilities, breakdown }) => ({
         provider: model.provider,
         modelId: model.modelId,
-        score: Number(score.toFixed(3)),
+        displayName: model.displayName,
+        score: Number(breakdown.total.toFixed(3)),
+        matchedCapabilities,
+        missingCapabilities,
+        breakdown: roundBreakdown(breakdown),
       })),
     };
   }
 
   private scoreModel(
     model: ModelRegistryEntry,
+    intent: DetectedIntent,
     requiredCapabilities: ModelCapabilityId[],
     request: RecommendationRequest,
   ) {
-    const capabilityScore =
-      requiredCapabilities.filter((capability) => model.capabilities.includes(capability)).length /
-      Math.max(requiredCapabilities.length, 1);
-    const qualityScore =
-      (model.reasoningStrength + model.writingStrength + model.codingStrength) / 30;
+    const matchedCapabilities = requiredCapabilities.filter((capability) =>
+      model.capabilities.includes(capability),
+    );
+    const missingCapabilities = requiredCapabilities.filter(
+      (capability) => !model.capabilities.includes(capability),
+    );
+    const capabilityScore = matchedCapabilities.length / Math.max(requiredCapabilities.length, 1);
+    const qualityScore = qualityForIntent(model, intent);
+    const contextScore = contextFitScore(model, requiredCapabilities, request.contextTokenEstimate);
     const speedScore = model.speedRating / 10;
     const costScore = model.costTier === "low" ? 1 : model.costTier === "medium" ? 0.82 : 0.62;
-    const preferenceScore = request.userPreferredProvider === model.provider ? 0.08 : 0;
-
-    return (
-      capabilityScore * 0.52 +
+    const preferenceScore = request.userPreferredProvider === model.provider ? 1 : 0;
+    const total =
+      capabilityScore * 0.44 +
       qualityScore * 0.22 +
-      speedScore * 0.14 +
+      contextScore * 0.1 +
+      speedScore * 0.1 +
       costScore * 0.08 +
-      preferenceScore
-    );
+      preferenceScore * 0.06;
+
+    return {
+      model,
+      matchedCapabilities,
+      missingCapabilities,
+      breakdown: {
+        capabilityMatch: capabilityScore,
+        quality: qualityScore,
+        contextFit: contextScore,
+        speed: speedScore,
+        cost: costScore,
+        preference: preferenceScore,
+        total,
+      },
+    };
   }
+}
+
+function qualityForIntent(model: ModelRegistryEntry, intent: DetectedIntent) {
+  if (intent === "coding" || intent === "debugging") {
+    return (model.codingStrength * 0.65 + model.reasoningStrength * 0.35) / 10;
+  }
+
+  if (
+    intent === "business_writing" ||
+    intent === "creative_writing" ||
+    intent === "long_form_writing"
+  ) {
+    return (model.writingStrength * 0.7 + model.reasoningStrength * 0.3) / 10;
+  }
+
+  if (intent === "image_generation" || intent === "image_editing") {
+    return model.imageGeneration ? 0.92 : 0.15;
+  }
+
+  if (
+    intent === "research" ||
+    intent === "data_analysis" ||
+    intent === "document_analysis" ||
+    intent === "business_strategy"
+  ) {
+    return (model.reasoningStrength * 0.7 + model.writingStrength * 0.3) / 10;
+  }
+
+  return (model.reasoningStrength + model.writingStrength + model.codingStrength) / 30;
+}
+
+function contextFitScore(
+  model: ModelRegistryEntry,
+  requiredCapabilities: ModelCapabilityId[],
+  contextTokenEstimate = 0,
+) {
+  const longContextRequired =
+    requiredCapabilities.includes("long_context") ||
+    requiredCapabilities.includes("document_analysis") ||
+    contextTokenEstimate > 32000;
+  const targetWindow = longContextRequired ? 200000 : 128000;
+  const capacityScore = Math.min(model.contextWindowEstimate / targetWindow, 1);
+
+  return longContextRequired ? capacityScore : Math.max(0.65, capacityScore);
+}
+
+function roundBreakdown(breakdown: RecommendationScoreBreakdown) {
+  return {
+    capabilityMatch: Number(breakdown.capabilityMatch.toFixed(3)),
+    quality: Number(breakdown.quality.toFixed(3)),
+    contextFit: Number(breakdown.contextFit.toFixed(3)),
+    speed: Number(breakdown.speed.toFixed(3)),
+    cost: Number(breakdown.cost.toFixed(3)),
+    preference: Number(breakdown.preference.toFixed(3)),
+    total: Number(breakdown.total.toFixed(3)),
+  };
 }

@@ -115,14 +115,23 @@ model User {
   emailVerified       DateTime?
   image               String?
   passwordHash        String?
+  jobTitle            String?
+  companyName         String?
+  timezone            String                @default("UTC")
+  locale              String                @default("en")
   defaultRoutingMode  RoutingMode           @default(suggest)
   defaultModelId      String?
   dataRetentionDays   Int                   @default(365)
   memoryEnabled       Boolean               @default(true)
+  twoFactorEnabled    Boolean               @default(false)
+  twoFactorSecretEncrypted String?           @db.Text
+  twoFactorConfirmedAt DateTime?
+  twoFactorRecoveryCodesEncrypted String?    @db.Text
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   accounts            Account[]
   sessions            Session[]
+  notificationPreference NotificationPreference?
   memberships         WorkspaceMember[]
   conversations       Conversation[]
   messages            Message[]
@@ -135,6 +144,20 @@ model User {
   artifacts           Artifact[]
 
   @@index([email])
+}
+
+model NotificationPreference {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  emailProductUpdates    Boolean  @default(false)
+  emailUsageAlerts       Boolean  @default(true)
+  emailSecurityAlerts    Boolean  @default(true)
+  emailWeeklyDigest      Boolean  @default(true)
+  providerIncidentAlerts Boolean  @default(true)
+  billingAlerts          Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {
