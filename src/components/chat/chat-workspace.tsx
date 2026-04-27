@@ -1,12 +1,13 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { SendHorizontal } from "lucide-react";
+import Image from "next/image";
+import { Loader2, MessageSquare, Plus, SendHorizontal, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { ModelControls } from "@/components/chat/model-controls";
-import { useChatStore } from "@/components/chat/chat-store";
+import { useChatStore, type RoutingMode } from "@/components/chat/chat-store";
 import {
   RecommendationBanner,
   type RecommendationViewModel,
@@ -18,9 +19,22 @@ type ApiEnvelope<T> =
 
 type ChatMessage = {
   id: string;
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system" | "tool";
   content: string;
-  modelDisplayName?: string;
+  provider?: string | null;
+  modelId?: string | null;
+  modelDisplayName?: string | null;
+  createdAt?: string;
+};
+
+type ConversationListItem = {
+  id: string;
+  title: string;
+  routingMode: RoutingMode;
+  activeProvider?: string | null;
+  activeModelId?: string | null;
+  updatedAt: string;
+  messages: ChatMessage[];
 };
 
 type WorkspacePayload = {
@@ -28,118 +42,284 @@ type WorkspacePayload = {
 };
 
 type ConversationPayload = {
-  conversation: { id: string };
+  conversation: ConversationListItem;
 };
 
-type RecommendationPayload = {
-  recommendation: RecommendationViewModel;
+type ConversationListPayload = {
+  conversations: ConversationListItem[];
 };
 
 type MessagePayload = {
-  userMessage: { id: string; content: string };
-  assistantMessage: { id: string; content: string; modelDisplayName?: string } | null;
+  userMessage: ChatMessage;
+  assistantMessage: ChatMessage | null;
   recommendation: RecommendationViewModel;
+  routingDecision: {
+    provider: string;
+    modelId: string;
+    modelDisplayName: string;
+    mode: RoutingMode;
+  } | null;
 };
 
 async function parseEnvelope<T>(response: Response): Promise<ApiEnvelope<T>> {
   return response.json() as Promise<ApiEnvelope<T>>;
 }
 
+function formatRelative(value: string) {
+  const date = new Date(value);
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.max(1, Math.round(diffMs / 60000));
+
+  if (diffMinutes < 60) {
+    return `${diffMinutes}m ago`;
+  }
+
+  const diffHours = Math.round(diffMinutes / 60);
+  if (diffHours < 24) {
+    return `${diffHours}h ago`;
+  }
+
+  return date.toLocaleDateString();
+}
+
+function upsertMessage(messages: ChatMessage[], message: ChatMessage) {
+  const exists = messages.some((item) => item.id === message.id);
+  return exists ? messages.map((item) => (item.id === message.id ? message : item)) : [...messages, message];
+}
+
+function MessageContent({ content }: { content: string }) {
+  const imageMatch = content.match(/!\[(.*?)\]\((data:image\/[^)]+|https?:\/\/[^)]+)\)/);
+
+  if (!imageMatch) {
+    return <p className="whitespace-pre-wrap text-sm leading-6">{content}</p>;
+  }
+
+  const [markdown, alt, src] = imageMatch;
+  const before = content.slice(0, content.indexOf(markdown)).trim();
+  const after = content.slice(content.indexOf(markdown) + markdown.length).trim();
+
+  return (
+    <div className="grid gap-3">
+      {before ? <p className="whitespace-pre-wrap text-sm leading-6">{before}</p> : null}
+      <Image
+        src={src}
+        alt={alt || "Generated image"}
+        width={1024}
+        height={1024}
+        unoptimized
+        className="max-h-[520px] w-full rounded-md border object-contain"
+      />
+      {after ? <p className="whitespace-pre-wrap text-sm leading-6">{after}</p> : null}
+    </div>
+  );
+}
+
 export function ChatWorkspace() {
-  const { routingMode, selectedModel, setRoutingMode } = useChatStore();
-  const [workspaceId, setWorkspaceId] = useState<string | null>(null);
+  const { routingMode, selectedModel, setRoutingMode, setSelectedModel } = useChatStore();
+  const [workspace, setWorkspace] = useState<{ id: string; name: string } | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversations, setConversations] = useState<ConversationListItem[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [prompt, setPrompt] = useState("");
-  const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
+  const [pendingMessageId, setPendingMessageId] = useState<string | null>(null);
   const [recommendation, setRecommendation] = useState<RecommendationViewModel | null>(null);
-  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [status, setStatus] = useState<"booting" | "idle" | "loading" | "error">("booting");
   const [error, setError] = useState<string | null>(null);
 
-  const canSend = useMemo(() => prompt.trim().length > 0 && status !== "loading", [prompt, status]);
+  const activeConversation = conversations.find((conversation) => conversation.id === conversationId);
+  const canSend = useMemo(
+    () => prompt.trim().length > 0 && Boolean(conversationId) && status !== "loading",
+    [conversationId, prompt, status],
+  );
+
+  async function refreshConversations(workspaceId = workspace?.id) {
+    if (!workspaceId) {
+      return [];
+    }
+
+    const response = await fetch(`/api/conversations?workspaceId=${workspaceId}`);
+    const envelope = await parseEnvelope<ConversationListPayload>(response);
+
+    if (!envelope.success) {
+      throw new Error(envelope.error.message);
+    }
+
+    setConversations(envelope.data.conversations);
+    return envelope.data.conversations;
+  }
+
+  async function openConversation(id: string) {
+    setStatus("loading");
+    setError(null);
+    const response = await fetch(`/api/conversations/${id}`);
+    const envelope = await parseEnvelope<ConversationPayload>(response);
+
+    if (!envelope.success) {
+      setError(envelope.error.message);
+      setStatus("error");
+      return;
+    }
+
+    const conversation = envelope.data.conversation;
+    setConversationId(conversation.id);
+    setMessages(conversation.messages);
+    setRecommendation(null);
+    setPendingMessageId(null);
+    setRoutingMode(conversation.routingMode);
+
+    if (conversation.activeProvider && conversation.activeModelId) {
+      setSelectedModel({
+        provider: conversation.activeProvider,
+        modelId: conversation.activeModelId,
+      });
+    }
+
+    setStatus("idle");
+  }
+
+  async function createConversation(workspaceId = workspace?.id) {
+    if (!workspaceId) {
+      return;
+    }
+
+    setStatus("loading");
+    setError(null);
+    const response = await fetch("/api/conversations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        workspaceId,
+        title: "New conversation",
+        routingMode,
+        provider: selectedModel.provider,
+        modelId: selectedModel.modelId,
+      }),
+    });
+    const envelope = await parseEnvelope<ConversationPayload>(response);
+
+    if (!envelope.success) {
+      setError(envelope.error.message);
+      setStatus("error");
+      return;
+    }
+
+    setConversationId(envelope.data.conversation.id);
+    setMessages([]);
+    setRecommendation(null);
+    setPendingMessageId(null);
+    await refreshConversations(workspaceId);
+    setStatus("idle");
+  }
+
+  async function deleteConversation(id: string) {
+    if (!workspace) {
+      return;
+    }
+
+    await fetch(`/api/conversations/${id}`, { method: "DELETE" });
+    const updated = await refreshConversations(workspace.id);
+    const next = updated.find((conversation) => conversation.id !== id);
+
+    if (conversationId === id) {
+      if (next) {
+        await openConversation(next.id);
+      } else {
+        await createConversation(workspace.id);
+      }
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
 
     async function bootstrap() {
+      setStatus("booting");
       const workspaceResponse = await fetch("/api/workspaces");
       const workspaceEnvelope = await parseEnvelope<WorkspacePayload>(workspaceResponse);
 
       if (!workspaceEnvelope.success || !workspaceEnvelope.data.workspaces[0]) {
-        if (!cancelled) {
-          setError("Sign in and create a workspace to use persistent chat.");
-        }
+        throw new Error("Sign in and create a workspace to use persistent chat.");
+      }
+
+      const activeWorkspace = workspaceEnvelope.data.workspaces[0];
+      if (cancelled) {
         return;
       }
 
-      const workspace = workspaceEnvelope.data.workspaces[0];
-      const conversationResponse = await fetch("/api/conversations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          workspaceId: workspace.id,
-          title: "OmniAI session",
-          routingMode,
-          provider: selectedModel.provider,
-          modelId: selectedModel.modelId,
-        }),
-      });
-      const conversationEnvelope = await parseEnvelope<ConversationPayload>(conversationResponse);
+      setWorkspace(activeWorkspace);
+      const list = await refreshConversations(activeWorkspace.id);
 
-      if (!cancelled && conversationEnvelope.success) {
-        setWorkspaceId(workspace.id);
-        setConversationId(conversationEnvelope.data.conversation.id);
+      if (cancelled) {
+        return;
+      }
+
+      const requestedConversationId =
+        typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("conversationId");
+      const initialConversation =
+        list.find((conversation) => conversation.id === requestedConversationId) ?? list[0];
+
+      if (initialConversation) {
+        await openConversation(initialConversation.id);
+      } else {
+        await createConversation(activeWorkspace.id);
       }
     }
 
-    bootstrap().catch(() => {
+    bootstrap().catch((bootError: unknown) => {
       if (!cancelled) {
-        setError("Could not initialize the chat workspace.");
+        setError(bootError instanceof Error ? bootError.message : "Could not initialize chat.");
+        setStatus("error");
       }
     });
 
     return () => {
       cancelled = true;
     };
-  }, [routingMode, selectedModel.modelId, selectedModel.provider]);
+    // Bootstrap should run once; controls are applied when a conversation is created or selected.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  async function evaluatePrompt(content: string) {
-    if (!workspaceId) {
-      return null;
-    }
-
-    const response = await fetch("/api/recommendations/evaluate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        workspaceId,
-        prompt: content,
-        currentProvider: selectedModel.provider,
-        currentModelId: selectedModel.modelId,
-        routingMode,
-      }),
+  function applyMessagePayload(payload: MessagePayload) {
+    setMessages((current) => {
+      const withUser = upsertMessage(current, payload.userMessage);
+      return payload.assistantMessage ? upsertMessage(withUser, payload.assistantMessage) : withUser;
     });
 
-    const envelope = await parseEnvelope<RecommendationPayload>(response);
-    return envelope.success ? envelope.data.recommendation : null;
+    if (payload.routingDecision) {
+      setSelectedModel({
+        provider: payload.routingDecision.provider,
+        modelId: payload.routingDecision.modelId,
+      });
+      setRoutingMode(payload.routingDecision.mode);
+    }
+
+    setRecommendation(payload.assistantMessage ? null : payload.recommendation);
+    setPendingMessageId(payload.assistantMessage ? null : payload.userMessage.id);
   }
 
-  async function sendToConversation(content: string, acceptRecommendation?: boolean) {
+  async function sendToConversation(input: {
+    content?: string;
+    pendingId?: string;
+    acceptRecommendation?: boolean;
+    routingModeOverride?: RoutingMode;
+  }) {
     if (!conversationId) {
       setError("Chat is not connected to a conversation yet.");
       return;
     }
 
     setStatus("loading");
+    setError(null);
     const response = await fetch(`/api/conversations/${conversationId}/messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        content,
-        routingMode,
+        content: input.content,
+        pendingMessageId: input.pendingId,
+        routingMode: input.routingModeOverride ?? routingMode,
         selectedProvider: selectedModel.provider,
         selectedModelId: selectedModel.modelId,
-        acceptRecommendation,
+        acceptRecommendation: input.acceptRecommendation,
       }),
     });
     const envelope = await parseEnvelope<MessagePayload>(response);
@@ -150,23 +330,12 @@ export function ChatWorkspace() {
       return;
     }
 
-    setMessages((current) => [
-      ...current,
-      { id: envelope.data.userMessage.id, role: "user", content: envelope.data.userMessage.content },
-      ...(envelope.data.assistantMessage
-        ? [
-            {
-              id: envelope.data.assistantMessage.id,
-              role: "assistant" as const,
-              content: envelope.data.assistantMessage.content,
-              modelDisplayName: envelope.data.assistantMessage.modelDisplayName,
-            },
-          ]
-        : []),
-    ]);
-    setRecommendation(envelope.data.assistantMessage ? null : envelope.data.recommendation);
-    setPendingPrompt(envelope.data.assistantMessage ? null : content);
+    applyMessagePayload(envelope.data);
     setStatus("idle");
+
+    if (workspace) {
+      void refreshConversations(workspace.id);
+    }
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -177,58 +346,126 @@ export function ChatWorkspace() {
       return;
     }
 
-    setError(null);
-    setStatus("loading");
     setPrompt("");
-
-    if (routingMode === "suggest") {
-      const evaluated = await evaluatePrompt(content);
-
-      if (evaluated?.shouldAskToSwitch) {
-        setRecommendation(evaluated);
-        setPendingPrompt(content);
-        setStatus("idle");
-        return;
-      }
-    }
-
-    await sendToConversation(content, routingMode === "auto" ? true : undefined);
+    await sendToConversation({
+      content,
+      acceptRecommendation: routingMode === "auto" ? true : undefined,
+    });
   }
 
   return (
     <div className="overflow-hidden rounded-lg border bg-card shadow-soft">
       <ModelControls />
-      <div className="grid min-h-[560px] lg:grid-cols-[280px_1fr]">
-        <aside className="hidden border-r bg-muted/40 p-4 lg:block">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold">Conversations</h2>
-            <Badge>Personal</Badge>
+      <div className="grid min-h-[650px] lg:grid-cols-[320px_1fr]">
+        <aside className="border-b bg-muted/30 p-4 lg:border-b-0 lg:border-r">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold">History</h2>
+              <p className="mt-1 text-xs text-muted-foreground">{workspace?.name ?? "Workspace"}</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => createConversation()}>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              New
+            </Button>
           </div>
-          <div className="mt-4 rounded-md border bg-background p-3 text-sm">
-            <p className="font-medium">OmniAI session</p>
-            <p className="mt-1 text-xs text-muted-foreground">Routing: {routingMode}</p>
+          <div className="mt-4 grid max-h-[560px] gap-2 overflow-auto pr-1">
+            {conversations.length === 0 ? (
+              <div className="rounded-md border border-dashed bg-background p-4 text-sm text-muted-foreground">
+                No conversations yet.
+              </div>
+            ) : (
+              conversations.map((conversation) => (
+                <div
+                  key={conversation.id}
+                  className={`group flex items-start gap-2 rounded-md border p-3 ${
+                    conversation.id === conversationId ? "border-primary bg-background" : "bg-background/70"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    className="min-w-0 flex-1 text-left"
+                    onClick={() => openConversation(conversation.id)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <MessageSquare className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                      <p className="truncate text-sm font-medium">{conversation.title}</p>
+                    </div>
+                    <p className="mt-1 truncate text-xs text-muted-foreground">
+                      {conversation.messages[0]?.content ?? "No messages yet"}
+                    </p>
+                    <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                      <Badge className="bg-muted">{conversation.routingMode}</Badge>
+                      <span>{formatRelative(conversation.updatedAt)}</span>
+                    </div>
+                  </button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 opacity-70 lg:opacity-0 lg:group-hover:opacity-100"
+                    onClick={() => deleteConversation(conversation.id)}
+                    aria-label="Delete conversation"
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  </Button>
+                </div>
+              ))
+            )}
           </div>
         </aside>
-        <section className="flex min-h-[560px] flex-col">
-          <div className="flex-1 space-y-4 p-4">
-            {recommendation && pendingPrompt ? (
+
+        <section className="flex min-h-[650px] flex-col">
+          <div className="border-b bg-background px-4 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="truncate text-sm font-semibold">
+                  {activeConversation?.title ?? "New conversation"}
+                </h2>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {selectedModel.provider} / {selectedModel.modelId}
+                </p>
+              </div>
+              <Badge>{routingMode}</Badge>
+            </div>
+          </div>
+
+          <div className="flex-1 space-y-4 overflow-auto p-4">
+            {recommendation && pendingMessageId ? (
               <RecommendationBanner
                 recommendation={recommendation}
                 loading={status === "loading"}
-                onSwitch={() => sendToConversation(pendingPrompt, true)}
-                onStay={() => sendToConversation(pendingPrompt, false)}
+                onSwitch={() =>
+                  sendToConversation({
+                    pendingId: pendingMessageId,
+                    acceptRecommendation: true,
+                  })
+                }
+                onStay={() =>
+                  sendToConversation({
+                    pendingId: pendingMessageId,
+                    acceptRecommendation: false,
+                  })
+                }
                 onAutoRoute={() => {
                   setRoutingMode("auto");
-                  void sendToConversation(pendingPrompt, true);
+                  void sendToConversation({
+                    pendingId: pendingMessageId,
+                    acceptRecommendation: true,
+                    routingModeOverride: "auto",
+                  });
                 }}
               />
             ) : null}
-            {messages.length === 0 ? (
+
+            {status === "booting" ? (
+              <div className="grid h-72 place-items-center rounded-lg border border-dashed bg-background">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+              </div>
+            ) : messages.length === 0 ? (
               <div className="grid h-72 place-items-center rounded-lg border border-dashed bg-background text-center">
                 <div className="max-w-sm px-4">
-                  <p className="text-sm font-medium">Start with a task, not a model choice.</p>
+                  <p className="text-sm font-medium">Start with the work you need done.</p>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    OmniAI will classify the prompt and recommend a stronger provider when it matters.
+                    OmniAI will store the conversation and recommend a stronger model before switching.
                   </p>
                 </div>
               </div>
@@ -240,28 +477,34 @@ export function ChatWorkspace() {
                     message.role === "assistant" ? "bg-muted/50" : "bg-background"
                   }`}
                 >
-                  <div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase text-muted-foreground">
+                  <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium uppercase text-muted-foreground">
                     {message.role}
                     {message.modelDisplayName ? <Badge>{message.modelDisplayName}</Badge> : null}
                   </div>
-                  <p className="whitespace-pre-wrap text-sm leading-6">{message.content}</p>
+                  <MessageContent content={message.content} />
                 </article>
               ))
             )}
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
           </div>
+
           <form className="border-t bg-background p-4" onSubmit={onSubmit}>
             <Textarea
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
               placeholder="Ask OmniAI to write, debug, research, summarize, analyze, or generate an image..."
+              disabled={status === "booting"}
             />
             <div className="mt-3 flex items-center justify-between gap-3">
               <p className="text-xs text-muted-foreground">
-                Provider keys stay server-side. Suggest mode evaluates intent before routing.
+                Suggest mode stores your prompt first, then asks before switching models.
               </p>
               <Button type="submit" disabled={!canSend}>
-                <SendHorizontal className="h-4 w-4" aria-hidden="true" />
+                {status === "loading" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <SendHorizontal className="h-4 w-4" aria-hidden="true" />
+                )}
                 Send
               </Button>
             </div>

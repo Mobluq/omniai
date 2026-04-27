@@ -15,6 +15,8 @@ export type ModelCapabilityId =
   | "function_calling"
   | "embeddings";
 
+export type ProviderId = "openai" | "anthropic" | "google" | "stability" | "mistral" | "amazon";
+
 export type TextGenerationInput = {
   prompt: string;
   modelId: string;

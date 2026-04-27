@@ -26,7 +26,7 @@ API routes use a database-backed limiter in the `RateLimitBucket` table. It stor
 
 ## API Key Handling
 
-`AIProviderConfig` stores encrypted key material only. The current scaffold does not implement encryption. Before production, add envelope encryption using a managed KMS and store only ciphertext.
+`AIProviderConfig` stores encrypted key material only. Workspace provider keys are encrypted with AES-256-GCM using `APP_ENCRYPTION_KEY` or, as a local fallback, `NEXTAUTH_SECRET`. Production should keep `APP_ENCRYPTION_KEY` stable and separate from session secrets; larger deployments should move this to managed KMS envelope encryption.
 
 ## Prompt Injection
 

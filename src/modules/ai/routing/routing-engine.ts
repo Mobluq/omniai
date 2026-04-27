@@ -1,6 +1,8 @@
 import type { RoutingMode } from "@prisma/client";
 import { badRequest } from "@/lib/errors/app-error";
 import { createProvider, isProviderId } from "@/modules/ai/providers/provider-factory";
+import { ProviderConfigurationService } from "@/modules/ai/providers/provider-config-service";
+import type { TextGenerationOutput } from "@/modules/ai/providers/types";
 import { RecommendationEngine } from "@/modules/ai/recommendation/recommendation-engine";
 import { ModelRegistryService } from "@/modules/ai/registry/model-registry";
 
@@ -13,6 +15,8 @@ export type RoutingRequest = {
   currentModelId?: string;
   acceptRecommendation?: boolean;
   context?: string[];
+  userId?: string;
+  workspaceId?: string;
 };
 
 export type RoutingDecision = {
@@ -27,6 +31,7 @@ export type RoutingDecision = {
 export class RoutingEngine {
   private readonly recommendations = new RecommendationEngine();
   private readonly registry = new ModelRegistryService();
+  private readonly providerConfigs = new ProviderConfigurationService();
 
   decide(request: RoutingRequest): RoutingDecision {
     const recommendation = this.recommendations.evaluate({
@@ -101,12 +106,38 @@ export class RoutingEngine {
       throw badRequest("Unsupported provider.");
     }
 
-    const provider = createProvider(decision.provider);
-    const output = await provider.generateText({
-      prompt: request.prompt,
-      modelId: decision.modelId,
-      context: request.context,
+    const runtimeConfig = await this.providerConfigs.getRuntimeConfig({
+      provider: decision.provider,
+      userId: request.userId,
+      workspaceId: request.workspaceId,
     });
+    const provider = createProvider(decision.provider, runtimeConfig);
+    const selectedModel = this.registry.getByProviderAndModel(decision.provider, decision.modelId);
+    let output: TextGenerationOutput;
+
+    if (selectedModel?.imageGeneration && provider.generateImage) {
+      const image = await provider.generateImage({
+        prompt: request.prompt,
+        modelId: decision.modelId,
+      });
+      const content = image.imageUrl
+        ? `Generated image with ${decision.modelDisplayName}.\n\n![Generated image](${image.imageUrl})`
+        : `${decision.modelDisplayName} is selected for image generation, but no image was returned. Confirm the provider key in Settings and try again.`;
+
+      output = {
+        content,
+        modelId: decision.modelId,
+        provider: decision.provider,
+        tokenInputEstimate: Math.ceil(request.prompt.length / 4),
+        tokenOutputEstimate: Math.ceil(content.length / 4),
+      };
+    } else {
+      output = await provider.generateText({
+        prompt: request.prompt,
+        modelId: decision.modelId,
+        context: request.context,
+      });
+    }
 
     return { decision, output };
   }

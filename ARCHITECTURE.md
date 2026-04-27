@@ -37,7 +37,7 @@ generateImage?(input): Promise<ImageGenerationOutput>
 embedText?(input): Promise<EmbeddingOutput>
 ```
 
-Adapters currently return safe placeholders. Real API calls can be added inside each adapter without changing UI components or route handlers.
+Adapters are isolated behind the provider interface. OpenAI, Anthropic, Gemini, Mistral, Stability AI, and Amazon Bedrock have server-side adapter implementations with safe no-key fallbacks. Workspace keys are resolved through the provider configuration service before falling back to deployment environment variables.
 
 ## Recommendation Engine
 
@@ -59,6 +59,8 @@ Routing modes:
 - `auto`: automatically select the highest scoring model.
 
 The chat orchestrator stores the user message, evaluates recommendation, optionally pauses for user confirmation, then routes and logs usage.
+
+Suggestion approval routes the already-stored user message, so accepting or rejecting a recommendation does not duplicate the prompt in history.
 
 ## Memory Layer
 

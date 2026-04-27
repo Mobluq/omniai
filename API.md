@@ -58,6 +58,38 @@ Returns workspaces for the current user.
 
 Requires workspace membership.
 
+`PATCH /api/workspaces/:id`
+
+Requires workspace admin access.
+
+```json
+{
+  "defaultRoutingMode": "suggest",
+  "defaultModelId": "openai-chat-primary",
+  "memoryEnabled": true,
+  "dataRetentionDays": 365
+}
+```
+
+## Providers
+
+`GET /api/providers?workspaceId=...`
+
+Returns provider connection status, model options, and required environment variable names. It never returns API keys.
+
+`PUT /api/providers`
+
+Requires workspace admin access.
+
+```json
+{
+  "workspaceId": "workspace_id",
+  "provider": "anthropic",
+  "apiKey": "provider-secret",
+  "isEnabled": true
+}
+```
+
 ## Conversations
 
 `GET /api/conversations?workspaceId=...`
@@ -95,6 +127,18 @@ Archives a conversation.
 
 In suggest mode, the endpoint can return `202` with a recommendation and no assistant message so the client can ask whether to switch.
 
+To continue a stored message after the user accepts or rejects a recommendation:
+
+```json
+{
+  "pendingMessageId": "message_id",
+  "routingMode": "suggest",
+  "selectedProvider": "openai",
+  "selectedModelId": "openai-chat-primary",
+  "acceptRecommendation": true
+}
+```
+
 ## Recommendation
 
 `POST /api/recommendations/evaluate`
@@ -114,6 +158,7 @@ In suggest mode, the endpoint can return `202` with a recommendation and no assi
 `POST /api/ai/route`
 
 Returns a routing decision and provider placeholder output.
+When provider credentials are configured, routing calls the selected provider adapter server-side.
 
 ## Usage
 

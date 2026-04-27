@@ -9,7 +9,7 @@ OmniAI is a production-oriented foundation for a multi-model AI orchestration Sa
 - PostgreSQL with Prisma ORM
 - NextAuth credentials foundation with OAuth-ready schema
 - Zod validation for API inputs
-- Provider abstraction for OpenAI, Anthropic, Google Gemini, Stability AI, and Mistral
+- Provider abstraction for OpenAI/ChatGPT, Anthropic Claude, Google Gemini, Mistral, Stability AI, and Amazon Bedrock
 - Vitest for unit tests and Playwright-ready E2E configuration
 - Docker Compose for local PostgreSQL with pgvector
 
@@ -75,7 +75,9 @@ The scaffold includes:
 - Signup/sign-in foundation
 - Multi-tenant workspace schema and authorization checks
 - Conversation and message storage
-- Provider abstraction and isolated provider adapters
+- Persistent chat history with selectable conversations
+- Server-side provider connection settings with encrypted workspace API keys
+- Isolated provider adapters with live-call paths and safe no-key fallbacks
 - Model registry with capability metadata
 - Rule-based recommendation engine designed for future LLM classification
 - Manual, suggest, and auto routing foundation

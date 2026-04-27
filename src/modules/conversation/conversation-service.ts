@@ -92,6 +92,23 @@ export class ConversationService {
     return conversation;
   }
 
+  async getUserMessage(userId: string, conversationId: string, messageId: string) {
+    await this.get(userId, conversationId);
+    const message = await prisma.message.findFirst({
+      where: {
+        id: messageId,
+        conversationId,
+        role: "user",
+      },
+    });
+
+    if (!message) {
+      throw notFound("Message not found.");
+    }
+
+    return message;
+  }
+
   async delete(userId: string, conversationId: string) {
     const conversation = await this.get(userId, conversationId);
     await assertWorkspaceAccess(userId, conversation.workspaceId, "member");
@@ -103,21 +120,45 @@ export class ConversationService {
   }
 
   async addMessage(input: CreateMessageInput) {
-    return prisma.message.create({
-      data: {
-        conversationId: input.conversationId,
-        workspaceId: input.workspaceId,
-        userId: input.userId,
-        role: input.role,
-        content: input.content,
-        provider: input.provider,
-        modelId: input.modelId,
-        modelDisplayName: input.modelDisplayName,
-        tokenInput: input.tokenInput,
-        tokenOutput: input.tokenOutput,
-        costEstimate: input.costEstimate,
-        metadata: input.metadata,
-      },
+    const [message] = await prisma.$transaction([
+      prisma.message.create({
+        data: {
+          conversationId: input.conversationId,
+          workspaceId: input.workspaceId,
+          userId: input.userId,
+          role: input.role,
+          content: input.content,
+          provider: input.provider,
+          modelId: input.modelId,
+          modelDisplayName: input.modelDisplayName,
+          tokenInput: input.tokenInput,
+          tokenOutput: input.tokenOutput,
+          costEstimate: input.costEstimate,
+          metadata: input.metadata,
+        },
+      }),
+      prisma.conversation.update({
+        where: { id: input.conversationId },
+        data: { updatedAt: new Date() },
+      }),
+    ]);
+
+    return message;
+  }
+
+  async renameFromPrompt(conversationId: string, prompt: string) {
+    const title = prompt
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 72);
+
+    if (!title) {
+      return null;
+    }
+
+    return prisma.conversation.update({
+      where: { id: conversationId },
+      data: { title },
     });
   }
 }

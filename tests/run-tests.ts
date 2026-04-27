@@ -10,7 +10,10 @@ async function run() {
 
   const registry = new ModelRegistryService();
   const providers = new Set(registry.list().map((model) => model.provider));
-  assert.deepEqual(providers, new Set(["openai", "anthropic", "google", "stability", "mistral"]));
+  assert.deepEqual(
+    providers,
+    new Set(["openai", "anthropic", "google", "stability", "mistral", "amazon"]),
+  );
 
   const imageModels = registry.getByCapability("image_generation");
   assert.ok(imageModels.length >= 2);
@@ -66,7 +69,7 @@ async function run() {
     routingMode: "auto",
   });
   assert.ok(["openai", "stability"].includes(autoResult.decision.provider));
-  assert.match(autoResult.output.content, /adapter placeholder response/);
+  assert.match(autoResult.output.content, /image generation|no image was returned/i);
 
   console.log("All unit assertions passed.");
 }

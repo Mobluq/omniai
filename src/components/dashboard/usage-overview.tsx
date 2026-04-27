@@ -1,14 +1,34 @@
 import { Activity, Coins, MessageSquare, Route } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const metrics = [
-  { label: "Requests", value: "0", icon: Activity },
-  { label: "Conversations", value: "0", icon: MessageSquare },
-  { label: "Routing decisions", value: "0", icon: Route },
-  { label: "Estimated cost", value: "$0.00", icon: Coins },
-];
+export type UsageOverviewProps = {
+  requestCount: number;
+  conversationCount: number;
+  routingDecisionCount: number;
+  estimatedCost: number;
+};
 
-export function UsageOverview() {
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 4,
+  }).format(value);
+}
+
+export function UsageOverview({
+  requestCount,
+  conversationCount,
+  routingDecisionCount,
+  estimatedCost,
+}: UsageOverviewProps) {
+  const metrics = [
+    { label: "Requests", value: requestCount.toLocaleString(), icon: Activity },
+    { label: "Conversations", value: conversationCount.toLocaleString(), icon: MessageSquare },
+    { label: "Routing decisions", value: routingDecisionCount.toLocaleString(), icon: Route },
+    { label: "Estimated cost", value: formatCurrency(estimatedCost), icon: Coins },
+  ];
+
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       {metrics.map((metric) => (

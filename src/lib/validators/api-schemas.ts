@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const routingModeSchema = z.enum(["manual", "suggest", "auto"]);
+export const providerIdSchema = z.enum(["openai", "anthropic", "google", "stability", "mistral", "amazon"]);
 
 export const createWorkspaceSchema = z.object({
   name: z.string().min(2).max(80),
@@ -14,13 +15,19 @@ export const createConversationSchema = z.object({
   provider: z.string().min(1).optional(),
 });
 
-export const sendMessageSchema = z.object({
-  content: z.string().min(1).max(20000),
-  routingMode: routingModeSchema.default("suggest"),
-  selectedProvider: z.string().min(1).optional(),
-  selectedModelId: z.string().min(1).optional(),
-  acceptRecommendation: z.boolean().optional(),
-});
+export const sendMessageSchema = z
+  .object({
+    content: z.string().min(1).max(20000).optional(),
+    pendingMessageId: z.string().min(1).optional(),
+    routingMode: routingModeSchema.default("suggest"),
+    selectedProvider: z.string().min(1).optional(),
+    selectedModelId: z.string().min(1).optional(),
+    acceptRecommendation: z.boolean().optional(),
+  })
+  .refine((value) => value.content || value.pendingMessageId, {
+    message: "content or pendingMessageId is required.",
+    path: ["content"],
+  });
 
 export const recommendationRequestSchema = z.object({
   prompt: z.string().min(1).max(20000),
@@ -40,9 +47,9 @@ export const routeRequestSchema = z.object({
 });
 
 export const providerConfigurationSchema = z.object({
-  provider: z.string().min(1),
-  displayName: z.string().min(1).max(80),
-  encryptedApiKey: z.string().optional(),
+  workspaceId: z.string().min(1),
+  provider: providerIdSchema,
+  apiKey: z.string().max(10000).optional(),
   isEnabled: z.boolean(),
 });
 

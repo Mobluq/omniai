@@ -4,11 +4,13 @@ import { sanitizeUserText, hashSensitiveText } from "@/lib/security/request-cont
 import { ConversationService } from "@/modules/conversation/conversation-service";
 import { MemoryService } from "@/modules/memory/memory-service";
 import { RecommendationEngine } from "@/modules/ai/recommendation/recommendation-engine";
+import { ModelRegistryService } from "@/modules/ai/registry/model-registry";
 import { RoutingEngine } from "@/modules/ai/routing/routing-engine";
 import { UsageService } from "@/modules/usage/usage-service";
 
 export type SendConversationMessageInput = {
-  content: string;
+  content?: string;
+  pendingMessageId?: string;
   routingMode: RoutingMode;
   selectedProvider?: string;
   selectedModelId?: string;
@@ -19,20 +21,30 @@ export class ChatOrchestrator {
   private readonly conversations = new ConversationService();
   private readonly memory = new MemoryService();
   private readonly recommendations = new RecommendationEngine();
+  private readonly registry = new ModelRegistryService();
   private readonly routing = new RoutingEngine();
   private readonly usage = new UsageService();
 
   async sendMessage(userId: string, conversationId: string, input: SendConversationMessageInput) {
     const conversation = await this.conversations.get(userId, conversationId);
-    const content = sanitizeUserText(input.content);
+    const existingPendingMessage = input.pendingMessageId
+      ? await this.conversations.getUserMessage(userId, conversation.id, input.pendingMessageId)
+      : null;
+    const content = sanitizeUserText(existingPendingMessage?.content ?? input.content ?? "");
 
-    const userMessage = await this.conversations.addMessage({
-      conversationId: conversation.id,
-      workspaceId: conversation.workspaceId,
-      userId,
-      role: "user",
-      content,
-    });
+    const userMessage =
+      existingPendingMessage ??
+      (await this.conversations.addMessage({
+        conversationId: conversation.id,
+        workspaceId: conversation.workspaceId,
+        userId,
+        role: "user",
+        content,
+      }));
+
+    if (!existingPendingMessage && ["New conversation", "OmniAI session"].includes(conversation.title)) {
+      await this.conversations.renameFromPrompt(conversation.id, content);
+    }
 
     const recommendation = this.recommendations.evaluate({
       prompt: content,
@@ -80,6 +92,8 @@ export class ChatOrchestrator {
       currentProvider: conversation.activeProvider ?? input.selectedProvider,
       currentModelId: conversation.activeModelId ?? input.selectedModelId,
       acceptRecommendation: input.acceptRecommendation,
+      userId,
+      workspaceId: conversation.workspaceId,
       context,
     });
 
@@ -113,7 +127,10 @@ export class ChatOrchestrator {
       conversationId: conversation.id,
       provider: routed.decision.provider,
       modelId: routed.decision.modelId,
-      requestType: "text_generation",
+      requestType: this.registry.getByProviderAndModel(routed.decision.provider, routed.decision.modelId)
+        ?.imageGeneration
+        ? "image_generation"
+        : "text_generation",
       tokenInputEstimate: routed.output.tokenInputEstimate,
       tokenOutputEstimate: routed.output.tokenOutputEstimate,
       success: true,

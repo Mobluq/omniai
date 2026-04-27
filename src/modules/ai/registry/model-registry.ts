@@ -1,10 +1,10 @@
-import type { ModelCapabilityId } from "@/modules/ai/providers/types";
+import type { ModelCapabilityId, ProviderId } from "@/modules/ai/providers/types";
 
 export type CostTier = "low" | "medium" | "high" | "premium";
 export type ProviderStatus = "available" | "disabled" | "degraded" | "beta";
 
 export type ModelRegistryEntry = {
-  provider: "openai" | "anthropic" | "google" | "stability" | "mistral";
+  provider: ProviderId;
   modelId: string;
   displayName: string;
   description: string;
@@ -140,6 +140,28 @@ export const modelRegistry: ModelRegistryEntry[] = [
     codingStrength: 8,
     imageGeneration: false,
     contextWindowEstimate: 128000,
+    status: "available",
+  },
+  {
+    provider: "amazon",
+    modelId: "amazon-bedrock-primary",
+    displayName: "Amazon Bedrock Primary",
+    description: "Enterprise AWS-hosted model routing through Amazon Bedrock Converse.",
+    capabilities: [
+      "text_generation",
+      "long_context",
+      "reasoning",
+      "summarization",
+      "business_writing",
+      "document_analysis",
+    ],
+    costTier: "medium",
+    speedRating: 7,
+    reasoningStrength: 8,
+    writingStrength: 8,
+    codingStrength: 7,
+    imageGeneration: false,
+    contextWindowEstimate: 200000,
     status: "available",
   },
 ];

@@ -249,6 +249,7 @@ model AIProviderConfig {
   workspace            Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user                 User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([workspaceId, provider])
   @@index([workspaceId, provider])
   @@index([userId, provider])
 }
