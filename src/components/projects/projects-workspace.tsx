@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
+import { errorMessage } from "@/lib/api/client";
 
 type ApiEnvelope<T> =
   | { success: true; data: T }
@@ -33,6 +35,7 @@ async function parseEnvelope<T>(response: Response): Promise<ApiEnvelope<T>> {
 }
 
 export function ProjectsWorkspace() {
+  const { toast } = useToast();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [name, setName] = useState("");
@@ -68,10 +71,12 @@ export function ProjectsWorkspace() {
     load()
       .then(() => setStatus("ready"))
       .catch((loadError: unknown) => {
-        setError(loadError instanceof Error ? loadError.message : "Could not load projects.");
+        const message = errorMessage(loadError, "Could not load projects.");
+        setError(message);
+        toast({ title: "Projects could not be loaded", description: message, variant: "error" });
         setStatus("error");
       });
-  }, []);
+  }, [toast]);
 
   async function onCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -96,7 +101,9 @@ export function ProjectsWorkspace() {
     const envelope = await parseEnvelope<{ project: Project }>(response);
 
     if (!envelope.success) {
-      setError(envelope.error.message);
+      const message = envelope.error.message;
+      setError(message);
+      toast({ title: "Project could not be created", description: message, variant: "error" });
       setStatus("ready");
       return;
     }
@@ -106,6 +113,7 @@ export function ProjectsWorkspace() {
     setInstructions("");
     await load();
     setStatus("ready");
+    toast({ title: "Project created", description: `${envelope.data.project.name} is ready.`, variant: "success" });
   }
 
   if (status === "loading") {

@@ -8,11 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { useToast } from "@/components/ui/toast";
+import { parseApiResponse, errorMessage } from "@/lib/api/client";
 import { modelRegistry } from "@/modules/ai/registry/model-registry";
-
-type ApiEnvelope<T> =
-  | { success: true; data: T }
-  | { success: false; error: { code: string; message: string } };
 
 type Workspace = {
   id: string;
@@ -40,11 +38,8 @@ type ProviderConnection = {
   }>;
 };
 
-async function parseEnvelope<T>(response: Response): Promise<ApiEnvelope<T>> {
-  return response.json() as Promise<ApiEnvelope<T>>;
-}
-
 export function SettingsWorkspace() {
+  const { toast } = useToast();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [providers, setProviders] = useState<ProviderConnection[]>([]);
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
@@ -68,20 +63,18 @@ export function SettingsWorkspace() {
 
     async function load() {
       setStatus("loading");
-      const workspaceResponse = await fetch("/api/workspaces");
-      const workspaceEnvelope = await parseEnvelope<{ workspaces: Workspace[] }>(workspaceResponse);
+      const workspaceEnvelope = await parseApiResponse<{ workspaces: Workspace[] }>(
+        await fetch("/api/workspaces"),
+      );
 
-      if (!workspaceEnvelope.success || !workspaceEnvelope.data.workspaces[0]) {
+      if (!workspaceEnvelope.workspaces[0]) {
         throw new Error("No workspace found.");
       }
 
-      const activeWorkspace = workspaceEnvelope.data.workspaces[0];
-      const providersResponse = await fetch(`/api/providers?workspaceId=${activeWorkspace.id}`);
-      const providersEnvelope = await parseEnvelope<{ providers: ProviderConnection[] }>(providersResponse);
-
-      if (!providersEnvelope.success) {
-        throw new Error(providersEnvelope.error.message);
-      }
+      const activeWorkspace = workspaceEnvelope.workspaces[0];
+      const providersEnvelope = await parseApiResponse<{ providers: ProviderConnection[] }>(
+        await fetch(`/api/providers?workspaceId=${activeWorkspace.id}`),
+      );
 
       if (!cancelled) {
         setWorkspace(activeWorkspace);
@@ -89,13 +82,18 @@ export function SettingsWorkspace() {
         setDefaultModelId(activeWorkspace.defaultModelId ?? "openai-chat-primary");
         setRetentionDays(activeWorkspace.retentionDays);
         setMemoryEnabled(activeWorkspace.memoryEnabled);
-        setProviders(providersEnvelope.data.providers);
+        setProviders(providersEnvelope.providers);
         setStatus("ready");
       }
     }
 
-    load().catch(() => {
+    load().catch((loadError: unknown) => {
       if (!cancelled) {
+        toast({
+          title: "Settings could not be loaded",
+          description: errorMessage(loadError),
+          variant: "error",
+        });
         setStatus("error");
       }
     });
@@ -103,7 +101,7 @@ export function SettingsWorkspace() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [toast]);
 
   async function saveProvider(provider: ProviderConnection, isEnabled = true) {
     if (!workspace) {
@@ -112,24 +110,31 @@ export function SettingsWorkspace() {
 
     setSavingProvider(provider.provider);
     setNotice(null);
-    const response = await fetch("/api/providers", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        workspaceId: workspace.id,
-        provider: provider.provider,
-        apiKey: apiKeys[provider.provider],
-        isEnabled,
-      }),
-    });
-    const envelope = await parseEnvelope<{ providers: ProviderConnection[] }>(response);
-
-    if (envelope.success) {
-      setProviders(envelope.data.providers);
+    try {
+      const envelope = await parseApiResponse<{ providers: ProviderConnection[] }>(
+        await fetch("/api/providers", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            workspaceId: workspace.id,
+            provider: provider.provider,
+            apiKey: apiKeys[provider.provider],
+            isEnabled,
+          }),
+        }),
+      );
+      setProviders(envelope.providers);
       setApiKeys((current) => ({ ...current, [provider.provider]: "" }));
       setNotice(`${provider.displayName} settings saved.`);
-    } else {
-      setNotice(envelope.error.message);
+      toast({
+        title: isEnabled ? "Provider saved" : "Provider disabled",
+        description: `${provider.displayName} settings were updated.`,
+        variant: "success",
+      });
+    } catch (providerError: unknown) {
+      const message = errorMessage(providerError);
+      setNotice(message);
+      toast({ title: "Provider update failed", description: message, variant: "error" });
     }
 
     setSavingProvider(null);
@@ -142,23 +147,26 @@ export function SettingsWorkspace() {
 
     setSavingSettings(true);
     setNotice(null);
-    const response = await fetch(`/api/workspaces/${workspace.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        defaultRoutingMode,
-        defaultModelId,
-        memoryEnabled,
-        dataRetentionDays: retentionDays,
-      }),
-    });
-    const envelope = await parseEnvelope<{ workspace: Workspace }>(response);
-
-    if (envelope.success) {
-      setWorkspace(envelope.data.workspace);
+    try {
+      const envelope = await parseApiResponse<{ workspace: Workspace }>(
+        await fetch(`/api/workspaces/${workspace.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            defaultRoutingMode,
+            defaultModelId,
+            memoryEnabled,
+            dataRetentionDays: retentionDays,
+          }),
+        }),
+      );
+      setWorkspace(envelope.workspace);
       setNotice("Workspace settings saved.");
-    } else {
-      setNotice(envelope.error.message);
+      toast({ title: "Workspace defaults saved", variant: "success" });
+    } catch (settingsError: unknown) {
+      const message = errorMessage(settingsError);
+      setNotice(message);
+      toast({ title: "Settings update failed", description: message, variant: "error" });
     }
 
     setSavingSettings(false);
@@ -171,20 +179,31 @@ export function SettingsWorkspace() {
 
     setTestingProvider(provider.provider);
     setNotice(null);
-    const response = await fetch("/api/providers/test", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        workspaceId: workspace.id,
-        provider: provider.provider,
-      }),
-    });
-    const envelope = await parseEnvelope<{
-      configured: boolean;
-      message: string;
-    }>(response);
-
-    setNotice(envelope.success ? envelope.data.message : envelope.error.message);
+    try {
+      const envelope = await parseApiResponse<{
+        configured: boolean;
+        message: string;
+      }>(
+        await fetch("/api/providers/test", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            workspaceId: workspace.id,
+            provider: provider.provider,
+          }),
+        }),
+      );
+      setNotice(envelope.message);
+      toast({
+        title: envelope.configured ? "Provider is configured" : "Provider needs credentials",
+        description: envelope.message,
+        variant: envelope.configured ? "success" : "warning",
+      });
+    } catch (testError: unknown) {
+      const message = errorMessage(testError);
+      setNotice(message);
+      toast({ title: "Provider test failed", description: message, variant: "error" });
+    }
     setTestingProvider(null);
   }
 

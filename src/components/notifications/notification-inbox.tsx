@@ -7,7 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
+import { useToast } from "@/components/ui/toast";
 import type { AppNotification } from "@/components/notifications/notification-center";
+import { errorMessage } from "@/lib/api/client";
 
 type ApiEnvelope<T> =
   | { success: true; data: T }
@@ -67,6 +69,7 @@ function formatDate(value: string) {
 }
 
 export function NotificationInbox() {
+  const { toast } = useToast();
   const [items, setItems] = useState<AppNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [filter, setFilter] = useState<NotificationFilter>("all");
@@ -91,26 +94,48 @@ export function NotificationInbox() {
         setUnreadCount(result.unreadCount);
         setStatus("ready");
       })
-      .catch(() => setStatus("error"));
-  }, []);
+      .catch((loadError: unknown) => {
+        toast({
+          title: "Notifications could not be loaded",
+          description: errorMessage(loadError),
+          variant: "error",
+        });
+        setStatus("error");
+      });
+  }, [toast]);
 
   async function onMarkRead(id: string) {
-    const updated = await updateNotification(id, { read: true });
-    setItems((current) => current.map((item) => (item.id === id ? updated : item)));
-    setUnreadCount((current) => Math.max(0, current - 1));
+    try {
+      const updated = await updateNotification(id, { read: true });
+      setItems((current) => current.map((item) => (item.id === id ? updated : item)));
+      setUnreadCount((current) => Math.max(0, current - 1));
+      toast({ title: "Notification marked as read", variant: "success" });
+    } catch (markError: unknown) {
+      toast({ title: "Could not mark as read", description: errorMessage(markError), variant: "error" });
+    }
   }
 
   async function onArchive(id: string) {
-    const archived = items.find((item) => item.id === id);
-    await updateNotification(id, { archived: true, read: true });
-    setItems((current) => current.filter((item) => item.id !== id));
-    setUnreadCount((current) => (archived?.readAt ? current : Math.max(0, current - 1)));
+    try {
+      const archived = items.find((item) => item.id === id);
+      await updateNotification(id, { archived: true, read: true });
+      setItems((current) => current.filter((item) => item.id !== id));
+      setUnreadCount((current) => (archived?.readAt ? current : Math.max(0, current - 1)));
+      toast({ title: "Notification archived", variant: "success" });
+    } catch (archiveError: unknown) {
+      toast({ title: "Could not archive notification", description: errorMessage(archiveError), variant: "error" });
+    }
   }
 
   async function onMarkAllRead() {
-    await markAllRead();
-    setItems((current) => current.map((item) => ({ ...item, readAt: item.readAt ?? new Date().toISOString() })));
-    setUnreadCount(0);
+    try {
+      await markAllRead();
+      setItems((current) => current.map((item) => ({ ...item, readAt: item.readAt ?? new Date().toISOString() })));
+      setUnreadCount(0);
+      toast({ title: "Notifications marked as read", variant: "success" });
+    } catch (markAllError: unknown) {
+      toast({ title: "Could not update notifications", description: errorMessage(markAllError), variant: "error" });
+    }
   }
 
   return (

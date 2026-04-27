@@ -6,8 +6,10 @@ import { Loader2, MessageSquare, Plus, SendHorizontal, Trash2 } from "lucide-rea
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
 import { ModelControls } from "@/components/chat/model-controls";
 import { useChatStore, type RoutingMode } from "@/components/chat/chat-store";
+import { errorMessage } from "@/lib/api/client";
 import {
   RecommendationBanner,
   type RecommendationViewModel,
@@ -115,6 +117,7 @@ function MessageContent({ content }: { content: string }) {
 }
 
 export function ChatWorkspace() {
+  const { toast } = useToast();
   const { routingMode, selectedModel, setRoutingMode, setSelectedModel } = useChatStore();
   const [workspace, setWorkspace] = useState<{ id: string; name: string } | null>(null);
   const [projectId, setProjectId] = useState<string | null>(null);
@@ -157,6 +160,7 @@ export function ChatWorkspace() {
 
     if (!envelope.success) {
       setError(envelope.error.message);
+      toast({ title: "Conversation could not be opened", description: envelope.error.message, variant: "error" });
       setStatus("error");
       return;
     }
@@ -201,6 +205,7 @@ export function ChatWorkspace() {
 
     if (!envelope.success) {
       setError(envelope.error.message);
+      toast({ title: "Conversation could not be created", description: envelope.error.message, variant: "error" });
       setStatus("error");
       return;
     }
@@ -211,6 +216,7 @@ export function ChatWorkspace() {
     setPendingMessageId(null);
     await refreshConversations(workspaceId);
     setStatus("idle");
+    toast({ title: "New conversation created", variant: "success" });
   }
 
   async function deleteConversation(id: string) {
@@ -218,7 +224,18 @@ export function ChatWorkspace() {
       return;
     }
 
-    await fetch(`/api/conversations/${id}`, { method: "DELETE" });
+    const deleteResponse = await fetch(`/api/conversations/${id}`, { method: "DELETE" });
+    const deleteEnvelope = await parseEnvelope<{ archived: boolean }>(deleteResponse);
+
+    if (!deleteEnvelope.success) {
+      toast({
+        title: "Conversation could not be deleted",
+        description: deleteEnvelope.error.message,
+        variant: "error",
+      });
+      return;
+    }
+
     const updated = await refreshConversations(workspace.id);
     const next = updated.find((conversation) => conversation.id !== id);
 
@@ -229,6 +246,8 @@ export function ChatWorkspace() {
         await createConversation(workspace.id);
       }
     }
+
+    toast({ title: "Conversation deleted", variant: "success" });
   }
 
   useEffect(() => {
@@ -272,7 +291,9 @@ export function ChatWorkspace() {
 
     bootstrap().catch((bootError: unknown) => {
       if (!cancelled) {
-        setError(bootError instanceof Error ? bootError.message : "Could not initialize chat.");
+        const message = errorMessage(bootError, "Could not initialize chat.");
+        setError(message);
+        toast({ title: "Chat could not be loaded", description: message, variant: "error" });
         setStatus("error");
       }
     });
@@ -300,6 +321,14 @@ export function ChatWorkspace() {
 
     setRecommendation(payload.assistantMessage ? null : payload.recommendation);
     setPendingMessageId(payload.assistantMessage ? null : payload.userMessage.id);
+
+    if (!payload.assistantMessage && payload.recommendation?.shouldAskToSwitch) {
+      toast({
+        title: "Model recommendation ready",
+        description: `${payload.recommendation.recommendedModelDisplayName} may be better for this task.`,
+        variant: "info",
+      });
+    }
   }
 
   async function sendToConversation(input: {
@@ -310,6 +339,7 @@ export function ChatWorkspace() {
   }) {
     if (!conversationId) {
       setError("Chat is not connected to a conversation yet.");
+      toast({ title: "Chat is not ready", description: "Open or create a conversation first.", variant: "error" });
       return;
     }
 
@@ -332,11 +362,20 @@ export function ChatWorkspace() {
     if (!envelope.success) {
       setStatus("error");
       setError(envelope.error.message);
+      toast({ title: "Message failed", description: envelope.error.message, variant: "error" });
       return;
     }
 
     applyMessagePayload(envelope.data);
     setStatus("idle");
+
+    if (envelope.data.assistantMessage) {
+      toast({
+        title: "Response ready",
+        description: `${envelope.data.assistantMessage.modelDisplayName ?? "Selected model"} answered.`,
+        variant: "success",
+      });
+    }
 
     if (workspace) {
       void refreshConversations(workspace.id);

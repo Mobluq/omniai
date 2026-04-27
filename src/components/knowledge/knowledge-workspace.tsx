@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
+import { errorMessage } from "@/lib/api/client";
 
 type ApiEnvelope<T> =
   | { success: true; data: T }
@@ -34,6 +36,7 @@ async function parseEnvelope<T>(response: Response): Promise<ApiEnvelope<T>> {
 }
 
 export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: string }) {
+  const { toast } = useToast();
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
   const [sources, setSources] = useState<KnowledgeSource[]>([]);
@@ -84,7 +87,9 @@ export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: st
     load(initialProjectId ?? "")
       .then(() => setStatus("ready"))
       .catch((loadError: unknown) => {
-        setError(loadError instanceof Error ? loadError.message : "Could not load knowledge.");
+        const message = errorMessage(loadError, "Could not load knowledge.");
+        setError(message);
+        toast({ title: "Knowledge could not be loaded", description: message, variant: "error" });
         setStatus("error");
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -93,8 +98,15 @@ export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: st
   async function onProjectChange(nextProjectId: string) {
     setProjectId(nextProjectId);
     setStatus("loading");
-    await load(nextProjectId);
-    setStatus("ready");
+    try {
+      await load(nextProjectId);
+      setStatus("ready");
+    } catch (loadError: unknown) {
+      const message = errorMessage(loadError, "Could not load knowledge.");
+      setError(message);
+      toast({ title: "Knowledge could not be loaded", description: message, variant: "error" });
+      setStatus("error");
+    }
   }
 
   async function onCreate(event: FormEvent<HTMLFormElement>) {
@@ -121,7 +133,9 @@ export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: st
     const envelope = await parseEnvelope<{ knowledgeSource: KnowledgeSource }>(response);
 
     if (!envelope.success) {
-      setError(envelope.error.message);
+      const message = envelope.error.message;
+      setError(message);
+      toast({ title: "Knowledge could not be saved", description: message, variant: "error" });
       setStatus("ready");
       return;
     }
@@ -131,6 +145,7 @@ export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: st
     setContent("");
     await load(projectId);
     setStatus("ready");
+    toast({ title: "Knowledge saved", description: `${envelope.data.knowledgeSource.title} is available for context.`, variant: "success" });
   }
 
   if (status === "loading") {

@@ -18,11 +18,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { useToast } from "@/components/ui/toast";
+import { parseApiResponse, errorMessage } from "@/lib/api/client";
 import { modelRegistry } from "@/modules/ai/registry/model-registry";
-
-type ApiEnvelope<T> =
-  | { success: true; data: T }
-  | { success: false; error: { code: string; message: string } };
 
 type Profile = {
   id: string;
@@ -105,11 +103,8 @@ const notificationLabels: Array<{
   },
 ];
 
-async function parseEnvelope<T>(response: Response): Promise<ApiEnvelope<T>> {
-  return response.json() as Promise<ApiEnvelope<T>>;
-}
-
 export function AccountSettings() {
+  const { toast } = useToast();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [notifications, setNotifications] = useState<NotificationPreferences | null>(null);
   const [security, setSecurity] = useState<SecurityOverview | null>(null);
@@ -137,31 +132,29 @@ export function AccountSettings() {
 
     async function load() {
       setStatus("loading");
-      const [profileResponse, notificationsResponse, securityResponse] = await Promise.all([
-        fetch("/api/account/profile"),
-        fetch("/api/account/notifications"),
-        fetch("/api/account/security"),
-      ]);
       const [profileEnvelope, notificationsEnvelope, securityEnvelope] = await Promise.all([
-        parseEnvelope<{ profile: Profile }>(profileResponse),
-        parseEnvelope<{ preferences: NotificationPreferences }>(notificationsResponse),
-        parseEnvelope<{ security: SecurityOverview }>(securityResponse),
+        parseApiResponse<{ profile: Profile }>(await fetch("/api/account/profile")),
+        parseApiResponse<{ preferences: NotificationPreferences }>(
+          await fetch("/api/account/notifications"),
+        ),
+        parseApiResponse<{ security: SecurityOverview }>(await fetch("/api/account/security")),
       ]);
-
-      if (!profileEnvelope.success || !notificationsEnvelope.success || !securityEnvelope.success) {
-        throw new Error("Account data could not be loaded.");
-      }
 
       if (!cancelled) {
-        setProfile(profileEnvelope.data.profile);
-        setNotifications(notificationsEnvelope.data.preferences);
-        setSecurity(securityEnvelope.data.security);
+        setProfile(profileEnvelope.profile);
+        setNotifications(notificationsEnvelope.preferences);
+        setSecurity(securityEnvelope.security);
         setStatus("ready");
       }
     }
 
-    load().catch(() => {
+    load().catch((loadError: unknown) => {
       if (!cancelled) {
+        toast({
+          title: "Account settings could not be loaded",
+          description: errorMessage(loadError),
+          variant: "error",
+        });
         setStatus("error");
       }
     });
@@ -169,15 +162,13 @@ export function AccountSettings() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [toast]);
 
   async function reloadSecurity() {
-    const response = await fetch("/api/account/security");
-    const envelope = await parseEnvelope<{ security: SecurityOverview }>(response);
-
-    if (envelope.success) {
-      setSecurity(envelope.data.security);
-    }
+    const envelope = await parseApiResponse<{ security: SecurityOverview }>(
+      await fetch("/api/account/security"),
+    );
+    setSecurity(envelope.security);
   }
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
@@ -190,28 +181,31 @@ export function AccountSettings() {
     setSavingProfile(true);
     setNotice(null);
     const formData = new FormData(event.currentTarget);
-    const response = await fetch("/api/account/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: String(formData.get("name") ?? ""),
-        jobTitle: String(formData.get("jobTitle") ?? "") || null,
-        companyName: String(formData.get("companyName") ?? "") || null,
-        timezone: String(formData.get("timezone") ?? "UTC"),
-        locale: String(formData.get("locale") ?? "en"),
-        defaultRoutingMode: String(formData.get("defaultRoutingMode") ?? "suggest"),
-        defaultModelId: String(formData.get("defaultModelId") ?? defaultModelId),
-        memoryEnabled: formData.get("memoryEnabled") === "on",
-        dataRetentionDays: Number(formData.get("dataRetentionDays") ?? 365),
-      }),
-    });
-    const envelope = await parseEnvelope<{ profile: Profile }>(response);
-
-    if (envelope.success) {
-      setProfile(envelope.data.profile);
+    try {
+      const envelope = await parseApiResponse<{ profile: Profile }>(
+        await fetch("/api/account/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: String(formData.get("name") ?? ""),
+            jobTitle: String(formData.get("jobTitle") ?? "") || null,
+            companyName: String(formData.get("companyName") ?? "") || null,
+            timezone: String(formData.get("timezone") ?? "UTC"),
+            locale: String(formData.get("locale") ?? "en"),
+            defaultRoutingMode: String(formData.get("defaultRoutingMode") ?? "suggest"),
+            defaultModelId: String(formData.get("defaultModelId") ?? defaultModelId),
+            memoryEnabled: formData.get("memoryEnabled") === "on",
+            dataRetentionDays: Number(formData.get("dataRetentionDays") ?? 365),
+          }),
+        }),
+      );
+      setProfile(envelope.profile);
       setNotice("Profile saved.");
-    } else {
-      setNotice(envelope.error.message);
+      toast({ title: "Profile saved", variant: "success" });
+    } catch (profileError: unknown) {
+      const message = errorMessage(profileError);
+      setNotice(message);
+      toast({ title: "Profile update failed", description: message, variant: "error" });
     }
 
     setSavingProfile(false);
@@ -224,18 +218,21 @@ export function AccountSettings() {
 
     setSavingNotifications(true);
     setNotice(null);
-    const response = await fetch("/api/account/notifications", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(notifications),
-    });
-    const envelope = await parseEnvelope<{ preferences: NotificationPreferences }>(response);
-
-    if (envelope.success) {
-      setNotifications(envelope.data.preferences);
+    try {
+      const envelope = await parseApiResponse<{ preferences: NotificationPreferences }>(
+        await fetch("/api/account/notifications", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(notifications),
+        }),
+      );
+      setNotifications(envelope.preferences);
       setNotice("Notification preferences saved.");
-    } else {
-      setNotice(envelope.error.message);
+      toast({ title: "Notification preferences saved", variant: "success" });
+    } catch (notificationError: unknown) {
+      const message = errorMessage(notificationError);
+      setNotice(message);
+      toast({ title: "Notification update failed", description: message, variant: "error" });
     }
 
     setSavingNotifications(false);
@@ -244,14 +241,17 @@ export function AccountSettings() {
   async function startTwoFactorSetup() {
     setUpdatingSecurity(true);
     setNotice(null);
-    const response = await fetch("/api/account/security/2fa/setup", { method: "POST" });
-    const envelope = await parseEnvelope<{ setup: TwoFactorSetup }>(response);
-
-    if (envelope.success) {
-      setTwoFactorSetup(envelope.data.setup);
+    try {
+      const envelope = await parseApiResponse<{ setup: TwoFactorSetup }>(
+        await fetch("/api/account/security/2fa/setup", { method: "POST" }),
+      );
+      setTwoFactorSetup(envelope.setup);
       setNotice("Authenticator setup started.");
-    } else {
-      setNotice(envelope.error.message);
+      toast({ title: "Authenticator setup started", variant: "success" });
+    } catch (setupError: unknown) {
+      const message = errorMessage(setupError);
+      setNotice(message);
+      toast({ title: "2FA setup failed", description: message, variant: "error" });
     }
 
     setUpdatingSecurity(false);
@@ -260,21 +260,28 @@ export function AccountSettings() {
   async function verifyTwoFactorSetup() {
     setUpdatingSecurity(true);
     setNotice(null);
-    const response = await fetch("/api/account/security/2fa/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: verifyCode }),
-    });
-    const envelope = await parseEnvelope<{ recoveryCodes: string[] }>(response);
-
-    if (envelope.success) {
-      setRecoveryCodes(envelope.data.recoveryCodes);
+    try {
+      const envelope = await parseApiResponse<{ recoveryCodes: string[] }>(
+        await fetch("/api/account/security/2fa/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: verifyCode }),
+        }),
+      );
+      setRecoveryCodes(envelope.recoveryCodes);
       setTwoFactorSetup(null);
       setVerifyCode("");
       await reloadSecurity();
       setNotice("Two-factor authentication is enabled.");
-    } else {
-      setNotice(envelope.error.message);
+      toast({
+        title: "Two-factor authentication enabled",
+        description: "Store your recovery codes somewhere safe.",
+        variant: "success",
+      });
+    } catch (verifyError: unknown) {
+      const message = errorMessage(verifyError);
+      setNotice(message);
+      toast({ title: "2FA verification failed", description: message, variant: "error" });
     }
 
     setUpdatingSecurity(false);
@@ -283,20 +290,23 @@ export function AccountSettings() {
   async function disableTwoFactor() {
     setUpdatingSecurity(true);
     setNotice(null);
-    const response = await fetch("/api/account/security/2fa/disable", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token: disableCode }),
-    });
-    const envelope = await parseEnvelope<{ disabled: boolean }>(response);
-
-    if (envelope.success) {
+    try {
+      await parseApiResponse<{ disabled: boolean }>(
+        await fetch("/api/account/security/2fa/disable", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: disableCode }),
+        }),
+      );
       setDisableCode("");
       setRecoveryCodes([]);
       await reloadSecurity();
       setNotice("Two-factor authentication is disabled.");
-    } else {
-      setNotice(envelope.error.message);
+      toast({ title: "Two-factor authentication disabled", variant: "warning" });
+    } catch (disableError: unknown) {
+      const message = errorMessage(disableError);
+      setNotice(message);
+      toast({ title: "Could not disable 2FA", description: message, variant: "error" });
     }
 
     setUpdatingSecurity(false);
@@ -305,20 +315,23 @@ export function AccountSettings() {
   async function changePassword() {
     setChangingPassword(true);
     setNotice(null);
-    const response = await fetch("/api/account/security/password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ currentPassword, newPassword }),
-    });
-    const envelope = await parseEnvelope<{ changed: boolean }>(response);
-
-    if (envelope.success) {
+    try {
+      await parseApiResponse<{ changed: boolean }>(
+        await fetch("/api/account/security/password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ currentPassword, newPassword }),
+        }),
+      );
       setCurrentPassword("");
       setNewPassword("");
       await reloadSecurity();
       setNotice("Password changed.");
-    } else {
-      setNotice(envelope.error.message);
+      toast({ title: "Password changed", variant: "success" });
+    } catch (passwordError: unknown) {
+      const message = errorMessage(passwordError);
+      setNotice(message);
+      toast({ title: "Password change failed", description: message, variant: "error" });
     }
 
     setChangingPassword(false);

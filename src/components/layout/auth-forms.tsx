@@ -7,10 +7,14 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/toast";
+import { parseApiResponse, errorMessage } from "@/lib/api/client";
 
 type FormState = "idle" | "loading" | "error";
 
 export function SignInForm() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [state, setState] = useState<FormState>("idle");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -21,13 +25,21 @@ export function SignInForm() {
       email: String(formData.get("email")),
       password: String(formData.get("password")),
       oneTimeCode: String(formData.get("oneTimeCode") ?? ""),
-      redirect: true,
-      callbackUrl: "/dashboard",
+      redirect: false,
     });
 
     if (result?.error) {
       setState("error");
+      toast({
+        title: "Sign in failed",
+        description: "Check your email, password, and authenticator code.",
+        variant: "error",
+      });
+      return;
     }
+
+    toast({ title: "Signed in", description: "Opening your workspace.", variant: "success" });
+    router.push("/dashboard");
   }
 
   return (
@@ -67,6 +79,7 @@ export function SignInForm() {
 
 export function SignUpForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const [state, setState] = useState<FormState>("idle");
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -76,23 +89,30 @@ export function SignUpForm() {
     const email = String(formData.get("email"));
     const password = String(formData.get("password"));
 
-    const response = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: String(formData.get("name")),
-        email,
-        password,
-        inviteCode: String(formData.get("inviteCode") ?? "") || undefined,
-      }),
-    });
-
-    if (!response.ok) {
+    try {
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: String(formData.get("name")),
+          email,
+          password,
+          inviteCode: String(formData.get("inviteCode") ?? "") || undefined,
+        }),
+      });
+      await parseApiResponse(response);
+    } catch (signUpError: unknown) {
       setState("error");
+      toast({
+        title: "Account could not be created",
+        description: errorMessage(signUpError, "Check the details and try again."),
+        variant: "error",
+      });
       return;
     }
 
     await signIn("credentials", { email, password, redirect: false });
+    toast({ title: "Account created", description: "Your workspace is ready.", variant: "success" });
     router.push("/dashboard");
   }
 
