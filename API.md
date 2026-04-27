@@ -184,6 +184,14 @@ Returns generated or manually saved artifacts.
 }
 ```
 
+`GET /api/artifacts/:id`
+
+Returns one artifact.
+
+`DELETE /api/artifacts/:id`
+
+Deletes an artifact.
+
 `GET /api/conversations/:id`
 
 `DELETE /api/conversations/:id`

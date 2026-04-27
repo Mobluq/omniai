@@ -1,5 +1,6 @@
 import type { ArtifactType, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
+import { notFound } from "@/lib/errors/app-error";
 import { assertWorkspaceAccess } from "@/lib/security/workspace-authorization";
 import { ProjectService } from "@/modules/project/project-service";
 
@@ -88,6 +89,34 @@ export class ArtifactService {
         modelId: input.modelId,
         metadata: input.metadata,
       },
+    });
+  }
+
+  async get(userId: string, artifactId: string) {
+    const artifact = await prisma.artifact.findFirst({
+      where: {
+        id: artifactId,
+        workspace: {
+          members: {
+            some: { userId },
+          },
+        },
+      },
+    });
+
+    if (!artifact) {
+      throw notFound("Artifact not found.");
+    }
+
+    return artifact;
+  }
+
+  async delete(userId: string, artifactId: string) {
+    const artifact = await this.get(userId, artifactId);
+    await assertWorkspaceAccess(userId, artifact.workspaceId, "member");
+
+    return prisma.artifact.delete({
+      where: { id: artifactId },
     });
   }
 
