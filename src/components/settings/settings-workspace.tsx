@@ -11,6 +11,7 @@ import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import { parseApiResponse, errorMessage } from "@/lib/api/client";
 import { modelRegistry } from "@/modules/ai/registry/model-registry";
+import { TeamMembers } from "@/components/settings/team-members";
 
 type Workspace = {
   id: string;
@@ -331,6 +332,8 @@ export function SettingsWorkspace() {
             })}
           </div>
         </div>
+
+        <TeamMembers workspaceId={workspace.id} />
       </section>
 
       <aside className="grid content-start gap-4">

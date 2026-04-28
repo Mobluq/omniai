@@ -13,6 +13,7 @@ OmniAI now has the core product surfaces expected from a serious multi-model AI 
 - global search across conversations, messages, projects, knowledge, and artifacts
 - usage dashboard
 - account/profile/security settings
+- workspace member and invitation management
 - provider connection settings
 - mobile app navigation drawer
 - Resend-backed email verification and password reset transport
@@ -58,6 +59,7 @@ Current producers:
 - 2FA disabled
 - password changed
 - provider enabled/disabled
+- workspace invite accepted
 
 Planned producers:
 
@@ -65,15 +67,14 @@ Planned producers:
 - subscription renewal/payment failure
 - provider outage/degraded mode
 - auto-routing fallback used
-- workspace invite accepted
 - knowledge ingestion completed or failed
 
 ## Remaining Product Gaps
 
 These are not blockers for a grounded MVP, but they are the next areas to make the product feel more complete:
 
-- workspace member invitation and role management UI
 - branded email templates beyond the current Resend verification/reset transport
+- advanced team governance such as SSO, SCIM, domain capture, and enterprise policy controls
 - Stripe webhook fulfillment for subscription state changes
 - provider health telemetry and fallback notifications
 - file upload pipeline with background ingestion jobs

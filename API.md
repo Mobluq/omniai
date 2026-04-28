@@ -176,6 +176,45 @@ Requires workspace admin access.
 }
 ```
 
+`GET /api/workspaces/:id/members`
+
+Returns workspace members for any workspace member. Pending invites are only returned to owners and admins.
+
+`PATCH /api/workspaces/:id/members/:memberId`
+
+Requires workspace owner/admin access. Owners cannot be changed from this endpoint, and admins cannot change their own role.
+
+```json
+{ "role": "member" }
+```
+
+`DELETE /api/workspaces/:id/members/:memberId`
+
+Requires workspace owner/admin access. Owners cannot be removed from this endpoint, and admins cannot remove themselves.
+
+`POST /api/workspaces/:id/invites`
+
+Requires workspace owner/admin access. Creates a single-use 7-day invite for the target email address. The raw invite URL is only returned at creation time; the stored token is hashed.
+
+```json
+{
+  "email": "teammate@example.com",
+  "role": "member"
+}
+```
+
+`DELETE /api/workspaces/:id/invites/:inviteId`
+
+Requires workspace owner/admin access. Revokes a pending invite.
+
+`POST /api/workspace-invites/accept`
+
+Requires sign-in. The signed-in user's email must match the invited email address.
+
+```json
+{ "token": "invite-token-from-email" }
+```
+
 ## Providers
 
 `GET /api/providers?workspaceId=...`

@@ -11,6 +11,13 @@ type EmailVerificationInput = {
   verificationUrl: string;
 };
 
+type WorkspaceInviteEmailInput = {
+  to: string;
+  workspaceName: string;
+  inviterName: string;
+  inviteUrl: string;
+};
+
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -104,6 +111,52 @@ export async function sendEmailVerificationEmail(input: EmailVerificationInput) 
 
   if (!response.ok) {
     logger.warn("Email verification delivery failed", {
+      status: response.status,
+    });
+    return { sent: false, reason: "send_failed" as const };
+  }
+
+  return { sent: true, reason: null };
+}
+
+export async function sendWorkspaceInviteEmail(input: WorkspaceInviteEmailInput) {
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+
+  if (!apiKey || !from) {
+    logger.warn("Workspace invite email skipped because email transport is not configured", {
+      emailConfigured: false,
+    });
+    return { sent: false, reason: "not_configured" as const };
+  }
+
+  const safeInviteUrl = escapeHtml(input.inviteUrl);
+  const safeWorkspaceName = escapeHtml(input.workspaceName);
+  const safeInviterName = escapeHtml(input.inviterName);
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from,
+      to: input.to,
+      subject: `You're invited to ${input.workspaceName} on OmniAI`,
+      text: `${input.inviterName} invited you to join ${input.workspaceName} on OmniAI.\n\nAccept the invite here: ${input.inviteUrl}`,
+      html: `
+        <div style="font-family:Inter,Arial,sans-serif;line-height:1.6;color:#111827">
+          <h1 style="font-size:20px;margin:0 0 12px">Join ${safeWorkspaceName} on OmniAI</h1>
+          <p>${safeInviterName} invited you to collaborate in this OmniAI workspace.</p>
+          <p><a href="${safeInviteUrl}" style="color:#2563eb">Accept invite</a></p>
+          <p style="font-size:13px;color:#6b7280">This invite expires in 7 days.</p>
+        </div>
+      `,
+    }),
+  });
+
+  if (!response.ok) {
+    logger.warn("Workspace invite email delivery failed", {
       status: response.status,
     });
     return { sent: false, reason: "send_failed" as const };

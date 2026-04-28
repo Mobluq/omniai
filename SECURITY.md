@@ -20,6 +20,8 @@ Two-factor authentication uses TOTP. Setup secrets and recovery codes are encryp
 
 Workspace access is checked through `assertWorkspaceAccess`. Workspace-scoped resources must always verify membership before read or write operations. Core tables include `workspaceId` where tenant isolation is required.
 
+Workspace invites are tenant-scoped, single-use, and expire after 7 days. Invite tokens are only shown at creation time and stored as SHA-256 hashes. Accepting an invite requires an authenticated user whose email matches the invited address. Owners cannot be removed or demoted through the member-management endpoint, and admins cannot remove or demote themselves from that screen.
+
 ## API Validation
 
 All route inputs use Zod schemas from `src/lib/validators/api-schemas.ts`. Route handlers return consistent success/error envelopes and do not leak internal errors.

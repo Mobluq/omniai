@@ -78,6 +78,7 @@ The scaffold includes:
 - Email verification flow with Resend transactional-email delivery hooks
 - Forgot-password and password-reset flow with rate limits, audit logs, and transactional-email delivery hooks
 - Multi-tenant workspace schema and authorization checks
+- Workspace member listing, role management, pending invites, invite revocation, and secure invite acceptance
 - Conversation and message storage
 - Persistent chat history with selectable conversations
 - Account profile, notification preferences, and sign-in security surfaces

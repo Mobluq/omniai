@@ -72,6 +72,19 @@ export const settingsUpdateSchema = z.object({
   dataRetentionDays: z.number().int().min(1).max(3650).optional(),
 });
 
+export const workspaceInviteCreateSchema = z.object({
+  email: z.string().email().max(255),
+  role: z.enum(["admin", "member", "viewer"]).default("member"),
+});
+
+export const workspaceMemberUpdateSchema = z.object({
+  role: z.enum(["admin", "member", "viewer"]),
+});
+
+export const workspaceInviteAcceptSchema = z.object({
+  token: z.string().min(32).max(256),
+});
+
 export const updateProfileSchema = z.object({
   name: z.string().min(2).max(80).optional(),
   jobTitle: z.string().max(120).nullable().optional(),
