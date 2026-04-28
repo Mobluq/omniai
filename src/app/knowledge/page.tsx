@@ -10,9 +10,10 @@ export default async function KnowledgePage({ searchParams }: KnowledgePageProps
 
   return (
     <AppShell>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Knowledge</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <div className="page-shell mb-6">
+        <p className="page-kicker">Memory layer</p>
+        <h1 className="page-title mt-2">Knowledge</h1>
+        <p className="page-copy">
           Manage reusable workspace and project context before it reaches any provider.
         </p>
       </div>

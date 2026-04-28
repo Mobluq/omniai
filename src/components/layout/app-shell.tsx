@@ -1,62 +1,61 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Bot, Search, UserRound } from "lucide-react";
+import { MessageSquarePlus, Search, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/notification-center";
 import { MobileNavigation } from "@/components/layout/mobile-navigation";
-import { navItems } from "@/components/layout/nav-items";
+import { DesktopNavigation } from "@/components/layout/desktop-navigation";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-background">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r bg-card px-4 py-5 lg:block">
-        <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold">
-          <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
-            <Bot className="h-5 w-5" aria-hidden="true" />
-          </span>
-          OmniAI
-        </Link>
-        <nav className="mt-8 grid gap-1">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              <item.icon className="h-4 w-4" aria-hidden="true" />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-      </aside>
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur lg:px-8">
-          <div className="flex min-w-0 items-center gap-2">
-            <MobileNavigation />
-            <Link href="/dashboard" className="flex min-w-0 items-center gap-2 font-semibold lg:hidden">
-              <Bot className="h-5 w-5 shrink-0" aria-hidden="true" />
-              <span className="truncate">OmniAI</span>
-            </Link>
-          </div>
-          <div className="hidden text-sm text-muted-foreground lg:block">Multi-model AI workspace</div>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="icon" aria-label="Search">
-              <Link href="/search">
-                <Search className="h-4 w-4" aria-hidden="true" />
+    <div className="min-h-[100dvh] bg-background">
+      <DesktopNavigation />
+      <div className="lg:pl-72">
+        <header className="sticky top-0 z-20 border-b border-border/70 bg-background/90 backdrop-blur-xl">
+          <div className="mx-auto flex h-16 max-w-[1480px] items-center justify-between px-3 sm:px-4 lg:px-8">
+            <div className="flex min-w-0 items-center gap-2">
+              <MobileNavigation />
+              <Link
+                href="/dashboard"
+                className="flex min-w-0 items-center gap-2 font-semibold tracking-tight lg:hidden"
+              >
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-foreground text-background">
+                  AI
+                </span>
+                <span className="truncate">OmniAI</span>
               </Link>
-            </Button>
-            <NotificationCenter />
-            <Button asChild variant="outline" size="sm">
-              <Link href="/settings">Workspace</Link>
-            </Button>
-            <Button asChild variant="ghost" size="icon" aria-label="Account">
-              <Link href="/account">
-                <UserRound className="h-4 w-4" aria-hidden="true" />
-              </Link>
-            </Button>
+            </div>
+            <div className="hidden min-w-0 flex-1 px-8 lg:block">
+              <div className="mx-auto flex max-w-xl items-center justify-between rounded-lg border border-border/70 bg-card/70 px-3 py-2 text-xs text-muted-foreground shadow-line">
+                <span>Unified prompt routing</span>
+                <span className="h-1 w-1 rounded-full bg-border" />
+                <span>Workspace memory</span>
+                <span className="h-1 w-1 rounded-full bg-border" />
+                <span>Provider governance</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Button asChild variant="ghost" size="icon" aria-label="Search">
+                <Link href="/search">
+                  <Search className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </Button>
+              <NotificationCenter />
+              <Button asChild variant="default" size="sm" className="hidden sm:inline-flex">
+                <Link href="/chat">
+                  <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
+                  New chat
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="icon" aria-label="Account">
+                <Link href="/account">
+                  <UserRound className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </header>
-        <main className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8">{children}</main>
+        <main className="mx-auto w-full max-w-[1480px] px-3 py-4 sm:px-4 sm:py-6 lg:px-8">{children}</main>
       </div>
     </div>
   );

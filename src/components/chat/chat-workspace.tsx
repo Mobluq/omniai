@@ -399,13 +399,13 @@ export function ChatWorkspace() {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-card shadow-soft">
+    <div className="page-shell overflow-hidden rounded-lg border border-border/80 bg-card/95 shadow-panel">
       <ModelControls />
-      <div className="grid min-h-[calc(100svh-12rem)] lg:min-h-[650px] lg:grid-cols-[320px_1fr]">
-        <aside className="hidden border-b bg-muted/30 p-4 lg:block lg:border-b-0 lg:border-r">
+      <div className="grid min-h-[calc(100svh-12rem)] lg:min-h-[680px] lg:grid-cols-[340px_1fr]">
+        <aside className="hidden border-b border-border/70 bg-muted/35 p-4 lg:block lg:border-b-0 lg:border-r">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold">History</h2>
+              <h2 className="text-sm font-semibold tracking-tight">History</h2>
               <p className="mt-1 text-xs text-muted-foreground">{workspace?.name ?? "Workspace"}</p>
             </div>
             <Button size="sm" variant="outline" onClick={() => createConversation()}>
@@ -413,17 +413,17 @@ export function ChatWorkspace() {
               New
             </Button>
           </div>
-          <div className="mt-4 grid max-h-[560px] gap-2 overflow-auto pr-1">
+          <div className="thin-scrollbar mt-4 grid max-h-[590px] gap-2 overflow-auto pr-1">
             {conversations.length === 0 ? (
-              <div className="rounded-md border border-dashed bg-background p-4 text-sm text-muted-foreground">
+              <div className="rounded-lg border border-dashed bg-background/70 p-4 text-sm text-muted-foreground">
                 No conversations yet.
               </div>
             ) : (
               conversations.map((conversation) => (
                 <div
                   key={conversation.id}
-                  className={`group flex items-start gap-2 rounded-md border p-3 ${
-                    conversation.id === conversationId ? "border-primary bg-background" : "bg-background/70"
+                  className={`group flex items-start gap-2 rounded-lg border p-3 transition-all ${
+                    conversation.id === conversationId ? "border-foreground bg-background shadow-line" : "bg-background/70 hover:bg-background"
                   }`}
                 >
                   <button
@@ -439,7 +439,9 @@ export function ChatWorkspace() {
                       {conversation.messages[0]?.content ?? "No messages yet"}
                     </p>
                     <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge className="bg-muted">{conversation.routingMode}</Badge>
+                      <Badge className={conversation.routingMode === "auto" ? "border-primary/30 bg-primary/10 text-primary" : "bg-muted"}>
+                        {conversation.routingMode}
+                      </Badge>
                       <span>{formatRelative(conversation.updatedAt)}</span>
                     </div>
                   </button>
@@ -458,8 +460,8 @@ export function ChatWorkspace() {
           </div>
         </aside>
 
-        <section className="flex min-h-[calc(100svh-12rem)] flex-col lg:min-h-[650px]">
-          <div className="grid gap-3 border-b bg-muted/30 p-3 lg:hidden">
+        <section className="flex min-h-[calc(100svh-12rem)] flex-col lg:min-h-[680px]">
+          <div className="grid gap-3 border-b border-border/70 bg-muted/35 p-3 lg:hidden">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
                 <p className="text-sm font-semibold">Conversation</p>
@@ -490,21 +492,23 @@ export function ChatWorkspace() {
               )}
             </Select>
           </div>
-          <div className="border-b bg-background px-4 py-3">
+          <div className="border-b border-border/70 bg-background/80 px-4 py-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
-                <h2 className="truncate text-sm font-semibold">
+                <h2 className="truncate text-sm font-semibold tracking-tight">
                   {activeConversation?.title ?? "New conversation"}
                 </h2>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {selectedModel.provider} / {selectedModel.modelId}
                 </p>
               </div>
-              <Badge>{routingMode}</Badge>
+              <Badge className={routingMode === "auto" ? "border-primary/30 bg-primary/10 text-primary" : undefined}>
+                {routingMode}
+              </Badge>
             </div>
           </div>
 
-          <div className="flex-1 space-y-4 overflow-auto p-3 sm:p-4">
+          <div className="thin-scrollbar flex-1 space-y-4 overflow-auto bg-background/35 p-3 sm:p-5">
             {recommendation && pendingMessageId ? (
               <RecommendationBanner
                 recommendation={recommendation}
@@ -533,11 +537,15 @@ export function ChatWorkspace() {
             ) : null}
 
             {status === "booting" ? (
-              <div className="grid h-72 place-items-center rounded-lg border border-dashed bg-background">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden="true" />
+              <div className="grid h-72 place-items-center rounded-lg border border-dashed bg-card">
+                <div className="grid w-full max-w-sm gap-3 px-6">
+                  <div className="h-3 w-28 animate-pulse rounded-full bg-muted" />
+                  <div className="h-20 animate-pulse rounded-lg bg-muted/70" />
+                  <div className="h-3 w-40 animate-pulse rounded-full bg-muted" />
+                </div>
               </div>
             ) : messages.length === 0 ? (
-              <div className="grid h-72 place-items-center rounded-lg border border-dashed bg-background text-center">
+              <div className="grid h-72 place-items-center rounded-lg border border-dashed bg-card text-center">
                 <div className="max-w-sm px-4">
                   <p className="text-sm font-medium">Start with the work you need done.</p>
                   <p className="mt-2 text-sm text-muted-foreground">
@@ -549,11 +557,11 @@ export function ChatWorkspace() {
               messages.map((message) => (
                 <article
                   key={message.id}
-                  className={`rounded-lg border p-4 ${
-                    message.role === "assistant" ? "bg-muted/50" : "bg-background"
+                  className={`rounded-lg border border-border/70 p-4 shadow-line ${
+                    message.role === "assistant" ? "bg-card" : "bg-background/80"
                   }`}
                 >
-                  <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium uppercase text-muted-foreground">
+                  <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     {message.role}
                     {message.modelDisplayName ? <Badge>{message.modelDisplayName}</Badge> : null}
                   </div>
@@ -564,7 +572,7 @@ export function ChatWorkspace() {
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
           </div>
 
-          <form className="sticky bottom-0 border-t bg-background p-3 sm:p-4" onSubmit={onSubmit}>
+          <form className="sticky bottom-0 border-t border-border/70 bg-card/95 p-3 shadow-[0_-18px_55px_rgba(15,23,42,0.08)] sm:p-4" onSubmit={onSubmit}>
             <Textarea
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}

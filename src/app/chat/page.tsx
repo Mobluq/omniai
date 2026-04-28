@@ -4,10 +4,11 @@ import { ChatWorkspace } from "@/components/chat/chat-workspace";
 export default function ChatPage() {
   return (
     <AppShell>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Chat</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          One conversation interface with model selection, recommendation, and routing controls.
+      <div className="page-shell mb-6">
+        <p className="page-kicker">Unified conversation</p>
+        <h1 className="page-title mt-2">Chat with routing intelligence</h1>
+        <p className="page-copy">
+          Store the prompt first, evaluate intent, then decide whether to stay with the selected model or switch to the stronger provider for the task.
         </p>
       </div>
       <ChatWorkspace />

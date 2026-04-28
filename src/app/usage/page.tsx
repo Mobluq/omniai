@@ -41,10 +41,11 @@ export default async function UsagePage() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div className="page-shell mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Usage</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="page-kicker">Metering</p>
+          <h1 className="page-title mt-2">Usage</h1>
+          <p className="page-copy">
             Provider, model, request type, token, and cost estimates for {workspace.name}.
           </p>
         </div>

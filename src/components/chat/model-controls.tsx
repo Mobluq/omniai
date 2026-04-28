@@ -8,9 +8,9 @@ export function ModelControls() {
   const { routingMode, selectedModel, setRoutingMode, setSelectedModel } = useChatStore();
 
   return (
-    <div className="grid gap-3 border-b bg-card p-3 sm:p-4 md:grid-cols-[1fr_180px]">
+    <div className="grid gap-3 border-b border-border/70 bg-card/95 p-3 sm:p-4 md:grid-cols-[1fr_190px]">
       <label className="grid gap-1 text-sm">
-        <span className="font-medium">Model</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Model</span>
         <Select
           value={`${selectedModel.provider}:${selectedModel.modelId}`}
           onChange={(event) => {
@@ -26,7 +26,7 @@ export function ModelControls() {
         </Select>
       </label>
       <label className="grid gap-1 text-sm">
-        <span className="font-medium">Routing</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Routing</span>
         <Select
           value={routingMode}
           onChange={(event) => setRoutingMode(event.target.value as RoutingMode)}

@@ -4,9 +4,10 @@ import { AccountSettings } from "@/components/account/account-settings";
 export default function AccountPage() {
   return (
     <AppShell>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Account</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <div className="page-shell mb-6">
+        <p className="page-kicker">Personal controls</p>
+        <h1 className="page-title mt-2">Account</h1>
+        <p className="page-copy">
           Manage profile defaults, notifications, sign-in security, and personal AI behavior.
         </p>
       </div>

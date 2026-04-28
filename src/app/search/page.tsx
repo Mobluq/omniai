@@ -4,9 +4,10 @@ import { SearchWorkspace } from "@/components/search/search-workspace";
 export default function SearchPage() {
   return (
     <AppShell>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Search</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <div className="page-shell mb-6">
+        <p className="page-kicker">Workspace recall</p>
+        <h1 className="page-title mt-2">Search</h1>
+        <p className="page-copy">
           Find conversations, messages, project context, knowledge sources, and saved artifacts.
         </p>
       </div>

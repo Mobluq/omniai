@@ -3,43 +3,43 @@
 @tailwind utilities;
 
 :root {
-  --background: 210 20% 98%;
-  --foreground: 222 47% 11%;
+  --background: 210 16% 97%;
+  --foreground: 220 30% 10%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --primary: 221 83% 28%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 168 76% 36%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 214 32% 91%;
-  --muted-foreground: 215 16% 37%;
-  --accent: 38 92% 50%;
-  --accent-foreground: 222 47% 11%;
-  --destructive: 0 72% 51%;
+  --card-foreground: 220 30% 10%;
+  --primary: 173 65% 26%;
+  --primary-foreground: 180 30% 98%;
+  --secondary: 151 52% 34%;
+  --secondary-foreground: 180 30% 98%;
+  --muted: 210 14% 91%;
+  --muted-foreground: 218 12% 38%;
+  --accent: 34 84% 48%;
+  --accent-foreground: 220 30% 10%;
+  --destructive: 358 68% 48%;
   --destructive-foreground: 210 40% 98%;
-  --border: 214 32% 86%;
-  --input: 214 32% 86%;
-  --ring: 221 83% 28%;
+  --border: 214 16% 84%;
+  --input: 214 16% 84%;
+  --ring: 173 65% 26%;
 }
 
 .dark {
-  --background: 222 47% 8%;
-  --foreground: 210 40% 98%;
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 98%;
-  --primary: 213 94% 68%;
-  --primary-foreground: 222 47% 11%;
-  --secondary: 168 76% 42%;
-  --secondary-foreground: 222 47% 11%;
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 72%;
-  --accent: 38 92% 58%;
-  --accent-foreground: 222 47% 11%;
-  --destructive: 0 72% 51%;
+  --background: 220 20% 8%;
+  --foreground: 210 24% 96%;
+  --card: 220 18% 11%;
+  --card-foreground: 210 24% 96%;
+  --primary: 172 62% 46%;
+  --primary-foreground: 220 22% 7%;
+  --secondary: 151 52% 45%;
+  --secondary-foreground: 220 22% 7%;
+  --muted: 218 16% 17%;
+  --muted-foreground: 215 14% 70%;
+  --accent: 34 88% 56%;
+  --accent-foreground: 220 22% 7%;
+  --destructive: 358 68% 54%;
   --destructive-foreground: 210 40% 98%;
-  --border: 217 33% 22%;
-  --input: 217 33% 22%;
-  --ring: 213 94% 68%;
+  --border: 218 15% 23%;
+  --input: 218 15% 23%;
+  --ring: 172 62% 46%;
 }
 
 * {
@@ -53,7 +53,9 @@ html {
 
 body {
   min-height: 100%;
-  background: hsl(var(--background));
+  background:
+    radial-gradient(circle at 12% 8%, hsl(var(--primary) / 0.08), transparent 28rem),
+    linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted) / 0.45));
   color: hsl(var(--foreground));
   overflow-x: hidden;
   font-feature-settings:
@@ -66,4 +68,45 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+::selection {
+  background: hsl(var(--primary) / 0.18);
+}
+
+@layer components {
+  .page-shell {
+    @apply mx-auto w-full max-w-[1480px];
+  }
+
+  .page-kicker {
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-primary;
+  }
+
+  .page-title {
+    @apply text-2xl font-semibold tracking-tight text-foreground md:text-3xl;
+  }
+
+  .page-copy {
+    @apply mt-2 max-w-3xl text-sm leading-6 text-muted-foreground;
+  }
+
+  .metric-value {
+    @apply font-mono text-2xl font-semibold tracking-tight text-foreground;
+  }
+
+  .thin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+
+  .thin-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .thin-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 999px;
+  }
 }

@@ -30,9 +30,10 @@ export default function RoutingPage() {
 
   return (
     <AppShell>
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">Routing intelligence</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+      <div className="page-shell mb-6">
+        <p className="page-kicker">Recommendation engine</p>
+        <h1 className="page-title mt-2">Routing intelligence</h1>
+        <p className="page-copy">
           How OmniAI classifies tasks, scores models, and prepares context before provider calls.
         </p>
       </div>

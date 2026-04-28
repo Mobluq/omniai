@@ -49,14 +49,14 @@ export function MobileNavigation() {
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <button
             type="button"
-            className="absolute inset-0 bg-foreground/35"
+            className="absolute inset-0 bg-foreground/45 backdrop-blur-[2px]"
             onClick={() => setOpen(false)}
             aria-label="Close navigation overlay"
           />
-          <aside className="relative flex h-full w-[min(88vw,340px)] flex-col border-r bg-card shadow-2xl">
-            <div className="flex h-16 items-center justify-between border-b px-4">
+          <aside className="relative flex h-full w-[min(88vw,360px)] flex-col border-r border-border/70 bg-card shadow-2xl">
+            <div className="flex h-16 items-center justify-between border-b border-border/70 px-4">
               <Link href="/dashboard" className="flex items-center gap-2 text-base font-semibold">
-                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground">
+                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-foreground text-background">
                   <Bot className="h-5 w-5" aria-hidden="true" />
                 </span>
                 OmniAI
@@ -71,7 +71,10 @@ export function MobileNavigation() {
                 <X className="h-5 w-5" aria-hidden="true" />
               </Button>
             </div>
-            <nav className="grid gap-1 overflow-auto p-3">
+            <div className="m-3 rounded-lg border border-border/70 bg-muted/35 p-3 text-xs leading-5 text-muted-foreground">
+              Routing, memory, provider settings, usage, and team controls stay available from one drawer.
+            </div>
+            <nav className="thin-scrollbar grid gap-1 overflow-auto p-3 pt-0">
               {navItems.map((item) => {
                 const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
@@ -81,9 +84,9 @@ export function MobileNavigation() {
                     href={item.href}
                     onClick={() => setOpen(false)}
                     className={cn(
-                      "flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium",
+                      "flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium transition-all",
                       active
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-foreground text-background"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground",
                     )}
                   >

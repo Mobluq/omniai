@@ -32,10 +32,11 @@ export default async function ArtifactsPage({ searchParams }: ArtifactsPageProps
 
   return (
     <AppShell>
-      <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div className="page-shell mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <h1 className="text-2xl font-semibold">Artifacts</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="page-kicker">Saved outputs</p>
+          <h1 className="page-title mt-2">Artifacts</h1>
+          <p className="page-copy">
             Saved outputs from chat: documents, code, images, briefs, proposals, and prompts.
           </p>
         </div>
