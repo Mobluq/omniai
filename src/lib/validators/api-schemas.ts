@@ -7,6 +7,12 @@ export const createWorkspaceSchema = z.object({
   name: z.string().min(2).max(80),
 });
 
+export const globalSearchQuerySchema = z.object({
+  workspaceId: z.string().min(1),
+  q: z.string().trim().min(2).max(120),
+  limit: z.coerce.number().int().min(1).max(20).default(8),
+});
+
 export const createConversationSchema = z.object({
   workspaceId: z.string().min(1),
   projectId: z.string().min(1).optional(),

@@ -380,6 +380,12 @@ When provider credentials are configured, routing calls the selected provider ad
 
 Returns request count, success/failure totals, estimated tokens, estimated cost, provider breakdown, model breakdown, request type breakdown, daily rollups, and recent metered requests.
 
+## Search
+
+`GET /api/search?workspaceId=...&q=...&limit=8`
+
+Requires workspace membership. Searches conversations, messages, projects, knowledge sources, document chunks, and artifacts inside the selected workspace.
+
 ## Billing
 
 `POST /api/billing/checkout`

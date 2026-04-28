@@ -7,6 +7,7 @@ import {
   FileStack,
   LayoutDashboard,
   MessageSquare,
+  Search,
   Settings,
   UserRound,
 } from "lucide-react";
@@ -15,6 +16,7 @@ export const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/projects", label: "Projects", icon: Boxes },
   { href: "/chat", label: "Chat", icon: MessageSquare },
+  { href: "/search", label: "Search", icon: Search },
   { href: "/knowledge", label: "Knowledge", icon: Brain },
   { href: "/artifacts", label: "Artifacts", icon: FileStack },
   { href: "/notifications", label: "Notifications", icon: Bell },

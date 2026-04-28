@@ -10,6 +10,7 @@ OmniAI now has the core product surfaces expected from a serious multi-model AI 
 - projects with instructions
 - knowledge sources and memory scaffolding
 - artifacts for durable outputs
+- global search across conversations, messages, projects, knowledge, and artifacts
 - usage dashboard
 - account/profile/security settings
 - provider connection settings
@@ -27,6 +28,7 @@ Common patterns users expect from mature AI products:
 | --- | --- | --- |
 | Fast new chat | A clear primary path into a new conversation. | Present through Dashboard and Chat. |
 | Persistent history | Recent conversations remain visible and reopenable. | Present in Chat sidebar and Dashboard. |
+| Global recall | Users can find old chats, project context, saved knowledge, and outputs quickly. | Present through `/search`. |
 | Model visibility | User can see or choose which model is active. | Present in model controls and message metadata. |
 | Projects/workspaces | Context can be grouped by initiative. | Present through Projects, project instructions, knowledge, and artifacts. |
 | Artifacts/outputs | Important generated outputs are saved outside the transcript. | Present through Artifacts. |
@@ -75,7 +77,7 @@ These are not blockers for a grounded MVP, but they are the next areas to make t
 - Stripe webhook fulfillment for subscription state changes
 - provider health telemetry and fallback notifications
 - file upload pipeline with background ingestion jobs
-- searchable global command menu
+- searchable global command menu with keyboard shortcut
 - deeper mobile QA across every data-heavy table after more billing/team screens are added
 - user feedback on routing recommendations
 - cost tables per provider/model instead of rough estimates

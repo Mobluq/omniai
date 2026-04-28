@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Bot, UserRound } from "lucide-react";
+import { Bot, Search, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/notification-center";
 import { MobileNavigation } from "@/components/layout/mobile-navigation";
@@ -40,6 +40,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
           <div className="hidden text-sm text-muted-foreground lg:block">Multi-model AI workspace</div>
           <div className="flex items-center gap-2">
+            <Button asChild variant="ghost" size="icon" aria-label="Search">
+              <Link href="/search">
+                <Search className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </Button>
             <NotificationCenter />
             <Button asChild variant="outline" size="sm">
               <Link href="/settings">Workspace</Link>

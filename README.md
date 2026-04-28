@@ -83,6 +83,7 @@ The scaffold includes:
 - Account profile, notification preferences, and sign-in security surfaces
 - In-app notification bell and inbox for security, provider, workspace, usage, billing, and routing events
 - Project workspaces with instructions, knowledge, conversations, and artifacts
+- Global workspace search across conversations, messages, projects, knowledge, and artifacts
 - Knowledge source ingestion for notes, URLs, and file text
 - Automatic artifact capture for valuable generated outputs
 - Server-side provider connection settings with encrypted workspace API keys
