@@ -96,6 +96,10 @@ textarea {
     @apply font-mono text-2xl font-semibold tracking-tight text-foreground;
   }
 
+  .dashboard-panel {
+    @apply rounded-[1.35rem] border border-[#d8e5ed] bg-white shadow-[0_18px_40px_-30px_rgba(25,45,68,0.35)];
+  }
+
   .operational-panel {
     background:
       radial-gradient(circle at 16% 8%, rgba(255, 255, 255, 0.08), transparent 20rem),
