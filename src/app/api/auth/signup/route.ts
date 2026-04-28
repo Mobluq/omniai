@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
         user: { id: result.user.id, email: result.user.email, name: result.user.name },
         workspace: { id: result.workspace.id, name: result.workspace.name },
         verification: result.verification,
+        requiresEmailVerification: process.env.REQUIRE_EMAIL_VERIFICATION === "true",
       },
       201,
     );

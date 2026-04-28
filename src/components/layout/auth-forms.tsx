@@ -36,7 +36,7 @@ export function SignInForm({ oauthProviders = [] }: { oauthProviders?: OAuthProv
       setState("error");
       toast({
         title: "Sign in failed",
-        description: "Check your email, password, and authenticator code.",
+        description: "Check your email and password. Add an authenticator code only if 2FA is enabled.",
         variant: "error",
       });
       return;
@@ -77,16 +77,18 @@ export function SignInForm({ oauthProviders = [] }: { oauthProviders?: OAuthProv
         <Input id="password" name="password" type="password" autoComplete="current-password" required />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="oneTimeCode">Authenticator code</Label>
+        <Label htmlFor="oneTimeCode">Authenticator code optional</Label>
         <Input
           id="oneTimeCode"
           name="oneTimeCode"
           autoComplete="one-time-code"
-          placeholder="Authenticator or recovery code"
+          placeholder="Only if 2FA is enabled"
         />
       </div>
       {state === "error" ? (
-        <p className="text-sm text-destructive">The email, password, or authenticator code is incorrect.</p>
+        <p className="text-sm text-destructive">
+          The email or password is incorrect, or this account requires a 2FA code.
+        </p>
       ) : null}
       <Button type="submit" disabled={state === "loading"}>
         {state === "loading" ? "Signing in..." : "Sign in"}
@@ -381,15 +383,30 @@ export function SignUpForm() {
       });
       const result = await parseApiResponse<{
         verification?: { verificationUrl: string | null; emailConfigured: boolean };
+        requiresEmailVerification?: boolean;
       }>(response);
+
+      if (result.requiresEmailVerification) {
+        toast({
+          title: "Account created",
+          description: result.verification?.emailConfigured
+            ? "Check your email to verify the account."
+            : "Verify the account before signing in. Email delivery is not configured yet.",
+          variant: "success",
+        });
+        router.push(result.verification?.verificationUrl ?? `/auth/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
+      await signIn("credentials", { email, password, redirect: false });
       toast({
         title: "Account created",
         description: result.verification?.emailConfigured
-          ? "Check your email to verify the account."
-          : "Verify the account before signing in. Email delivery is not configured yet.",
+          ? "Your workspace is ready. A verification email was also sent."
+          : "Your workspace is ready.",
         variant: "success",
       });
-      router.push(result.verification?.verificationUrl ?? `/auth/verify-email?email=${encodeURIComponent(email)}`);
+      router.push("/dashboard");
       return;
     } catch (signUpError: unknown) {
       setState("error");

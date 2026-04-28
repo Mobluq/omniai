@@ -265,7 +265,13 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        if (user.twoFactorEnabled) {
+        const hasConfirmedTwoFactor =
+          user.twoFactorEnabled &&
+          Boolean(user.twoFactorConfirmedAt) &&
+          Boolean(user.twoFactorSecretEncrypted) &&
+          Boolean(user.twoFactorRecoveryCodesEncrypted);
+
+        if (hasConfirmedTwoFactor) {
           const isTotpValid =
             Boolean(user.twoFactorSecretEncrypted && oneTimeCode) &&
             verifyTotpToken({
@@ -288,6 +294,26 @@ export const authOptions: NextAuthOptions = {
             });
             return null;
           }
+        }
+
+        if (user.twoFactorEnabled && !hasConfirmedTwoFactor) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              twoFactorEnabled: false,
+              twoFactorConfirmedAt: null,
+              twoFactorSecretEncrypted: null,
+              twoFactorRecoveryCodesEncrypted: null,
+            },
+          });
+          await recordLoginAudit({
+            action: "auth.login_failed",
+            email,
+            userId: user.id,
+            reason: "stale_totp_reset",
+            ipAddress,
+            userAgent,
+          });
         }
 
         await resetRateLimit("auth.login", throttleKey);
