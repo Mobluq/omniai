@@ -49,7 +49,7 @@ export function MobileNavigation() {
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <button
             type="button"
-            className="absolute inset-0 bg-foreground/45 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-foreground/40 backdrop-blur-[2px]"
             onClick={() => setOpen(false)}
             aria-label="Close navigation overlay"
           />
@@ -71,8 +71,9 @@ export function MobileNavigation() {
                 <X className="h-5 w-5" aria-hidden="true" />
               </Button>
             </div>
-            <div className="m-3 rounded-lg border border-border/70 bg-muted/35 p-3 text-xs leading-5 text-muted-foreground">
-              Routing, memory, provider settings, usage, and team controls stay available from one drawer.
+            <div className="m-3 rounded-lg border border-border/70 bg-muted/30 p-3 text-xs leading-5 text-muted-foreground">
+              Routing, memory, provider settings, usage, and team controls stay available from one
+              drawer.
             </div>
             <nav className="thin-scrollbar grid gap-1 overflow-auto p-3 pt-0">
               {navItems.map((item) => {

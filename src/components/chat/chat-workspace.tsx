@@ -87,7 +87,9 @@ function formatRelative(value: string) {
 
 function upsertMessage(messages: ChatMessage[], message: ChatMessage) {
   const exists = messages.some((item) => item.id === message.id);
-  return exists ? messages.map((item) => (item.id === message.id ? message : item)) : [...messages, message];
+  return exists
+    ? messages.map((item) => (item.id === message.id ? message : item))
+    : [...messages, message];
 }
 
 function MessageContent({ content }: { content: string }) {
@@ -131,7 +133,9 @@ export function ChatWorkspace() {
   const [status, setStatus] = useState<"booting" | "idle" | "loading" | "error">("booting");
   const [error, setError] = useState<string | null>(null);
 
-  const activeConversation = conversations.find((conversation) => conversation.id === conversationId);
+  const activeConversation = conversations.find(
+    (conversation) => conversation.id === conversationId,
+  );
   const canSend = useMemo(
     () => prompt.trim().length > 0 && Boolean(conversationId) && status !== "loading",
     [conversationId, prompt, status],
@@ -161,7 +165,11 @@ export function ChatWorkspace() {
 
     if (!envelope.success) {
       setError(envelope.error.message);
-      toast({ title: "Conversation could not be opened", description: envelope.error.message, variant: "error" });
+      toast({
+        title: "Conversation could not be opened",
+        description: envelope.error.message,
+        variant: "error",
+      });
       setStatus("error");
       return;
     }
@@ -206,7 +214,11 @@ export function ChatWorkspace() {
 
     if (!envelope.success) {
       setError(envelope.error.message);
-      toast({ title: "Conversation could not be created", description: envelope.error.message, variant: "error" });
+      toast({
+        title: "Conversation could not be created",
+        description: envelope.error.message,
+        variant: "error",
+      });
       setStatus("error");
       return;
     }
@@ -265,7 +277,9 @@ export function ChatWorkspace() {
 
       const activeWorkspace = workspaceEnvelope.data.workspaces[0];
       const requestedProjectId =
-        typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("projectId");
+        typeof window === "undefined"
+          ? null
+          : new URLSearchParams(window.location.search).get("projectId");
       if (cancelled) {
         return;
       }
@@ -279,7 +293,9 @@ export function ChatWorkspace() {
       }
 
       const requestedConversationId =
-        typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("conversationId");
+        typeof window === "undefined"
+          ? null
+          : new URLSearchParams(window.location.search).get("conversationId");
       const initialConversation =
         list.find((conversation) => conversation.id === requestedConversationId) ?? list[0];
 
@@ -309,7 +325,9 @@ export function ChatWorkspace() {
   function applyMessagePayload(payload: MessagePayload) {
     setMessages((current) => {
       const withUser = upsertMessage(current, payload.userMessage);
-      return payload.assistantMessage ? upsertMessage(withUser, payload.assistantMessage) : withUser;
+      return payload.assistantMessage
+        ? upsertMessage(withUser, payload.assistantMessage)
+        : withUser;
     });
 
     if (payload.routingDecision) {
@@ -340,7 +358,11 @@ export function ChatWorkspace() {
   }) {
     if (!conversationId) {
       setError("Chat is not connected to a conversation yet.");
-      toast({ title: "Chat is not ready", description: "Open or create a conversation first.", variant: "error" });
+      toast({
+        title: "Chat is not ready",
+        description: "Open or create a conversation first.",
+        variant: "error",
+      });
       return;
     }
 
@@ -399,13 +421,13 @@ export function ChatWorkspace() {
   }
 
   return (
-    <div className="page-shell overflow-hidden rounded-lg border border-border/80 bg-card/95 shadow-panel">
+    <div className="page-shell overflow-hidden rounded-[1.5rem] border border-border/80 bg-card/95 shadow-panel">
       <ModelControls />
       <div className="grid min-h-[calc(100svh-12rem)] lg:min-h-[680px] lg:grid-cols-[340px_1fr]">
-        <aside className="hidden border-b border-border/70 bg-muted/35 p-4 lg:block lg:border-b-0 lg:border-r">
+        <aside className="hidden border-b border-border/70 bg-muted/30 p-4 lg:block lg:border-b-0 lg:border-r">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold tracking-tight">History</h2>
+              <h2 className="text-sm font-semibold tracking-tight">Conversation history</h2>
               <p className="mt-1 text-xs text-muted-foreground">{workspace?.name ?? "Workspace"}</p>
             </div>
             <Button size="sm" variant="outline" onClick={() => createConversation()}>
@@ -413,17 +435,33 @@ export function ChatWorkspace() {
               New
             </Button>
           </div>
-          <div className="thin-scrollbar mt-4 grid max-h-[590px] gap-2 overflow-auto pr-1">
+          <div className="mt-4 grid grid-cols-3 overflow-hidden rounded-xl border border-border/70 bg-card/75 text-center">
+            <div className="border-r border-border/70 p-2.5">
+              <p className="font-mono text-sm font-semibold">{conversations.length}</p>
+              <p className="text-[0.65rem] text-muted-foreground">threads</p>
+            </div>
+            <div className="border-r border-border/70 p-2.5">
+              <p className="font-mono text-sm font-semibold">{routingMode}</p>
+              <p className="text-[0.65rem] text-muted-foreground">mode</p>
+            </div>
+            <div className="p-2.5">
+              <p className="truncate font-mono text-sm font-semibold">{selectedModel.provider}</p>
+              <p className="text-[0.65rem] text-muted-foreground">active</p>
+            </div>
+          </div>
+          <div className="thin-scrollbar mt-4 grid max-h-[520px] gap-2 overflow-auto pr-1">
             {conversations.length === 0 ? (
-              <div className="rounded-lg border border-dashed bg-background/70 p-4 text-sm text-muted-foreground">
+              <div className="rounded-xl border border-dashed bg-background/70 p-4 text-sm text-muted-foreground">
                 No conversations yet.
               </div>
             ) : (
               conversations.map((conversation) => (
                 <div
                   key={conversation.id}
-                  className={`group flex items-start gap-2 rounded-lg border p-3 transition-all ${
-                    conversation.id === conversationId ? "border-foreground bg-background shadow-line" : "bg-background/70 hover:bg-background"
+                  className={`group flex items-start gap-2 rounded-xl border p-3 transition-all ${
+                    conversation.id === conversationId
+                      ? "border-foreground bg-background shadow-line"
+                      : "bg-background/70 hover:bg-background"
                   }`}
                 >
                   <button
@@ -439,7 +477,13 @@ export function ChatWorkspace() {
                       {conversation.messages[0]?.content ?? "No messages yet"}
                     </p>
                     <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge className={conversation.routingMode === "auto" ? "border-primary/30 bg-primary/10 text-primary" : "bg-muted"}>
+                      <Badge
+                        className={
+                          conversation.routingMode === "auto"
+                            ? "border-primary/30 bg-primary/10 text-primary"
+                            : "bg-muted"
+                        }
+                      >
                         {conversation.routingMode}
                       </Badge>
                       <span>{formatRelative(conversation.updatedAt)}</span>
@@ -461,11 +505,13 @@ export function ChatWorkspace() {
         </aside>
 
         <section className="flex min-h-[calc(100svh-12rem)] flex-col lg:min-h-[680px]">
-          <div className="grid gap-3 border-b border-border/70 bg-muted/35 p-3 lg:hidden">
+          <div className="grid gap-3 border-b border-border/70 bg-muted/30 p-3 lg:hidden">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
                 <p className="text-sm font-semibold">Conversation</p>
-                <p className="truncate text-xs text-muted-foreground">{workspace?.name ?? "Workspace"}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  {workspace?.name ?? "Workspace"}
+                </p>
               </div>
               <Button size="sm" variant="outline" onClick={() => createConversation()}>
                 <Plus className="h-4 w-4" aria-hidden="true" />
@@ -502,13 +548,19 @@ export function ChatWorkspace() {
                   {selectedModel.provider} / {selectedModel.modelId}
                 </p>
               </div>
-              <Badge className={routingMode === "auto" ? "border-primary/30 bg-primary/10 text-primary" : undefined}>
+              <Badge
+                className={
+                  routingMode === "auto"
+                    ? "border-primary/30 bg-primary/10 text-primary"
+                    : undefined
+                }
+              >
                 {routingMode}
               </Badge>
             </div>
           </div>
 
-          <div className="thin-scrollbar flex-1 space-y-4 overflow-auto bg-background/35 p-3 sm:p-5">
+          <div className="thin-scrollbar flex-1 space-y-4 overflow-auto bg-background/30 p-3 sm:p-5">
             {recommendation && pendingMessageId ? (
               <RecommendationBanner
                 recommendation={recommendation}
@@ -537,19 +589,23 @@ export function ChatWorkspace() {
             ) : null}
 
             {status === "booting" ? (
-              <div className="grid h-72 place-items-center rounded-lg border border-dashed bg-card">
+              <div className="grid h-72 place-items-center rounded-xl border border-dashed bg-card">
                 <div className="grid w-full max-w-sm gap-3 px-6">
                   <div className="h-3 w-28 animate-pulse rounded-full bg-muted" />
-                  <div className="h-20 animate-pulse rounded-lg bg-muted/70" />
+                  <div className="h-20 animate-pulse rounded-xl bg-muted/70" />
                   <div className="h-3 w-40 animate-pulse rounded-full bg-muted" />
                 </div>
               </div>
             ) : messages.length === 0 ? (
-              <div className="grid h-72 place-items-center rounded-lg border border-dashed bg-card text-center">
-                <div className="max-w-sm px-4">
+              <div className="grid min-h-72 place-items-center rounded-xl border border-dashed bg-card text-center">
+                <div className="max-w-md px-4 py-10">
+                  <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
+                    <MessageSquare className="h-7 w-7 text-primary" aria-hidden="true" />
+                  </div>
                   <p className="text-sm font-medium">Start with the work you need done.</p>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    OmniAI will store the conversation and recommend a stronger model before switching.
+                    OmniAI will store the conversation and recommend a stronger model before
+                    switching.
                   </p>
                 </div>
               </div>
@@ -557,7 +613,7 @@ export function ChatWorkspace() {
               messages.map((message) => (
                 <article
                   key={message.id}
-                  className={`rounded-lg border border-border/70 p-4 shadow-line ${
+                  className={`rounded-xl border border-border/70 p-4 shadow-line ${
                     message.role === "assistant" ? "bg-card" : "bg-background/80"
                   }`}
                 >
@@ -572,7 +628,10 @@ export function ChatWorkspace() {
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
           </div>
 
-          <form className="sticky bottom-0 border-t border-border/70 bg-card/95 p-3 shadow-[0_-18px_55px_rgba(15,23,42,0.08)] sm:p-4" onSubmit={onSubmit}>
+          <form
+            className="sticky bottom-0 border-t border-border/70 bg-card/95 p-3 shadow-[0_-18px_55px_rgba(15,23,42,0.08)] sm:p-4"
+            onSubmit={onSubmit}
+          >
             <Textarea
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}

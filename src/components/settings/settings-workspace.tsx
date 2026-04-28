@@ -44,7 +44,8 @@ export function SettingsWorkspace() {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [providers, setProviders] = useState<ProviderConnection[]>([]);
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
-  const [defaultRoutingMode, setDefaultRoutingMode] = useState<Workspace["defaultRoutingMode"]>("suggest");
+  const [defaultRoutingMode, setDefaultRoutingMode] =
+    useState<Workspace["defaultRoutingMode"]>("suggest");
   const [defaultModelId, setDefaultModelId] = useState("openai-chat-primary");
   const [retentionDays, setRetentionDays] = useState(365);
   const [memoryEnabled, setMemoryEnabled] = useState(true);
@@ -55,7 +56,9 @@ export function SettingsWorkspace() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const providerSummary = useMemo(() => {
-    const connected = providers.filter((provider) => provider.envConfigured || provider.workspaceConfigured).length;
+    const connected = providers.filter(
+      (provider) => provider.envConfigured || provider.workspaceConfigured,
+    ).length;
     return `${connected}/${providers.length || 6} connected`;
   }, [providers]);
 
@@ -225,208 +228,251 @@ export function SettingsWorkspace() {
   }
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
-      <section className="grid gap-6">
-        <div>
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="text-base font-semibold">AI provider connections</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Add workspace keys for ChatGPT, Claude, Gemini, Mistral, Stability, and Amazon Bedrock.
-              </p>
-            </div>
-            <Badge className="bg-muted">{providerSummary}</Badge>
+    <div className="grid gap-6">
+      <section className="operational-panel overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f2f7f4] shadow-[0_28px_90px_rgba(20,31,33,0.18)]">
+        <div className="grid gap-5 border-b border-white/10 p-5 md:grid-cols-[minmax(0,1fr)_360px] md:p-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
+              Provider vault
+            </p>
+            <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em]">
+              Keys, routing defaults, memory, and team controls
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
+              Provider credentials remain server-side, workspace settings drive routing behavior,
+              and access is scoped by role before protected data is returned.
+            </p>
           </div>
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            {providers.map((provider) => {
-              const connected = provider.envConfigured || provider.workspaceConfigured;
-              return (
-                <Card key={provider.provider} className="shadow-none">
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        <span className="grid h-9 w-9 place-items-center rounded-md bg-primary/10 text-primary">
-                          <PlugZap className="h-4 w-4" aria-hidden="true" />
-                        </span>
-                        <div>
-                          <CardTitle className="text-base">{provider.displayName}</CardTitle>
-                          <CardDescription>
-                            {connected ? "Ready for routing" : "Needs a server or workspace key"}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <Badge
-                        className={
-                          connected && provider.isEnabled
-                            ? "border-secondary/30 bg-secondary/10 text-secondary"
-                            : undefined
-                        }
-                      >
-                        {connected && provider.isEnabled ? "Connected" : "Not connected"}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="grid gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor={`${provider.provider}-key`}>{provider.keyLabel}</Label>
-                      <Input
-                        id={`${provider.provider}-key`}
-                        type="password"
-                        autoComplete="off"
-                        placeholder={provider.workspaceConfigured ? "Saved key is active" : provider.envKeys.join(", ")}
-                        value={apiKeys[provider.provider] ?? ""}
-                        onChange={(event) =>
-                          setApiKeys((current) => ({
-                            ...current,
-                            [provider.provider]: event.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {provider.models.map((model) => (
-                        <Badge key={model.modelId} className="bg-muted">
-                          {model.displayName}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                      <Button
-                        size="sm"
-                        className="w-full sm:w-auto"
-                        onClick={() => saveProvider(provider, true)}
-                        disabled={savingProvider === provider.provider}
-                      >
-                        {savingProvider === provider.provider ? (
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                        ) : (
-                          <KeyRound className="h-4 w-4" aria-hidden="true" />
-                        )}
-                        Save
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full sm:w-auto"
-                        onClick={() => saveProvider(provider, false)}
-                        disabled={savingProvider === provider.provider}
-                      >
-                        Disable
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="w-full sm:w-auto"
-                        onClick={() => testProvider(provider)}
-                        disabled={testingProvider === provider.provider}
-                      >
-                        {testingProvider === provider.provider ? (
-                          <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                        ) : null}
-                        Test
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-center">
+            {[
+              ["Providers", providers.length.toString()],
+              [
+                "Connected",
+                providers
+                  .filter((provider) => provider.envConfigured || provider.workspaceConfigured)
+                  .length.toString(),
+              ],
+              ["Memory", memoryEnabled ? "on" : "off"],
+            ].map(([label, value]) => (
+              <div key={label} className="border-r border-white/10 p-4 last:border-r-0">
+                <p className="font-mono text-xl font-semibold tracking-[-0.05em]">{value}</p>
+                <p className="mt-1 text-xs text-white/50">{label}</p>
+              </div>
+            ))}
           </div>
         </div>
-
-        <TeamMembers workspaceId={workspace.id} />
       </section>
 
-      <aside className="grid content-start gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Workspace defaults</CardTitle>
-            <CardDescription>{workspace.name}</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="defaultModel">Default model</Label>
-              <Select
-                id="defaultModel"
-                value={defaultModelId}
-                onChange={(event) => setDefaultModelId(event.target.value)}
-              >
-                {modelRegistry.map((model) => (
-                  <option key={`${model.provider}:${model.modelId}`} value={model.modelId}>
-                    {model.displayName}
-                  </option>
-                ))}
-              </Select>
+      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+        <section className="grid gap-6">
+          <div>
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h2 className="text-base font-semibold">AI provider connections</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Add workspace keys for ChatGPT, Claude, Gemini, Mistral, Stability, and Amazon
+                  Bedrock.
+                </p>
+              </div>
+              <Badge className="bg-muted">{providerSummary}</Badge>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="routingMode">Routing mode</Label>
-              <Select
-                id="routingMode"
-                value={defaultRoutingMode}
-                onChange={(event) =>
-                  setDefaultRoutingMode(event.target.value as Workspace["defaultRoutingMode"])
-                }
-              >
-                <option value="manual">Manual</option>
-                <option value="suggest">Suggest</option>
-                <option value="auto">Auto</option>
-              </Select>
+            <div className="mt-4 grid gap-4 lg:grid-cols-2">
+              {providers.map((provider) => {
+                const connected = provider.envConfigured || provider.workspaceConfigured;
+                return (
+                  <Card key={provider.provider} className="rounded-[1.25rem] shadow-none">
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-primary">
+                            <PlugZap className="h-4 w-4" aria-hidden="true" />
+                          </span>
+                          <div>
+                            <CardTitle className="text-base">{provider.displayName}</CardTitle>
+                            <CardDescription>
+                              {connected ? "Ready for routing" : "Needs a server or workspace key"}
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <Badge
+                          className={
+                            connected && provider.isEnabled
+                              ? "border-secondary/30 bg-secondary/10 text-secondary"
+                              : undefined
+                          }
+                        >
+                          {connected && provider.isEnabled ? "Connected" : "Not connected"}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="grid gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor={`${provider.provider}-key`}>{provider.keyLabel}</Label>
+                        <Input
+                          id={`${provider.provider}-key`}
+                          type="password"
+                          autoComplete="off"
+                          placeholder={
+                            provider.workspaceConfigured
+                              ? "Saved key is active"
+                              : provider.envKeys.join(", ")
+                          }
+                          value={apiKeys[provider.provider] ?? ""}
+                          onChange={(event) =>
+                            setApiKeys((current) => ({
+                              ...current,
+                              [provider.provider]: event.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {provider.models.map((model) => (
+                          <Badge key={model.modelId} className="bg-muted">
+                            {model.displayName}
+                          </Badge>
+                        ))}
+                      </div>
+                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                        <Button
+                          size="sm"
+                          className="w-full sm:w-auto"
+                          onClick={() => saveProvider(provider, true)}
+                          disabled={savingProvider === provider.provider}
+                        >
+                          {savingProvider === provider.provider ? (
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                          ) : (
+                            <KeyRound className="h-4 w-4" aria-hidden="true" />
+                          )}
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full sm:w-auto"
+                          onClick={() => saveProvider(provider, false)}
+                          disabled={savingProvider === provider.provider}
+                        >
+                          Disable
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="w-full sm:w-auto"
+                          onClick={() => testProvider(provider)}
+                          disabled={testingProvider === provider.provider}
+                        >
+                          {testingProvider === provider.provider ? (
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                          ) : null}
+                          Test
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="retention">Data retention days</Label>
-              <Input
-                id="retention"
-                type="number"
-                min={1}
-                max={3650}
-                value={retentionDays}
-                onChange={(event) => setRetentionDays(Number(event.target.value))}
-              />
-            </div>
-            <label className="flex items-center justify-between rounded-md border p-3 text-sm">
-              <span>Memory enabled</span>
-              <input
-                type="checkbox"
-                checked={memoryEnabled}
-                onChange={(event) => setMemoryEnabled(event.target.checked)}
-                className="h-4 w-4"
-              />
-            </label>
-            <Button onClick={saveSettings} disabled={savingSettings}>
-              {savingSettings ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-              ) : (
-                <Save className="h-4 w-4" aria-hidden="true" />
-              )}
-              Save defaults
-            </Button>
-            {notice ? <p className="text-sm text-muted-foreground">{notice}</p> : null}
-          </CardContent>
-        </Card>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5 text-secondary" aria-hidden="true" />
-              <CardTitle>Security status</CardTitle>
-            </div>
-            <CardDescription>Workspace keys are encrypted and never returned to the browser.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-2 text-sm">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-secondary" aria-hidden="true" />
-              Server-side provider calls
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-secondary" aria-hidden="true" />
-              Workspace authorization checks
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-secondary" aria-hidden="true" />
-              Encrypted saved keys
-            </div>
-          </CardContent>
-        </Card>
-      </aside>
+          <TeamMembers workspaceId={workspace.id} />
+        </section>
+
+        <aside className="grid content-start gap-4">
+          <Card className="rounded-[1.25rem]">
+            <CardHeader>
+              <CardTitle>Workspace defaults</CardTitle>
+              <CardDescription>{workspace.name}</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="defaultModel">Default model</Label>
+                <Select
+                  id="defaultModel"
+                  value={defaultModelId}
+                  onChange={(event) => setDefaultModelId(event.target.value)}
+                >
+                  {modelRegistry.map((model) => (
+                    <option key={`${model.provider}:${model.modelId}`} value={model.modelId}>
+                      {model.displayName}
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="routingMode">Routing mode</Label>
+                <Select
+                  id="routingMode"
+                  value={defaultRoutingMode}
+                  onChange={(event) =>
+                    setDefaultRoutingMode(event.target.value as Workspace["defaultRoutingMode"])
+                  }
+                >
+                  <option value="manual">Manual</option>
+                  <option value="suggest">Suggest</option>
+                  <option value="auto">Auto</option>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="retention">Data retention days</Label>
+                <Input
+                  id="retention"
+                  type="number"
+                  min={1}
+                  max={3650}
+                  value={retentionDays}
+                  onChange={(event) => setRetentionDays(Number(event.target.value))}
+                />
+              </div>
+              <label className="flex items-center justify-between rounded-xl border border-border/70 p-3 text-sm">
+                <span>Memory enabled</span>
+                <input
+                  type="checkbox"
+                  checked={memoryEnabled}
+                  onChange={(event) => setMemoryEnabled(event.target.checked)}
+                  className="h-4 w-4"
+                />
+              </label>
+              <Button onClick={saveSettings} disabled={savingSettings}>
+                {savingSettings ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Save className="h-4 w-4" aria-hidden="true" />
+                )}
+                Save defaults
+              </Button>
+              {notice ? <p className="text-sm text-muted-foreground">{notice}</p> : null}
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[1.25rem]">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-secondary" aria-hidden="true" />
+                <CardTitle>Security status</CardTitle>
+              </div>
+              <CardDescription>
+                Workspace keys are encrypted and never returned to the browser.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-2 text-sm">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-secondary" aria-hidden="true" />
+                Server-side provider calls
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-secondary" aria-hidden="true" />
+                Workspace authorization checks
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-secondary" aria-hidden="true" />
+                Encrypted saved keys
+              </div>
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
     </div>
   );
 }

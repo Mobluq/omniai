@@ -8,9 +8,11 @@ export function ModelControls() {
   const { routingMode, selectedModel, setRoutingMode, setSelectedModel } = useChatStore();
 
   return (
-    <div className="grid gap-3 border-b border-border/70 bg-card/95 p-3 sm:p-4 md:grid-cols-[1fr_190px]">
+    <div className="grid gap-3 border-b border-border/70 bg-card/95 p-3 sm:p-4 md:grid-cols-[minmax(0,1fr)_190px]">
       <label className="grid gap-1 text-sm">
-        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Model</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          Model
+        </span>
         <Select
           value={`${selectedModel.provider}:${selectedModel.modelId}`}
           onChange={(event) => {
@@ -19,14 +21,19 @@ export function ModelControls() {
           }}
         >
           {modelRegistry.map((model) => (
-            <option key={`${model.provider}:${model.modelId}`} value={`${model.provider}:${model.modelId}`}>
+            <option
+              key={`${model.provider}:${model.modelId}`}
+              value={`${model.provider}:${model.modelId}`}
+            >
               {model.displayName}
             </option>
           ))}
         </Select>
       </label>
       <label className="grid gap-1 text-sm">
-        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Routing</span>
+        <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+          Routing
+        </span>
         <Select
           value={routingMode}
           onChange={(event) => setRoutingMode(event.target.value as RoutingMode)}

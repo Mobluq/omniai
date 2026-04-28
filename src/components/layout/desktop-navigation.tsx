@@ -18,13 +18,7 @@ const workspaceItems = navItems.filter((item) =>
   ["/notifications", "/account", "/settings"].includes(item.href),
 );
 
-function NavSection({
-  title,
-  items,
-}: {
-  title: string;
-  items: readonly NavItem[];
-}) {
+function NavSection({ title, items }: { title: string; items: readonly NavItem[] }) {
   const pathname = usePathname();
 
   return (
@@ -47,7 +41,10 @@ function NavSection({
             )}
           >
             <item.icon
-              className={cn("h-4 w-4 shrink-0", active ? "text-primary" : "text-muted-foreground group-hover:text-foreground")}
+              className={cn(
+                "h-4 w-4 shrink-0",
+                active ? "text-primary" : "text-muted-foreground group-hover:text-foreground",
+              )}
               aria-hidden="true"
             />
             <span className="truncate">{item.label}</span>
@@ -72,7 +69,7 @@ export function DesktopNavigation() {
           </span>
         </Link>
 
-        <div className="mt-5 rounded-lg border border-border/70 bg-muted/35 p-3">
+        <div className="mt-5 rounded-lg border border-border/70 bg-muted/30 p-3">
           <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
             <span className="relative flex h-2.5 w-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/50" />
@@ -81,7 +78,8 @@ export function DesktopNavigation() {
             Routing engine online
           </div>
           <p className="mt-2 text-xs leading-5 text-muted-foreground">
-            Prompts are classified before model execution so users can review the recommended provider.
+            Prompts are classified before model execution so users can review the recommended
+            provider.
           </p>
         </div>
 
@@ -97,7 +95,8 @@ export function DesktopNavigation() {
             <div>
               <p className="text-xs font-semibold">Tenant-safe workspace</p>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                Provider keys stay server-side and workspace access is checked on every protected route.
+                Provider keys stay server-side and workspace access is checked on every protected
+                route.
               </p>
             </div>
           </div>
