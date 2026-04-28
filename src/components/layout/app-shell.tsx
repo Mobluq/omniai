@@ -1,10 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { MessageSquarePlus, Search, UserRound } from "lucide-react";
+import { MessageSquarePlus, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/notification-center";
 import { MobileNavigation } from "@/components/layout/mobile-navigation";
 import { DesktopNavigation } from "@/components/layout/desktop-navigation";
+import { GlobalSearch } from "@/components/layout/global-search";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -25,21 +26,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <span className="truncate">OmniAI</span>
               </Link>
             </div>
-            <div className="hidden min-w-0 flex-1 px-8 lg:block">
-              <div className="mx-auto flex max-w-xl items-center justify-between rounded-lg border border-border/70 bg-card/70 px-3 py-2 text-xs text-muted-foreground shadow-line">
-                <span>Unified prompt routing</span>
-                <span className="h-1 w-1 rounded-full bg-border" />
-                <span>Workspace memory</span>
-                <span className="h-1 w-1 rounded-full bg-border" />
-                <span>Provider governance</span>
-              </div>
-            </div>
+            <GlobalSearch />
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <Button asChild variant="ghost" size="icon" aria-label="Search">
-                <Link href="/search">
-                  <Search className="h-4 w-4" aria-hidden="true" />
-                </Link>
-              </Button>
               <NotificationCenter />
               <Button asChild variant="default" size="sm" className="hidden sm:inline-flex">
                 <Link href="/chat">

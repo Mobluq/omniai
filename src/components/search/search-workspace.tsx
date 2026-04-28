@@ -68,8 +68,11 @@ export function SearchWorkspace() {
 
   async function loadWorkspaces() {
     const result = await parseApiResponse<{ workspaces: Workspace[] }>(await fetch("/api/workspaces"));
+    const initialQuery =
+      typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("q") ?? "";
     setWorkspaces(result.workspaces);
     setWorkspaceId((current) => current || result.workspaces[0]?.id || "");
+    setQuery((current) => current || initialQuery);
     setStatus("ready");
   }
 
