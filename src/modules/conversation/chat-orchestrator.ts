@@ -85,6 +85,8 @@ export class ChatOrchestrator {
       };
     }
 
+    await this.usage.assertWorkspaceWithinLimits(conversation.workspaceId);
+
     const projectInstructions = conversation.project?.instructions
       ? [
           `Project instructions for "${conversation.project.name}":\n${conversation.project.instructions}`,

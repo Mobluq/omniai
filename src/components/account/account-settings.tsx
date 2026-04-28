@@ -434,8 +434,8 @@ export function AccountSettings() {
                 </label>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3">
-                <Button type="submit" disabled={savingProfile}>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+                <Button type="submit" disabled={savingProfile} className="w-full sm:w-auto">
                   {savingProfile ? (
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                   ) : (
@@ -478,7 +478,7 @@ export function AccountSettings() {
                 </label>
               ))}
             </div>
-            <Button onClick={saveNotifications} disabled={savingNotifications}>
+            <Button onClick={saveNotifications} disabled={savingNotifications} className="w-full sm:w-auto">
               {savingNotifications ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
@@ -506,7 +506,7 @@ export function AccountSettings() {
           </CardHeader>
           <CardContent className="grid gap-4">
             {!security.twoFactorEnabled ? (
-              <Button onClick={startTwoFactorSetup} disabled={updatingSecurity}>
+              <Button onClick={startTwoFactorSetup} disabled={updatingSecurity} className="w-full sm:w-auto">
                 {updatingSecurity ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : (
@@ -532,7 +532,12 @@ export function AccountSettings() {
                   pattern="[0-9]{6}"
                   placeholder="000000"
                 />
-                <Button variant="destructive" onClick={disableTwoFactor} disabled={updatingSecurity || disableCode.length !== 6}>
+                <Button
+                  variant="destructive"
+                  onClick={disableTwoFactor}
+                  disabled={updatingSecurity || disableCode.length !== 6}
+                  className="w-full sm:w-auto"
+                >
                   Disable 2FA
                 </Button>
               </div>
@@ -561,7 +566,11 @@ export function AccountSettings() {
                     placeholder="000000"
                   />
                 </div>
-                <Button onClick={verifyTwoFactorSetup} disabled={updatingSecurity || verifyCode.length !== 6}>
+                <Button
+                  onClick={verifyTwoFactorSetup}
+                  disabled={updatingSecurity || verifyCode.length !== 6}
+                  className="w-full sm:w-auto"
+                >
                   <KeyRound className="h-4 w-4" aria-hidden="true" />
                   Verify and enable
                 </Button>
@@ -611,6 +620,7 @@ export function AccountSettings() {
                 variant="outline"
                 onClick={changePassword}
                 disabled={changingPassword || !currentPassword || newPassword.length < 10}
+                className="w-full sm:w-auto"
               >
                 {changingPassword ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

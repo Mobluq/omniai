@@ -1,33 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  Activity,
-  Bell,
-  Bot,
-  Boxes,
-  Brain,
-  BrainCircuit,
-  FileStack,
-  LayoutDashboard,
-  MessageSquare,
-  Settings,
-  UserRound,
-} from "lucide-react";
+import { Bot, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/notification-center";
-
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/projects", label: "Projects", icon: Boxes },
-  { href: "/chat", label: "Chat", icon: MessageSquare },
-  { href: "/knowledge", label: "Knowledge", icon: Brain },
-  { href: "/artifacts", label: "Artifacts", icon: FileStack },
-  { href: "/notifications", label: "Notifications", icon: Bell },
-  { href: "/usage", label: "Usage", icon: Activity },
-  { href: "/routing", label: "Routing", icon: BrainCircuit },
-  { href: "/account", label: "Account", icon: UserRound },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
+import { MobileNavigation } from "@/components/layout/mobile-navigation";
+import { navItems } from "@/components/layout/nav-items";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -54,10 +31,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
       <div className="lg:pl-64">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-background/95 px-4 backdrop-blur lg:px-8">
-          <Link href="/dashboard" className="flex items-center gap-2 font-semibold lg:hidden">
-            <Bot className="h-5 w-5" aria-hidden="true" />
-            OmniAI
-          </Link>
+          <div className="flex min-w-0 items-center gap-2">
+            <MobileNavigation />
+            <Link href="/dashboard" className="flex min-w-0 items-center gap-2 font-semibold lg:hidden">
+              <Bot className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <span className="truncate">OmniAI</span>
+            </Link>
+          </div>
           <div className="hidden text-sm text-muted-foreground lg:block">Multi-model AI workspace</div>
           <div className="flex items-center gap-2">
             <NotificationCenter />
@@ -71,7 +51,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Button>
           </div>
         </header>
-        <main className="px-4 py-6 lg:px-8">{children}</main>
+        <main className="px-3 py-4 sm:px-4 sm:py-6 lg:px-8">{children}</main>
       </div>
     </div>
   );

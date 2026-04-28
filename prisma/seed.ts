@@ -89,11 +89,13 @@ async function seedAdminUser() {
     update: {
       name,
       passwordHash,
+      emailVerified: new Date(),
     },
     create: {
       email,
       name,
       passwordHash,
+      emailVerified: new Date(),
     },
   });
 

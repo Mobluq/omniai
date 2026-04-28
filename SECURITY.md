@@ -12,6 +12,8 @@ Credentials login is protected by database-backed throttling keyed by email and 
 
 Public signup is controlled by `SIGNUP_MODE`. Production defaults to invite-only and requires `SIGNUP_INVITE_CODE` unless signup is explicitly disabled or opened.
 
+Email verification and password resets use single-use hashed tokens stored in the Auth.js `VerificationToken` table. Email verification links expire after 24 hours; password reset links expire after 30 minutes. Public request endpoints are rate limited, return generic responses, record audit events, and only send links through server-side transactional email when `RESEND_API_KEY` and `EMAIL_FROM` are configured.
+
 Two-factor authentication uses TOTP. Setup secrets and recovery codes are encrypted at rest with the same secret encryption helper used for provider keys. Sign-in validates the optional authenticator or recovery code only after the password succeeds, consumes recovery codes after use, and records failed 2FA attempts as login failures.
 
 ## Authorization and Tenant Isolation

@@ -74,6 +74,9 @@ All secrets must be configured through environment variables. Do not commit `.en
 The scaffold includes:
 
 - Signup/sign-in foundation
+- Config-driven Google/GitHub OAuth login foundation
+- Email verification flow with Resend transactional-email delivery hooks
+- Forgot-password and password-reset flow with rate limits, audit logs, and transactional-email delivery hooks
 - Multi-tenant workspace schema and authorization checks
 - Conversation and message storage
 - Persistent chat history with selectable conversations
@@ -89,6 +92,6 @@ The scaffold includes:
 - Manual, suggest, and auto routing foundation
 - Memory/knowledge architecture prepared for vector search
 - Usage by provider, model, request type, token estimate, and cost estimate
-- Billing models, audit logs, and settings structure
+- Stripe checkout/customer portal routes, billing models, audit logs, and usage-limit enforcement
 
 See `UX_FLOW.md`, `ROUTING_INTELLIGENCE.md`, `ARCHITECTURE.md`, `SECURITY.md`, `ENVIRONMENT.md`, `API.md`, and `DEPLOYMENT.md` for more detail.

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Activity, BarChart3, Bot, CheckCircle2, CircleDollarSign, TriangleAlert } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { BillingActions } from "@/components/billing/billing-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -159,6 +160,16 @@ export default async function UsagePage() {
         </section>
 
         <aside className="grid content-start gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Billing</CardTitle>
+              <CardDescription>Upgrade plans or open the Stripe customer portal.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BillingActions workspaceId={workspace.id} />
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Usage by task</CardTitle>

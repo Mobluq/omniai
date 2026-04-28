@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Loader2, MessageSquare, Plus, SendHorizontal, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { ModelControls } from "@/components/chat/model-controls";
@@ -400,8 +401,8 @@ export function ChatWorkspace() {
   return (
     <div className="overflow-hidden rounded-lg border bg-card shadow-soft">
       <ModelControls />
-      <div className="grid min-h-[650px] lg:grid-cols-[320px_1fr]">
-        <aside className="border-b bg-muted/30 p-4 lg:border-b-0 lg:border-r">
+      <div className="grid min-h-[calc(100svh-12rem)] lg:min-h-[650px] lg:grid-cols-[320px_1fr]">
+        <aside className="hidden border-b bg-muted/30 p-4 lg:block lg:border-b-0 lg:border-r">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold">History</h2>
@@ -457,7 +458,38 @@ export function ChatWorkspace() {
           </div>
         </aside>
 
-        <section className="flex min-h-[650px] flex-col">
+        <section className="flex min-h-[calc(100svh-12rem)] flex-col lg:min-h-[650px]">
+          <div className="grid gap-3 border-b bg-muted/30 p-3 lg:hidden">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">Conversation</p>
+                <p className="truncate text-xs text-muted-foreground">{workspace?.name ?? "Workspace"}</p>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => createConversation()}>
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                New
+              </Button>
+            </div>
+            <Select
+              aria-label="Open conversation"
+              value={conversationId ?? ""}
+              onChange={(event) => {
+                if (event.target.value) {
+                  void openConversation(event.target.value);
+                }
+              }}
+            >
+              {conversations.length ? (
+                conversations.map((conversation) => (
+                  <option key={conversation.id} value={conversation.id}>
+                    {conversation.title}
+                  </option>
+                ))
+              ) : (
+                <option value="">No conversations yet</option>
+              )}
+            </Select>
+          </div>
           <div className="border-b bg-background px-4 py-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
@@ -472,7 +504,7 @@ export function ChatWorkspace() {
             </div>
           </div>
 
-          <div className="flex-1 space-y-4 overflow-auto p-4">
+          <div className="flex-1 space-y-4 overflow-auto p-3 sm:p-4">
             {recommendation && pendingMessageId ? (
               <RecommendationBanner
                 recommendation={recommendation}
@@ -532,18 +564,18 @@ export function ChatWorkspace() {
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
           </div>
 
-          <form className="border-t bg-background p-4" onSubmit={onSubmit}>
+          <form className="sticky bottom-0 border-t bg-background p-3 sm:p-4" onSubmit={onSubmit}>
             <Textarea
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
               placeholder="Ask OmniAI to write, debug, research, summarize, analyze, or generate an image..."
               disabled={status === "booting"}
             />
-            <div className="mt-3 flex items-center justify-between gap-3">
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs text-muted-foreground">
                 Suggest mode stores your prompt first, then asks before switching models.
               </p>
-              <Button type="submit" disabled={!canSend}>
+              <Button type="submit" disabled={!canSend} className="w-full sm:w-auto">
                 {status === "loading" ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : (

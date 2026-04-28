@@ -67,6 +67,30 @@ SENTRY_DSN=""
 
 Production deployments should configure these through the hosting provider secret manager.
 
+## Transactional email
+
+Email verification and password reset delivery use Resend when configured:
+
+```bash
+RESEND_API_KEY=""
+EMAIL_FROM="OmniAI <security@example.com>"
+```
+
+Without these values, local development still shows temporary verification/reset links after valid requests. Production should configure email before relying on self-service account recovery.
+
+## OAuth
+
+OAuth buttons appear on sign-in only when credentials are configured:
+
+```bash
+GOOGLE_OAUTH_CLIENT_ID=""
+GOOGLE_OAUTH_CLIENT_SECRET=""
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=""
+```
+
+Set `REQUIRE_EMAIL_VERIFICATION="true"` when you want credentials users blocked until they verify their email. Seeded admin users are marked verified by `npm run db:seed`.
+
 ## Admin bootstrap
 
 Seeded admin credentials are environment-driven and must never be committed:

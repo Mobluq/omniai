@@ -13,6 +13,9 @@ OmniAI now has the core product surfaces expected from a serious multi-model AI 
 - usage dashboard
 - account/profile/security settings
 - provider connection settings
+- mobile app navigation drawer
+- Resend-backed email verification and password reset transport
+- Stripe checkout/customer portal endpoints
 - in-app notification bell and inbox
 - routing intelligence explanation
 
@@ -30,6 +33,7 @@ Common patterns users expect from mature AI products:
 | Account controls | Profile, security, password, 2FA, notifications. | Present through Account. |
 | Usage visibility | Users can see usage by model/provider. | Present through Usage. |
 | Notifications | System, security, billing, provider, and usage events have an inbox. | Present through header bell and `/notifications`. |
+| Mobile navigation | Phone users need a compact app drawer and non-overflowing auth/chat surfaces. | Present through mobile drawer and mobile smoke test coverage. |
 | Settings separation | Provider and workspace controls are separate from personal account controls. | Present through Settings and Account. |
 | Trust/security posture | Rate limits, tenant isolation, secret handling, and audit logs. | Present in backend and docs. |
 
@@ -44,6 +48,8 @@ Notifications go to:
 Current producers:
 
 - account signup
+- email verification requested
+- email verified
 - workspace creation
 - 2FA setup started
 - 2FA enabled
@@ -65,12 +71,12 @@ Planned producers:
 These are not blockers for a grounded MVP, but they are the next areas to make the product feel more complete:
 
 - workspace member invitation and role management UI
-- email verification and password reset emails
-- billing checkout and subscription portal
+- branded email templates beyond the current Resend verification/reset transport
+- Stripe webhook fulfillment for subscription state changes
 - provider health telemetry and fallback notifications
 - file upload pipeline with background ingestion jobs
 - searchable global command menu
-- mobile-specific navigation polish
+- deeper mobile QA across every data-heavy table after more billing/team screens are added
 - user feedback on routing recommendations
 - cost tables per provider/model instead of rough estimates
 

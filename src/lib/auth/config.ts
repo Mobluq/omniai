@@ -2,13 +2,17 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { compare } from "bcryptjs";
 import { timingSafeEqual } from "node:crypto";
 import type { NextAuthOptions } from "next-auth";
+import type { Provider } from "next-auth/providers/index";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GitHubProvider from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/db/prisma";
 import { getServerEnv } from "@/lib/env/server";
 import { decryptSecret, encryptSecret } from "@/lib/security/encryption";
 import { assertRateLimit, resetRateLimit } from "@/lib/security/rate-limit";
 import { hashSensitiveText } from "@/lib/security/request-context";
 import { verifyTotpToken } from "@/lib/security/totp";
+import { getEnabledOAuthProviders } from "@/modules/auth/oauth-providers";
 
 if (process.env.NODE_ENV === "production") {
   getServerEnv();
@@ -60,6 +64,85 @@ async function recordLoginAudit(input: {
       },
     })
     .catch(() => undefined);
+}
+
+function slugifyWorkspaceName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 48);
+}
+
+async function ensurePersonalWorkspace(user: { id?: string; name?: string | null; email?: string | null }) {
+  if (!user.id) {
+    return;
+  }
+
+  const existingMembership = await prisma.workspaceMember.findFirst({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+
+  if (existingMembership) {
+    return;
+  }
+
+  const workspaceName = `${user.name ?? user.email ?? "OmniAI"}'s Workspace`;
+  const baseSlug = slugifyWorkspaceName(workspaceName) || "workspace";
+
+  const workspace = await prisma.workspace.create({
+    data: {
+      name: workspaceName,
+      slug: `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`,
+      type: "personal",
+      members: {
+        create: {
+          userId: user.id,
+          role: "owner",
+        },
+      },
+    },
+  });
+
+  await prisma.notificationPreference.upsert({
+    where: { userId: user.id },
+    update: {},
+    create: { userId: user.id },
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: user.id,
+      workspaceId: workspace.id,
+      type: "workspace",
+      title: "Personal workspace created",
+      body: `${workspace.name} is ready for conversations, projects, knowledge, and artifacts.`,
+      actionUrl: "/dashboard",
+    },
+  });
+}
+
+const oauthProviders: Provider[] = [];
+
+for (const provider of getEnabledOAuthProviders()) {
+  if (provider.id === "google") {
+    oauthProviders.push(
+      GoogleProvider({
+        clientId: process.env.GOOGLE_OAUTH_CLIENT_ID!,
+        clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
+      }),
+    );
+  }
+
+  if (provider.id === "github") {
+    oauthProviders.push(
+      GitHubProvider({
+        clientId: process.env.GITHUB_CLIENT_ID!,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      }),
+    );
+  }
 }
 
 function normalizeRecoveryCode(code: string) {
@@ -170,6 +253,18 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        if (process.env.REQUIRE_EMAIL_VERIFICATION === "true" && !user.emailVerified) {
+          await recordLoginAudit({
+            action: "auth.login_failed",
+            email,
+            userId: user.id,
+            reason: "email_unverified",
+            ipAddress,
+            userAgent,
+          });
+          return null;
+        }
+
         if (user.twoFactorEnabled) {
           const isTotpValid =
             Boolean(user.twoFactorSecretEncrypted && oneTimeCode) &&
@@ -212,6 +307,7 @@ export const authOptions: NextAuthOptions = {
         };
       },
     }),
+    ...oauthProviders,
   ],
   callbacks: {
     jwt({ token, user }) {
@@ -227,6 +323,11 @@ export const authOptions: NextAuthOptions = {
       }
 
       return session;
+    },
+  },
+  events: {
+    async createUser({ user }) {
+      await ensurePersonalWorkspace(user);
     },
   },
 };

@@ -289,9 +289,10 @@ export function SettingsWorkspace() {
                         </Badge>
                       ))}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <Button
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => saveProvider(provider, true)}
                         disabled={savingProvider === provider.provider}
                       >
@@ -305,6 +306,7 @@ export function SettingsWorkspace() {
                       <Button
                         size="sm"
                         variant="outline"
+                        className="w-full sm:w-auto"
                         onClick={() => saveProvider(provider, false)}
                         disabled={savingProvider === provider.provider}
                       >
@@ -313,6 +315,7 @@ export function SettingsWorkspace() {
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="w-full sm:w-auto"
                         onClick={() => testProvider(provider)}
                         disabled={testingProvider === provider.provider}
                       >

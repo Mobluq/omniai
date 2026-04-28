@@ -154,3 +154,31 @@ export const signUpSchema = z.object({
   password: z.string().min(10).max(128),
   inviteCode: z.string().max(128).optional(),
 });
+
+export const passwordResetRequestSchema = z.object({
+  email: z.string().email().max(255),
+});
+
+export const passwordResetConfirmSchema = z.object({
+  email: z.string().email().max(255),
+  token: z.string().min(32).max(256),
+  password: z.string().min(10).max(128),
+});
+
+export const emailVerificationRequestSchema = z.object({
+  email: z.string().email().max(255),
+});
+
+export const emailVerificationConfirmSchema = z.object({
+  email: z.string().email().max(255),
+  token: z.string().min(32).max(256),
+});
+
+export const billingCheckoutSchema = z.object({
+  workspaceId: z.string().min(1),
+  planCode: z.enum(["pro", "team", "enterprise"]),
+});
+
+export const billingPortalSchema = z.object({
+  workspaceId: z.string().min(1),
+});

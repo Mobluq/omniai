@@ -1,5 +1,6 @@
 import type { RequestType } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
+import { forbidden } from "@/lib/errors/app-error";
 
 export type RecordUsageInput = {
   userId: string;
@@ -16,6 +17,50 @@ export type RecordUsageInput = {
 };
 
 export class UsageService {
+  async assertWorkspaceWithinLimits(workspaceId: string) {
+    const subscription = await prisma.subscription.findFirst({
+      where: {
+        workspaceId,
+        status: { in: ["trialing", "active"] },
+      },
+      include: {
+        plan: {
+          include: { usageLimits: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    const plan =
+      subscription?.plan ??
+      (await prisma.plan.findUnique({
+        where: { code: "free" },
+        include: { usageLimits: true },
+      }));
+    const messageLimit = plan?.usageLimits.find(
+      (limit) => limit.metric === "messages" && limit.period === "month",
+    );
+
+    if (!messageLimit) {
+      return;
+    }
+
+    const now = new Date();
+    const periodStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
+    const used = await prisma.usageLog.count({
+      where: {
+        workspaceId,
+        success: true,
+        createdAt: { gte: periodStart },
+      },
+    });
+
+    if (used >= messageLimit.limit) {
+      throw forbidden(
+        `This workspace has reached its ${plan?.name ?? "current"} plan usage limit for the month.`,
+      );
+    }
+  }
+
   async record(input: RecordUsageInput) {
     return prisma.usageLog.create({
       data: {

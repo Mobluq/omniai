@@ -191,7 +191,7 @@ export function NotificationCenter() {
       </Button>
 
       {open ? (
-        <div className="absolute right-0 top-12 z-50 w-[min(92vw,420px)] overflow-hidden rounded-lg border bg-card shadow-xl">
+        <div className="fixed left-3 right-3 top-16 z-50 overflow-hidden rounded-lg border bg-card shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[min(92vw,420px)]">
           <div className="flex items-center justify-between border-b p-4">
             <div>
               <div className="text-sm font-semibold">Notifications</div>

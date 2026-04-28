@@ -8,7 +8,7 @@ export function ModelControls() {
   const { routingMode, selectedModel, setRoutingMode, setSelectedModel } = useChatStore();
 
   return (
-    <div className="grid gap-3 border-b bg-card p-4 md:grid-cols-[1fr_180px]">
+    <div className="grid gap-3 border-b bg-card p-3 sm:p-4 md:grid-cols-[1fr_180px]">
       <label className="grid gap-1 text-sm">
         <span className="font-medium">Model</span>
         <Select

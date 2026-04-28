@@ -42,6 +42,42 @@ Creates a user and personal workspace.
 
 Sign-in is handled by NextAuth at `/api/auth/[...nextauth]`.
 Credentials sign-in accepts an optional `oneTimeCode` when two-factor authentication is enabled.
+OAuth sign-in is enabled automatically when Google or GitHub OAuth environment variables are configured.
+
+`POST /api/auth/email-verification/request`
+
+Requests an email verification link without revealing whether the email exists. Production delivery uses Resend when `RESEND_API_KEY` and `EMAIL_FROM` are configured. Local development also returns a temporary verification URL.
+
+```json
+{ "email": "ada@example.com" }
+```
+
+`POST /api/auth/email-verification/confirm`
+
+```json
+{
+  "email": "ada@example.com",
+  "token": "verification-token-from-email"
+}
+```
+
+`POST /api/auth/password-reset/request`
+
+Requests a password reset without revealing whether the email exists. In production, configure `RESEND_API_KEY` and `EMAIL_FROM` so the reset link is delivered by email. In local development, the endpoint also returns a temporary reset URL for testing.
+
+```json
+{ "email": "ada@example.com" }
+```
+
+`POST /api/auth/password-reset/confirm`
+
+```json
+{
+  "email": "ada@example.com",
+  "token": "reset-token-from-email",
+  "password": "new-long-secure-password"
+}
+```
 
 ## Account
 
@@ -343,3 +379,24 @@ When provider credentials are configured, routing calls the selected provider ad
 `GET /api/usage?workspaceId=...&days=30`
 
 Returns request count, success/failure totals, estimated tokens, estimated cost, provider breakdown, model breakdown, request type breakdown, daily rollups, and recent metered requests.
+
+## Billing
+
+`POST /api/billing/checkout`
+
+Requires workspace admin access and configured Stripe secrets. Creates a Stripe Checkout subscription session.
+
+```json
+{
+  "workspaceId": "workspace_id",
+  "planCode": "pro"
+}
+```
+
+`POST /api/billing/portal`
+
+Requires workspace admin access and an existing Stripe customer ID.
+
+```json
+{ "workspaceId": "workspace_id" }
+```
