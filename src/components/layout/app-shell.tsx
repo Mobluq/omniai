@@ -98,7 +98,9 @@ export async function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <DesktopNavigation profile={profile} />
-      <main className="pt-[66px] lg:pl-[266px]">{children}</main>
+      <main className="px-3 pb-5 pt-[84px] transition-[padding-left] duration-200 sm:px-5 lg:pl-[var(--sidebar-width,266px)] lg:pr-6 xl:px-7">
+        {children}
+      </main>
     </div>
   );
 }

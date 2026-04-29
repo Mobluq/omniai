@@ -172,7 +172,7 @@ function MetricTile({
   return (
     <Link
       href={href}
-      className="group block min-h-[8.25rem] rounded-[1.15rem] border border-[#d8e5ed] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#b9cfe0] hover:shadow-[0_18px_44px_-32px_rgba(22,43,65,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
+      className="group flex h-full min-h-[9.75rem] flex-col justify-between rounded-[1.15rem] border border-[#d8e5ed] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#b9cfe0] hover:shadow-[0_18px_44px_-32px_rgba(22,43,65,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
     >
       <div className="flex items-start justify-between gap-3">
         <p className="text-xs font-medium text-[#75818d]">{label}</p>
@@ -181,10 +181,12 @@ function MetricTile({
           aria-hidden="true"
         />
       </div>
-      <p className="mt-4 font-mono text-[1.75rem] font-semibold tracking-[-0.06em] text-[#111418]">
-        {value}
-      </p>
-      <p className="mt-3 text-xs leading-5 text-[#677380]">{helper}</p>
+      <div>
+        <p className="mt-4 font-mono text-[1.75rem] font-semibold tracking-[-0.06em] text-[#111418]">
+          {value}
+        </p>
+        <p className="mt-3 text-xs leading-5 text-[#677380]">{helper}</p>
+      </div>
     </Link>
   );
 }
@@ -203,7 +205,7 @@ function PillButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "min-h-10 rounded-xl px-3 text-sm font-medium transition active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30",
+        "min-h-10 shrink-0 rounded-xl px-3 text-sm font-medium transition active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30",
         active
           ? "bg-[#dcecff] text-[#111418]"
           : "bg-[#f0f4f8] text-[#53606d] hover:bg-[#e7eef5] hover:text-[#111418]",
@@ -897,7 +899,7 @@ export function OmniTemplateDashboard({
             ["Memory sources", formatNumber(knowledgeSourceCount), "Knowledge available for context injection.", "/knowledge"],
             ["Estimated spend", formatCurrency(estimatedCost), `${successRate}% success rate in usage logs.`, "/usage"],
           ].map(([label, value, helper, href]) => (
-            <div key={label} className="metric-tile">
+            <div key={label} className="metric-tile h-full">
               <MetricTile label={label} value={value} helper={helper} href={href} />
             </div>
           ))}
@@ -912,7 +914,7 @@ export function OmniTemplateDashboard({
                   The core product behavior: store first, understand task, then route with evidence.
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="thin-scrollbar flex flex-nowrap items-center gap-2 overflow-x-auto pb-1">
                 {(["suggest", "auto", "manual"] as const).map((lens) => (
                   <PillButton
                     key={lens}

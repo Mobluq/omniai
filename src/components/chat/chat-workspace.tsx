@@ -1,8 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Loader2, MessageSquare, Plus, SendHorizontal, Trash2 } from "lucide-react";
+import { Loader2, MessageSquare, Plus, Search, SendHorizontal, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
@@ -96,6 +96,27 @@ function upsertMessage(messages: ChatMessage[], message: ChatMessage) {
   return exists
     ? messages.map((item) => (item.id === message.id ? message : item))
     : [...messages, message];
+}
+
+function getConversationTitle(conversation: ConversationListItem) {
+  if (conversation.title && conversation.title !== "New conversation") {
+    return conversation.title;
+  }
+
+  const firstMessage = conversation.messages.find((message) => message.role === "user")?.content;
+  return firstMessage ? firstMessage.slice(0, 70) : "New conversation";
+}
+
+function getConversationPreview(conversation: ConversationListItem) {
+  return conversation.messages.at(-1)?.content ?? "No messages yet";
+}
+
+function formatRoleLabel(role: ChatMessage["role"]) {
+  if (role === "assistant") {
+    return "OmniAI";
+  }
+
+  return role.charAt(0).toUpperCase() + role.slice(1);
 }
 
 function MessageContent({ content }: { content: string }) {
@@ -447,48 +468,52 @@ export function ChatWorkspace() {
     });
   }
 
+  function onComposerKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey) {
+      return;
+    }
+
+    event.preventDefault();
+    const form = event.currentTarget.form;
+    if (form) {
+      form.requestSubmit();
+    }
+  }
+
   return (
-    <div className="page-shell overflow-hidden rounded-[1.5rem] border border-border/80 bg-card/95 shadow-panel">
+    <div className="page-shell overflow-hidden rounded-[1.35rem] border border-border/80 bg-card/95 shadow-panel">
       <ModelControls />
-      <div className="grid min-h-[calc(100svh-12rem)] lg:min-h-[680px] lg:grid-cols-[340px_1fr]">
-        <aside className="hidden border-b border-border/70 bg-muted/30 p-4 lg:block lg:border-b-0 lg:border-r">
+      <div className="grid min-h-[calc(100svh-12rem)] lg:min-h-[720px] lg:grid-cols-[320px_minmax(0,1fr)]">
+        <aside className="hidden border-b border-border/70 bg-[#f7fafd] p-3 lg:block lg:border-b-0 lg:border-r">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold tracking-tight">Conversation history</h2>
+              <h2 className="text-sm font-semibold tracking-tight">History</h2>
               <p className="mt-1 text-xs text-muted-foreground">{workspace?.name ?? "Workspace"}</p>
             </div>
-            <Button size="sm" variant="outline" onClick={() => createConversation()}>
+            <Button size="sm" variant="outline" className="rounded-xl" onClick={() => createConversation()}>
               <Plus className="h-4 w-4" aria-hidden="true" />
               New
             </Button>
           </div>
-          <div className="mt-4 grid grid-cols-3 overflow-hidden rounded-xl border border-border/70 bg-card/75 text-center">
-            <div className="border-r border-border/70 p-2.5">
-              <p className="font-mono text-sm font-semibold">{conversations.length}</p>
-              <p className="text-[0.65rem] text-muted-foreground">threads</p>
-            </div>
-            <div className="border-r border-border/70 p-2.5">
-              <p className="font-mono text-sm font-semibold">{routingMode}</p>
-              <p className="text-[0.65rem] text-muted-foreground">mode</p>
-            </div>
-            <div className="p-2.5">
-              <p className="truncate font-mono text-sm font-semibold">{selectedModel.provider}</p>
-              <p className="text-[0.65rem] text-muted-foreground">active</p>
-            </div>
+
+          <div className="mt-3 flex min-h-10 items-center gap-2 rounded-xl border border-border/70 bg-white px-3 text-sm text-muted-foreground">
+            <Search className="h-4 w-4" aria-hidden="true" />
+            <span className="truncate">{conversations.length} threads in {routingMode} mode</span>
           </div>
-          <div className="thin-scrollbar mt-4 grid max-h-[520px] gap-2 overflow-auto pr-1">
+
+          <div className="thin-scrollbar mt-3 grid max-h-[calc(100svh-18rem)] gap-1.5 overflow-auto pr-1">
             {conversations.length === 0 ? (
-              <div className="rounded-xl border border-dashed bg-background/70 p-4 text-sm text-muted-foreground">
+              <div className="rounded-xl border border-dashed bg-white p-4 text-sm text-muted-foreground">
                 No conversations yet.
               </div>
             ) : (
               conversations.map((conversation) => (
-                <div
+                <article
                   key={conversation.id}
                   className={`group flex items-start gap-2 rounded-xl border p-3 transition-all ${
                     conversation.id === conversationId
-                      ? "border-foreground bg-background shadow-line"
-                      : "bg-background/70 hover:bg-background"
+                      ? "border-[#2f7cf6]/35 bg-white shadow-[0_16px_38px_-30px_rgba(28,54,82,0.55)]"
+                      : "border-transparent bg-transparent hover:border-border/70 hover:bg-white"
                   }`}
                 >
                   <button
@@ -497,11 +522,13 @@ export function ChatWorkspace() {
                     onClick={() => openConversation(conversation.id)}
                   >
                     <div className="flex items-center gap-2">
-                      <MessageSquare className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                      <p className="truncate text-sm font-medium">{conversation.title}</p>
+                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
+                        <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
+                      </span>
+                      <p className="truncate text-sm font-semibold">{getConversationTitle(conversation)}</p>
                     </div>
-                    <p className="mt-1 truncate text-xs text-muted-foreground">
-                      {conversation.messages[0]?.content ?? "No messages yet"}
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">
+                      {getConversationPreview(conversation)}
                     </p>
                     <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
                       <Badge
@@ -525,22 +552,22 @@ export function ChatWorkspace() {
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
-                </div>
+                </article>
               ))
             )}
           </div>
         </aside>
 
-        <section className="flex min-h-[calc(100svh-12rem)] flex-col lg:min-h-[680px]">
-          <div className="grid gap-3 border-b border-border/70 bg-muted/30 p-3 lg:hidden">
+        <section className="flex min-h-[calc(100svh-12rem)] flex-col bg-[#fbfdff] lg:min-h-[720px]">
+          <div className="grid gap-3 border-b border-border/70 bg-white p-3 lg:hidden">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-sm font-semibold">Conversation</p>
+                <p className="text-sm font-semibold">Chat</p>
                 <p className="truncate text-xs text-muted-foreground">
                   {workspace?.name ?? "Workspace"}
                 </p>
               </div>
-              <Button size="sm" variant="outline" onClick={() => createConversation()}>
+              <Button size="sm" variant="outline" className="rounded-xl" onClick={() => createConversation()}>
                 <Plus className="h-4 w-4" aria-hidden="true" />
                 New
               </Button>
@@ -557,7 +584,7 @@ export function ChatWorkspace() {
               {conversations.length ? (
                 conversations.map((conversation) => (
                   <option key={conversation.id} value={conversation.id}>
-                    {conversation.title}
+                    {getConversationTitle(conversation)}
                   </option>
                 ))
               ) : (
@@ -565,11 +592,11 @@ export function ChatWorkspace() {
               )}
             </Select>
           </div>
-          <div className="border-b border-border/70 bg-background/80 px-4 py-3">
+          <div className="border-b border-border/70 bg-white px-4 py-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0">
                 <h2 className="truncate text-sm font-semibold tracking-tight">
-                  {activeConversation?.title ?? "New conversation"}
+                  {activeConversation ? getConversationTitle(activeConversation) : "New conversation"}
                 </h2>
                 <p className="mt-1 text-xs text-muted-foreground">
                   {selectedModel.provider} / {selectedModel.modelId}
@@ -587,7 +614,7 @@ export function ChatWorkspace() {
             </div>
           </div>
 
-          <div className="thin-scrollbar flex-1 space-y-4 overflow-auto bg-background/30 p-3 sm:p-5">
+          <div className="thin-scrollbar flex-1 space-y-5 overflow-auto bg-[#fbfdff] px-3 py-4 sm:px-5 lg:px-8">
             {recommendation && pendingMessageId ? (
               <RecommendationBanner
                 recommendation={recommendation}
@@ -624,7 +651,7 @@ export function ChatWorkspace() {
                 </div>
               </div>
             ) : messages.length === 0 ? (
-              <div className="grid min-h-72 place-items-center rounded-xl border border-dashed bg-card text-center">
+              <div className="grid min-h-72 place-items-center rounded-2xl border border-dashed bg-white text-center">
                 <div className="max-w-md px-4 py-10">
                   <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted">
                     <MessageSquare className="h-7 w-7 text-primary" aria-hidden="true" />
@@ -640,15 +667,21 @@ export function ChatWorkspace() {
               messages.map((message) => (
                 <article
                   key={message.id}
-                  className={`rounded-xl border border-border/70 p-4 shadow-line ${
-                    message.role === "assistant" ? "bg-card" : "bg-background/80"
-                  }`}
+                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                 >
-                  <div className="mb-2 flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                    {message.role}
-                    {message.modelDisplayName ? <Badge>{message.modelDisplayName}</Badge> : null}
+                  <div
+                    className={`max-w-[92%] rounded-2xl border px-4 py-3 shadow-line sm:max-w-[78%] ${
+                      message.role === "user"
+                        ? "rounded-br-md border-[#dce7ef] bg-[#eef6ff]"
+                        : "rounded-bl-md border-border/70 bg-white"
+                    }`}
+                  >
+                    <div className="mb-2 flex flex-wrap items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                      {formatRoleLabel(message.role)}
+                      {message.modelDisplayName ? <Badge>{message.modelDisplayName}</Badge> : null}
+                    </div>
+                    <MessageContent content={message.content} />
                   </div>
-                  <MessageContent content={message.content} />
                 </article>
               ))
             )}
@@ -656,27 +689,36 @@ export function ChatWorkspace() {
           </div>
 
           <form
-            className="sticky bottom-0 border-t border-border/70 bg-card/95 p-3 shadow-[0_-18px_55px_rgba(15,23,42,0.08)] sm:p-4"
+            className="sticky bottom-0 border-t border-border/70 bg-white/95 p-3 shadow-[0_-18px_55px_rgba(15,23,42,0.08)] backdrop-blur sm:p-4"
             onSubmit={onSubmit}
           >
-            <Textarea
-              value={prompt}
-              onChange={(event) => setPrompt(event.target.value)}
-              placeholder="Ask OmniAI to write, debug, research, summarize, analyze, or generate an image..."
-              disabled={status === "booting"}
-            />
-            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-muted-foreground">
-                Suggest mode stores your prompt first, then asks before switching models.
-              </p>
-              <Button type="submit" disabled={!canSend} className="w-full sm:w-auto">
+            <div className="relative">
+              <Textarea
+                value={prompt}
+                onChange={(event) => setPrompt(event.target.value)}
+                onKeyDown={onComposerKeyDown}
+                placeholder="Message OmniAI..."
+                disabled={status === "booting"}
+                className="min-h-14 rounded-2xl bg-white py-3 pl-4 pr-14 text-base shadow-none sm:min-h-16 sm:text-sm"
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={!canSend}
+                className="absolute bottom-2.5 right-2.5 h-10 w-10 rounded-xl"
+                aria-label="Send message"
+              >
                 {status === "loading" ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : (
                   <SendHorizontal className="h-4 w-4" aria-hidden="true" />
                 )}
-                Send
               </Button>
+            </div>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-muted-foreground">
+                Enter sends. Shift+Enter adds a new line. Suggest mode asks before switching.
+              </p>
             </div>
           </form>
         </section>

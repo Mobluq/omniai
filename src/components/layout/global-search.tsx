@@ -217,11 +217,11 @@ export function GlobalSearch() {
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="Search your workspace..."
-                    className="h-11 rounded-xl border-[#d9e3eb] pl-9 pr-10"
+                    className="h-11 rounded-xl border-[#d9e3eb] pl-9 pr-12"
                   />
                   <button
                     type="button"
-                    className="absolute right-2 top-1/2 rounded-lg p-1.5 text-[#667381] hover:bg-[#eef3f7] hover:text-[#111418]"
+                    className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-[#667381] transition hover:bg-[#eef3f7] hover:text-[#111418] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
                     onClick={() => setOpen(false)}
                     aria-label="Close search"
                   >
@@ -265,11 +265,11 @@ export function GlobalSearch() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search OmniAI..."
-                className="h-11 rounded-xl border-[#d9e3eb] pl-9 pr-10"
+                className="h-11 rounded-xl border-[#d9e3eb] pl-9 pr-12"
               />
               <button
                 type="button"
-                className="absolute right-2 top-1/2 rounded-lg p-1.5 text-[#667381] hover:bg-[#eef3f7] hover:text-[#111418]"
+                className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-[#667381] transition hover:bg-[#eef3f7] hover:text-[#111418] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
                 onClick={() => setOpen(false)}
                 aria-label="Close search"
               >

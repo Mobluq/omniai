@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { AlertTriangle, Bot, HelpCircle, SendHorizontal, Sparkles, X } from "lucide-react";
 import { gsap } from "gsap";
 import {
@@ -120,6 +121,7 @@ function explainError(detail: OmniAIErrorEventDetail) {
 }
 
 export function AppAssistant() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<WorkerMessage[]>(starterMessages);
@@ -127,6 +129,7 @@ export function AppAssistant() {
   const listRef = useRef<HTMLDivElement | null>(null);
 
   const hasErrorContext = useMemo(() => messages.some((message) => message.tone === "error"), [messages]);
+  const liftAboveComposer = pathname.startsWith("/chat");
 
   useEffect(() => {
     function onError(event: Event) {
@@ -191,7 +194,7 @@ export function AppAssistant() {
   }
 
   return (
-    <div className="fixed bottom-4 right-4 z-[90]">
+    <div className={cn("fixed right-4 z-[90]", liftAboveComposer ? "bottom-24" : "bottom-4")}>
       {open ? (
         <div
           ref={panelRef}

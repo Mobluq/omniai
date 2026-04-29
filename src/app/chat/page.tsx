@@ -4,7 +4,7 @@ import { ChatWorkspace } from "@/components/chat/chat-workspace";
 export default function ChatPage() {
   return (
     <AppShell>
-      <div className="page-shell mb-6">
+      <div className="page-shell mb-5 hidden lg:block">
         <p className="page-kicker">Unified conversation</p>
         <h1 className="page-title mt-2">Chat with routing intelligence</h1>
         <p className="page-copy">

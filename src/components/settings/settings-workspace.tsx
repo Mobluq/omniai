@@ -280,7 +280,10 @@ export function SettingsWorkspace() {
               {providers.map((provider) => {
                 const connected = provider.envConfigured || provider.workspaceConfigured;
                 return (
-                  <Card key={provider.provider} className="rounded-[1.25rem] shadow-none">
+                  <Card
+                    key={provider.provider}
+                    className="flex h-full min-h-[22.5rem] flex-col rounded-[1.25rem] shadow-none"
+                  >
                     <CardHeader>
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-2">
@@ -305,7 +308,7 @@ export function SettingsWorkspace() {
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="grid gap-4">
+                    <CardContent className="flex flex-1 flex-col gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor={`${provider.provider}-key`}>{provider.keyLabel}</Label>
                         <Input
@@ -333,7 +336,7 @@ export function SettingsWorkspace() {
                           </Badge>
                         ))}
                       </div>
-                      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                         <Button
                           size="sm"
                           className="w-full sm:w-auto"
