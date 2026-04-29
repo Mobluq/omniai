@@ -19,10 +19,19 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+type ShellProfile = {
+  name: string;
+  email: string;
+  initials: string;
+  workspaceName: string;
+  workspaceType: string;
+  role: string;
+};
+
 const sections = [
   {
-    label: "Dashboard",
-    items: [{ href: "/dashboard", label: "Web", icon: Globe2, activeGroup: true }],
+    label: "Command",
+    items: [{ href: "/dashboard", label: "AI Operations", icon: Globe2, activeGroup: true }],
   },
   {
     label: "Model operations",
@@ -50,28 +59,38 @@ const sections = [
   },
 ];
 
-export function DesktopNavigation() {
+export function DesktopNavigation({ profile }: { profile: ShellProfile }) {
   const pathname = usePathname();
 
   return (
     <aside className="fixed bottom-0 left-0 top-[66px] z-30 hidden w-[266px] border-r border-[#d9e3eb] bg-white lg:block">
       <div className="flex h-full flex-col">
-        <div className="flex items-center justify-between border-b border-[#e5edf3] px-5 py-5">
+        <Link
+          href="/account"
+          className="group flex items-center justify-between border-b border-[#e5edf3] px-5 py-5 transition hover:bg-[#f7fafd]"
+        >
           <div className="flex min-w-0 items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-[#2f3742] text-xs font-semibold text-white">
-              MD
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#2f3742] text-xs font-semibold text-white">
+              {profile.initials}
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="rounded bg-[#7d6aff] px-1.5 py-0.5 text-[0.62rem] font-semibold text-white">
-                  Enterprise
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="max-w-[7.8rem] truncate rounded bg-[#e8f2ff] px-1.5 py-0.5 text-[0.62rem] font-semibold text-[#245b93]">
+                  {profile.workspaceType}
+                </span>
+                <span className="rounded bg-[#edf5ef] px-1.5 py-0.5 text-[0.62rem] font-semibold capitalize text-[#217547]">
+                  {profile.role}
                 </span>
               </div>
-              <p className="mt-1 truncate text-sm font-medium">Michele Du</p>
+              <p className="mt-1 truncate text-sm font-semibold">{profile.name}</p>
+              <p className="truncate text-[0.72rem] text-[#7a8591]">{profile.workspaceName}</p>
             </div>
           </div>
-          <AppWindow className="h-4 w-4 text-[#6d7784]" aria-hidden="true" />
-        </div>
+          <AppWindow
+            className="h-4 w-4 shrink-0 text-[#6d7784] transition group-hover:text-[#111418]"
+            aria-hidden="true"
+          />
+        </Link>
 
         <nav className="thin-scrollbar flex-1 overflow-auto px-4 py-5">
           {sections.map((section) => (
@@ -85,7 +104,7 @@ export function DesktopNavigation() {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        "flex min-h-11 items-center justify-between rounded-xl px-3 text-sm font-medium transition",
+                        "flex min-h-11 items-center justify-between rounded-xl px-3 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30",
                         active
                           ? "bg-[#eaf4ff] text-[#111418]"
                           : "text-[#404955] hover:bg-[#f3f7fb] hover:text-[#111418]",
@@ -109,7 +128,7 @@ export function DesktopNavigation() {
                     <Link
                       key={item}
                       href="/routing"
-                      className="text-sm text-[#111418] transition hover:text-[#2f7cf6]"
+                      className="min-h-8 rounded-lg px-2 py-1.5 text-sm text-[#111418] transition hover:bg-[#f3f7fb] hover:text-[#2f7cf6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
                     >
                       {item}
                     </Link>
@@ -121,7 +140,10 @@ export function DesktopNavigation() {
         </nav>
 
         <div className="border-t border-[#e5edf3] p-4">
-          <div className="rounded-2xl border border-[#d9e3eb] bg-[#f7fafd] p-4">
+          <Link
+            href="/settings"
+            className="block rounded-2xl border border-[#d9e3eb] bg-[#f7fafd] p-4 transition hover:border-[#bcd4e8] hover:bg-[#f0f7ff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
+          >
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Bot className="h-4 w-4 text-[#2f7cf6]" aria-hidden="true" />
               Provider mesh
@@ -129,7 +151,7 @@ export function DesktopNavigation() {
             <p className="mt-2 text-xs leading-5 text-[#6d7784]">
               OpenAI, Claude, Gemini, Mistral, Stability, and Bedrock keys stay server-side.
             </p>
-          </div>
+          </Link>
         </div>
       </div>
     </aside>
