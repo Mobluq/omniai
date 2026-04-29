@@ -6,7 +6,7 @@ import {
   FileText,
   MessageSquareText,
   Route,
-} from "lucide-react";
+} from "@/components/ui/huge-icons";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

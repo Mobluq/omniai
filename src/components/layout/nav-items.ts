@@ -10,7 +10,7 @@ import {
   Search,
   Settings,
   UserRound,
-} from "lucide-react";
+} from "@/components/ui/huge-icons";
 
 export const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { MessageSquarePlus } from "lucide-react";
+import { MessageSquarePlus } from "@/components/ui/huge-icons";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/notification-center";
 import { MobileNavigation } from "@/components/layout/mobile-navigation";
@@ -60,7 +60,9 @@ export async function AppShell({ children }: { children: ReactNode }) {
             <MobileNavigation profile={profile} />
             <Link href="/dashboard" className="flex shrink-0 items-center gap-3">
               <OmniMark />
-              <span className="hidden text-[1.05rem] font-semibold tracking-[-0.03em] sm:inline">OMNIAI</span>
+              <span className="hidden text-[1.05rem] font-semibold tracking-[-0.03em] sm:inline">
+                OMNIAI
+              </span>
             </Link>
           </div>
 

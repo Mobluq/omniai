@@ -2,12 +2,16 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { AlertTriangle, Bot, HelpCircle, SendHorizontal, Sparkles, X } from "lucide-react";
-import { gsap } from "gsap";
 import {
-  OMNIAI_ERROR_EVENT,
-  type OmniAIErrorEventDetail,
-} from "@/components/ui/toast";
+  AlertTriangle,
+  Bot,
+  HelpCircle,
+  SendHorizontal,
+  Sparkles,
+  X,
+} from "@/components/ui/huge-icons";
+import { gsap } from "gsap";
+import { OMNIAI_ERROR_EVENT, type OmniAIErrorEventDetail } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -22,8 +26,7 @@ const starterMessages: WorkerMessage[] = [
   {
     id: "welcome",
     role: "worker",
-    body:
-      "I can explain OmniAI, help you connect providers, troubleshoot chat errors, and point you to the right section of the app.",
+    body: "I can explain OmniAI, help you connect providers, troubleshoot chat errors, and point you to the right section of the app.",
   },
 ];
 
@@ -71,14 +74,22 @@ function getWorkerAnswer(question: string) {
     ].join(" ");
   }
 
-  if (normalized.includes("routing") || normalized.includes("best") || normalized.includes("model")) {
+  if (
+    normalized.includes("routing") ||
+    normalized.includes("best") ||
+    normalized.includes("model")
+  ) {
     return [
       "OmniAI does not send the prompt blindly first. It stores the user message, classifies the task, checks the current routing mode, then scores available configured models.",
       "The current scoring weighs capability match, intent, provider availability, speed, cost tier, quality strengths, context needs, and workspace restrictions. Manual uses your selected model, Suggest asks before switching, and Auto routes directly.",
     ].join(" ");
   }
 
-  if (normalized.includes("history") || normalized.includes("conversation") || normalized.includes("old chat")) {
+  if (
+    normalized.includes("history") ||
+    normalized.includes("conversation") ||
+    normalized.includes("old chat")
+  ) {
     return [
       "Conversation history is in Chat and the dashboard recent conversations area. Each conversation belongs to a workspace, and messages store role, provider, model, metadata, and usage records so future history, search, and billing stay connected.",
       "Use global search in the header to find chats, messages, knowledge, projects, and artifacts from one place.",
@@ -91,7 +102,11 @@ function getWorkerAnswer(question: string) {
     ].join(" ");
   }
 
-  if (normalized.includes("knowledge") || normalized.includes("memory") || normalized.includes("file")) {
+  if (
+    normalized.includes("knowledge") ||
+    normalized.includes("memory") ||
+    normalized.includes("file")
+  ) {
     return [
       "Knowledge and memory are designed as workspace-scoped sources, documents, chunks, embeddings, and retrieval context. The app has the foundation for shared memory; production file parsing and background embedding jobs still need to be connected before heavy document workflows.",
     ].join(" ");
@@ -128,7 +143,10 @@ export function AppAssistant() {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
 
-  const hasErrorContext = useMemo(() => messages.some((message) => message.tone === "error"), [messages]);
+  const hasErrorContext = useMemo(
+    () => messages.some((message) => message.tone === "error"),
+    [messages],
+  );
   const liftAboveComposer = pathname.startsWith("/chat");
 
   useEffect(() => {
@@ -280,7 +298,12 @@ export function AppAssistant() {
                 className="min-h-11 flex-1 resize-none rounded-2xl border border-[#d9e3eb] bg-white px-3 py-2.5 text-sm leading-5 outline-none transition placeholder:text-[#8a95a1] focus:border-[#2f7cf6] focus:ring-4 focus:ring-[#2f7cf6]/10"
                 rows={1}
               />
-              <Button type="submit" size="icon" className="h-11 w-11 rounded-2xl" aria-label="Send question">
+              <Button
+                type="submit"
+                size="icon"
+                className="h-11 w-11 rounded-2xl"
+                aria-label="Send question"
+              >
                 <SendHorizontal className="h-4 w-4" aria-hidden="true" />
               </Button>
             </form>

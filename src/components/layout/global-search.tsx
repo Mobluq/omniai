@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ArrowRight, Clock3, Loader2, Search, X } from "lucide-react";
+import { ArrowRight, Clock3, Loader2, Search, X } from "@/components/ui/huge-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,7 +99,9 @@ export function GlobalSearch() {
     let cancelled = false;
 
     async function loadWorkspaces() {
-      const result = await parseApiResponse<{ workspaces: Workspace[] }>(await fetch("/api/workspaces"));
+      const result = await parseApiResponse<{ workspaces: Workspace[] }>(
+        await fetch("/api/workspaces"),
+      );
 
       if (!cancelled) {
         setWorkspaces(result.workspaces);
@@ -142,7 +144,9 @@ export function GlobalSearch() {
         q: trimmedQuery,
         limit: "6",
       });
-      const result = await parseApiResponse<SearchPayload>(await fetch(`/api/search?${params.toString()}`));
+      const result = await parseApiResponse<SearchPayload>(
+        await fetch(`/api/search?${params.toString()}`),
+      );
 
       if (!cancelled) {
         setPayload(result);
@@ -211,7 +215,10 @@ export function GlobalSearch() {
             <div className="absolute left-0 right-0 top-12 z-40 overflow-hidden rounded-2xl border border-[#d9e3eb] bg-white shadow-[0_22px_70px_rgba(17,20,24,0.16)]">
               <div className="border-b border-[#d9e3eb] p-3">
                 <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8591]" aria-hidden="true" />
+                  <Search
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8591]"
+                    aria-hidden="true"
+                  />
                   <Input
                     autoFocus
                     value={query}
@@ -229,7 +236,9 @@ export function GlobalSearch() {
                   </button>
                 </div>
                 <p className="mt-2 text-xs text-[#667381]">
-                  {activeWorkspace ? `Searching ${activeWorkspace.name}` : "Open a workspace to search."}
+                  {activeWorkspace
+                    ? `Searching ${activeWorkspace.name}`
+                    : "Open a workspace to search."}
                 </p>
               </div>
               <SearchResults
@@ -259,7 +268,10 @@ export function GlobalSearch() {
         <div className="fixed inset-x-3 top-[74px] z-50 overflow-hidden rounded-2xl border border-[#d9e3eb] bg-white shadow-[0_22px_70px_rgba(17,20,24,0.16)] md:hidden">
           <form className="border-b border-[#d9e3eb] p-3" onSubmit={onSubmit}>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8591]" aria-hidden="true" />
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8591]"
+                aria-hidden="true"
+              />
               <Input
                 autoFocus
                 value={query}
@@ -322,7 +334,8 @@ function SearchResults({
   if (query.length < 2) {
     return (
       <div className="grid min-h-[220px] place-items-center p-6 text-center text-sm leading-6 text-[#667381]">
-        Type at least two characters to search conversations, messages, projects, knowledge, and artifacts.
+        Type at least two characters to search conversations, messages, projects, knowledge, and
+        artifacts.
       </div>
     );
   }
@@ -355,7 +368,9 @@ function SearchResults({
               <Badge className="mt-0.5 bg-muted">{result.label}</Badge>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{result.title}</p>
-                <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#667381]">{result.excerpt}</p>
+                <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#667381]">
+                  {result.excerpt}
+                </p>
                 <p className="mt-2 flex items-center gap-1 text-[0.7rem] text-[#667381]">
                   <Clock3 className="h-3 w-3" aria-hidden="true" />
                   {formatRelative(result.updatedAt)}

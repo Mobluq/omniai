@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, ImageIcon } from "lucide-react";
+import { FileText, ImageIcon } from "@/components/ui/huge-icons";
 import { requireUser } from "@/lib/auth/session";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
@@ -67,7 +67,9 @@ export default async function ArtifactsPage({ searchParams }: ArtifactsPageProps
                   </div>
                   <CardTitle className="line-clamp-2 text-base">{artifact.title}</CardTitle>
                   <CardDescription>
-                    {artifact.provider ? `${artifact.provider} / ${artifact.modelId}` : "Manual artifact"}
+                    {artifact.provider
+                      ? `${artifact.provider} / ${artifact.modelId}`
+                      : "Manual artifact"}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>

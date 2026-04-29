@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { ArrowRight, Bot, CheckCircle2, Database, Lock, Route, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  CheckCircle2,
+  Database,
+  Lock,
+  Route,
+  Sparkles,
+} from "@/components/ui/huge-icons";
 import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

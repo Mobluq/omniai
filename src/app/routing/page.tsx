@@ -6,7 +6,7 @@ import {
   Layers3,
   Route,
   SlidersHorizontal,
-} from "lucide-react";
+} from "@/components/ui/huge-icons";
 import { AppShell } from "@/components/layout/app-shell";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

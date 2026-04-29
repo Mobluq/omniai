@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  CheckCircle2,
-  Info,
-  TriangleAlert,
-  X,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, Info, TriangleAlert, X, XCircle } from "@/components/ui/huge-icons";
 import {
   createContext,
   type ReactNode,
@@ -126,13 +120,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-function ToastItem({
-  item,
-  onDismiss,
-}: {
-  item: ToastRecord;
-  onDismiss: (id: string) => void;
-}) {
+function ToastItem({ item, onDismiss }: { item: ToastRecord; onDismiss: (id: string) => void }) {
   const Icon = icons[item.variant];
 
   useEffect(() => {
@@ -153,7 +141,10 @@ function ToastItem({
       )}
       role={item.variant === "error" ? "alert" : "status"}
     >
-      <Icon className={cn("mt-0.5 h-5 w-5 shrink-0", iconClasses[item.variant])} aria-hidden="true" />
+      <Icon
+        className={cn("mt-0.5 h-5 w-5 shrink-0", iconClasses[item.variant])}
+        aria-hidden="true"
+      />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold">{item.title}</p>
         {item.description ? (

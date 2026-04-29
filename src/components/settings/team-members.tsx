@@ -1,7 +1,16 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Check, Copy, Loader2, MailPlus, Shield, Trash2, UserMinus, UsersRound } from "lucide-react";
+import {
+  Check,
+  Copy,
+  Loader2,
+  MailPlus,
+  Shield,
+  Trash2,
+  UserMinus,
+  UsersRound,
+} from "@/components/ui/huge-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -172,10 +181,18 @@ export function TeamMembers({ workspaceId }: { workspaceId: string }) {
           body: JSON.stringify({ role }),
         }),
       );
-      toast({ title: "Role updated", description: `${member.user.email ?? "Member"} is now ${role}.`, variant: "success" });
+      toast({
+        title: "Role updated",
+        description: `${member.user.email ?? "Member"} is now ${role}.`,
+        variant: "success",
+      });
       await refreshTeam();
     } catch (roleError: unknown) {
-      toast({ title: "Role update failed", description: errorMessage(roleError), variant: "error" });
+      toast({
+        title: "Role update failed",
+        description: errorMessage(roleError),
+        variant: "error",
+      });
     } finally {
       setBusyAction(null);
     }
@@ -192,7 +209,11 @@ export function TeamMembers({ workspaceId }: { workspaceId: string }) {
       await parseApiResponse<{ removed: boolean }>(
         await fetch(`/api/workspaces/${workspaceId}/members/${member.id}`, { method: "DELETE" }),
       );
-      toast({ title: "Member removed", description: `${label} no longer has workspace access.`, variant: "success" });
+      toast({
+        title: "Member removed",
+        description: `${label} no longer has workspace access.`,
+        variant: "success",
+      });
       await refreshTeam();
     } catch (removeError: unknown) {
       toast({ title: "Remove failed", description: errorMessage(removeError), variant: "error" });
@@ -207,7 +228,11 @@ export function TeamMembers({ workspaceId }: { workspaceId: string }) {
       await parseApiResponse<{ revoked: boolean }>(
         await fetch(`/api/workspaces/${workspaceId}/invites/${invite.id}`, { method: "DELETE" }),
       );
-      toast({ title: "Invite revoked", description: `${invite.email} can no longer use that invite.`, variant: "success" });
+      toast({
+        title: "Invite revoked",
+        description: `${invite.email} can no longer use that invite.`,
+        variant: "success",
+      });
       await refreshTeam();
     } catch (revokeError: unknown) {
       toast({ title: "Revoke failed", description: errorMessage(revokeError), variant: "error" });
@@ -257,7 +282,8 @@ export function TeamMembers({ workspaceId }: { workspaceId: string }) {
               Team members
             </CardTitle>
             <CardDescription>
-              Invite collaborators, change access levels, and remove members from {team.workspace.name}.
+              Invite collaborators, change access levels, and remove members from{" "}
+              {team.workspace.name}.
             </CardDescription>
           </div>
           <Badge className="w-fit bg-muted">{team.members.length} members</Badge>
@@ -311,7 +337,12 @@ export function TeamMembers({ workspaceId }: { workspaceId: string }) {
               <div className="grid gap-2 rounded-md border bg-background p-3">
                 <Label htmlFor="latest-invite-link">Latest invite link</Label>
                 <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
-                  <Input id="latest-invite-link" readOnly value={inviteUrl} className="font-mono text-xs" />
+                  <Input
+                    id="latest-invite-link"
+                    readOnly
+                    value={inviteUrl}
+                    className="font-mono text-xs"
+                  />
                   <Button type="button" variant="outline" onClick={copyInviteLink}>
                     {copied ? (
                       <Check className="h-4 w-4" aria-hidden="true" />
@@ -326,7 +357,8 @@ export function TeamMembers({ workspaceId }: { workspaceId: string }) {
           </form>
         ) : (
           <div className="rounded-lg border bg-muted/20 p-4 text-sm text-muted-foreground">
-            You can view workspace members. Ask an owner or admin to invite teammates or change roles.
+            You can view workspace members. Ask an owner or admin to invite teammates or change
+            roles.
           </div>
         )}
 
@@ -406,7 +438,9 @@ export function TeamMembers({ workspaceId }: { workspaceId: string }) {
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium">{invite.email}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Expires {formatDate(invite.expiresAt)}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Expires {formatDate(invite.expiresAt)}
+                    </p>
                   </div>
                   <Badge className="w-fit bg-muted">{roleLabel(invite.role)}</Badge>
                   {team.canManage ? (

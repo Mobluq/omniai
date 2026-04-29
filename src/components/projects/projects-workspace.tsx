@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import { ArrowRight, Loader2, Plus, Target } from "lucide-react";
+import { ArrowRight, Loader2, Plus, Target } from "@/components/ui/huge-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +41,8 @@ export function ProjectsWorkspace() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [instructions, setInstructions] = useState("");
-  const [defaultRoutingMode, setDefaultRoutingMode] = useState<Project["defaultRoutingMode"]>("suggest");
+  const [defaultRoutingMode, setDefaultRoutingMode] =
+    useState<Project["defaultRoutingMode"]>("suggest");
   const [status, setStatus] = useState<"loading" | "ready" | "saving" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
 
@@ -113,7 +114,11 @@ export function ProjectsWorkspace() {
     setInstructions("");
     await load();
     setStatus("ready");
-    toast({ title: "Project created", description: `${envelope.data.project.name} is ready.`, variant: "success" });
+    toast({
+      title: "Project created",
+      description: `${envelope.data.project.name} is ready.`,
+      variant: "success",
+    });
   }
 
   if (status === "loading") {
@@ -125,7 +130,11 @@ export function ProjectsWorkspace() {
   }
 
   if (status === "error") {
-    return <div className="rounded-lg border border-destructive/30 p-6 text-sm text-destructive">{error}</div>;
+    return (
+      <div className="rounded-lg border border-destructive/30 p-6 text-sm text-destructive">
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -146,7 +155,9 @@ export function ProjectsWorkspace() {
                 <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
                   <div>
                     <CardTitle>{project.name}</CardTitle>
-                    <CardDescription>{project.description || "No description yet."}</CardDescription>
+                    <CardDescription>
+                      {project.description || "No description yet."}
+                    </CardDescription>
                   </div>
                   <Badge>{project.defaultRoutingMode}</Badge>
                 </div>
@@ -155,11 +166,15 @@ export function ProjectsWorkspace() {
                 <div className="grid gap-3 text-sm md:grid-cols-3">
                   <div className="rounded-md border p-3">
                     <p className="text-muted-foreground">Conversations</p>
-                    <p className="mt-1 text-xl font-semibold">{project._count?.conversations ?? 0}</p>
+                    <p className="mt-1 text-xl font-semibold">
+                      {project._count?.conversations ?? 0}
+                    </p>
                   </div>
                   <div className="rounded-md border p-3">
                     <p className="text-muted-foreground">Knowledge</p>
-                    <p className="mt-1 text-xl font-semibold">{project._count?.knowledgeSources ?? 0}</p>
+                    <p className="mt-1 text-xl font-semibold">
+                      {project._count?.knowledgeSources ?? 0}
+                    </p>
                   </div>
                   <div className="rounded-md border p-3">
                     <p className="text-muted-foreground">Artifacts</p>
@@ -196,7 +211,11 @@ export function ProjectsWorkspace() {
             <form className="grid gap-4" onSubmit={onCreate}>
               <div className="grid gap-2">
                 <Label htmlFor="project-name">Name</Label>
-                <Input id="project-name" value={name} onChange={(event) => setName(event.target.value)} />
+                <Input
+                  id="project-name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="project-description">Description</Label>
@@ -219,7 +238,9 @@ export function ProjectsWorkspace() {
                 <Select
                   id="project-routing"
                   value={defaultRoutingMode}
-                  onChange={(event) => setDefaultRoutingMode(event.target.value as Project["defaultRoutingMode"])}
+                  onChange={(event) =>
+                    setDefaultRoutingMode(event.target.value as Project["defaultRoutingMode"])
+                  }
                 >
                   <option value="manual">Manual</option>
                   <option value="suggest">Suggest</option>

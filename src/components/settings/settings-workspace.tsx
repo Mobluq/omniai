@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, KeyRound, Loader2, Save, ShieldCheck } from "lucide-react";
+import { CheckCircle2, KeyRound, Loader2, Save, ShieldCheck } from "@/components/ui/huge-icons";
 import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

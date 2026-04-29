@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { BookOpen, Loader2, Plus } from "lucide-react";
+import { BookOpen, Loader2, Plus } from "@/components/ui/huge-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,7 +66,9 @@ export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: st
       ),
     ]);
     const projectEnvelope = await parseEnvelope<{ projects: Project[] }>(projectResponse);
-    const knowledgeEnvelope = await parseEnvelope<{ knowledgeSources: KnowledgeSource[] }>(knowledgeResponse);
+    const knowledgeEnvelope = await parseEnvelope<{ knowledgeSources: KnowledgeSource[] }>(
+      knowledgeResponse,
+    );
 
     if (!projectEnvelope.success) {
       throw new Error(projectEnvelope.error.message);
@@ -145,7 +147,11 @@ export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: st
     setContent("");
     await load(projectId);
     setStatus("ready");
-    toast({ title: "Knowledge saved", description: `${envelope.data.knowledgeSource.title} is available for context.`, variant: "success" });
+    toast({
+      title: "Knowledge saved",
+      description: `${envelope.data.knowledgeSource.title} is available for context.`,
+      variant: "success",
+    });
   }
 
   if (status === "loading") {
@@ -157,7 +163,11 @@ export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: st
   }
 
   if (status === "error") {
-    return <div className="rounded-lg border border-destructive/30 p-6 text-sm text-destructive">{error}</div>;
+    return (
+      <div className="rounded-lg border border-destructive/30 p-6 text-sm text-destructive">
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -166,7 +176,9 @@ export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: st
         <div className="flex flex-col gap-3 rounded-lg border bg-card p-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-medium">Knowledge scope</p>
-            <p className="text-xs text-muted-foreground">Project knowledge is injected into matching chat routes.</p>
+            <p className="text-xs text-muted-foreground">
+              Project knowledge is injected into matching chat routes.
+            </p>
           </div>
           <Select value={projectId} onChange={(event) => onProjectChange(event.target.value)}>
             <option value="">Workspace-wide</option>
@@ -200,7 +212,9 @@ export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: st
               </CardHeader>
               <CardContent>
                 <p className="line-clamp-4 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">
-                  {source.documents[0]?.chunks[0]?.content ?? source.documents[0]?.sanitizedText ?? ""}
+                  {source.documents[0]?.chunks[0]?.content ??
+                    source.documents[0]?.sanitizedText ??
+                    ""}
                 </p>
               </CardContent>
             </Card>
@@ -212,13 +226,19 @@ export function KnowledgeWorkspace({ initialProjectId }: { initialProjectId?: st
         <Card>
           <CardHeader>
             <CardTitle>Add knowledge</CardTitle>
-            <CardDescription>Start with notes and copied file text; binary upload can come next.</CardDescription>
+            <CardDescription>
+              Start with notes and copied file text; binary upload can come next.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form className="grid gap-4" onSubmit={onCreate}>
               <div className="grid gap-2">
                 <Label htmlFor="knowledge-title">Title</Label>
-                <Input id="knowledge-title" value={title} onChange={(event) => setTitle(event.target.value)} />
+                <Input
+                  id="knowledge-title"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="knowledge-type">Type</Label>

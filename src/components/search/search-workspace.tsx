@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Clock3, Loader2, Search } from "lucide-react";
+import { Clock3, Loader2, Search } from "@/components/ui/huge-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,9 +67,13 @@ export function SearchWorkspace() {
   const activePayload = query.trim().length >= 2 ? payload : null;
 
   async function loadWorkspaces() {
-    const result = await parseApiResponse<{ workspaces: Workspace[] }>(await fetch("/api/workspaces"));
+    const result = await parseApiResponse<{ workspaces: Workspace[] }>(
+      await fetch("/api/workspaces"),
+    );
     const initialQuery =
-      typeof window === "undefined" ? "" : new URLSearchParams(window.location.search).get("q") ?? "";
+      typeof window === "undefined"
+        ? ""
+        : (new URLSearchParams(window.location.search).get("q") ?? "");
     setWorkspaces(result.workspaces);
     setWorkspaceId((current) => current || result.workspaces[0]?.id || "");
     setQuery((current) => current || initialQuery);
@@ -90,7 +94,9 @@ export function SearchWorkspace() {
       q: trimmed,
       limit: "8",
     });
-    const result = await parseApiResponse<SearchPayload>(await fetch(`/api/search?${params.toString()}`));
+    const result = await parseApiResponse<SearchPayload>(
+      await fetch(`/api/search?${params.toString()}`),
+    );
     setPayload(result);
     setStatus("ready");
   }
@@ -177,11 +183,15 @@ export function SearchWorkspace() {
               <CardTitle>Global search</CardTitle>
             </div>
             <CardDescription>
-              Search conversations, messages, projects, knowledge, and artifacts in {activeWorkspace?.name ?? "workspace"}.
+              Search conversations, messages, projects, knowledge, and artifacts in{" "}
+              {activeWorkspace?.name ?? "workspace"}.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form className="grid gap-3 sm:grid-cols-[1fr_190px_auto] sm:items-end" onSubmit={onSubmit}>
+            <form
+              className="grid gap-3 sm:grid-cols-[1fr_190px_auto] sm:items-end"
+              onSubmit={onSubmit}
+            >
               <div className="grid gap-2">
                 <Label htmlFor="searchQuery">Search terms</Label>
                 <Input

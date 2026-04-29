@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Bot, BrainCircuit, CheckCircle2, LockKeyhole, Route } from "lucide-react";
+import { Bot, BrainCircuit, CheckCircle2, LockKeyhole, Route } from "@/components/ui/huge-icons";
 
 export function AuthShell({ children, title }: { children: ReactNode; title: string }) {
   return (

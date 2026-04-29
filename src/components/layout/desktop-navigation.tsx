@@ -17,7 +17,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Share2,
-} from "lucide-react";
+} from "@/components/ui/huge-icons";
 import { cn } from "@/lib/utils";
 
 type ShellProfile = {
@@ -79,7 +79,9 @@ export function DesktopNavigation({ profile }: { profile: ShellProfile }) {
         <div
           className={cn(
             "flex items-center border-b border-[#e5edf3]",
-            collapsed ? "flex-col justify-center gap-2 px-3 py-4" : "justify-between gap-3 px-5 py-5",
+            collapsed
+              ? "flex-col justify-center gap-2 px-3 py-4"
+              : "justify-between gap-3 px-5 py-5",
           )}
         >
           <Link
@@ -104,7 +106,9 @@ export function DesktopNavigation({ profile }: { profile: ShellProfile }) {
                   </span>
                 </span>
                 <span className="mt-1 block truncate text-sm font-semibold">{profile.name}</span>
-                <span className="block truncate text-[0.72rem] text-[#7a8591]">{profile.workspaceName}</span>
+                <span className="block truncate text-[0.72rem] text-[#7a8591]">
+                  {profile.workspaceName}
+                </span>
               </span>
             ) : (
               <span className="sr-only">Open account profile</span>
@@ -125,7 +129,9 @@ export function DesktopNavigation({ profile }: { profile: ShellProfile }) {
           </button>
         </div>
 
-        <nav className={cn("thin-scrollbar flex-1 overflow-auto py-5", collapsed ? "px-3" : "px-4")}>
+        <nav
+          className={cn("thin-scrollbar flex-1 overflow-auto py-5", collapsed ? "px-3" : "px-4")}
+        >
           {sections.map((section) => (
             <div key={section.label} className={collapsed ? "mb-3" : "mb-5"}>
               {!collapsed ? (
@@ -148,7 +154,9 @@ export function DesktopNavigation({ profile }: { profile: ShellProfile }) {
                           : "text-[#404955] hover:bg-[#f3f7fb] hover:text-[#111418]",
                       )}
                     >
-                      <span className={cn("flex items-center", collapsed ? "justify-center" : "gap-3")}>
+                      <span
+                        className={cn("flex items-center", collapsed ? "justify-center" : "gap-3")}
+                      >
                         <item.icon className="h-4 w-4 text-[#5f6975]" aria-hidden="true" />
                         <span className={collapsed ? "sr-only" : ""}>{item.label}</span>
                       </span>
@@ -183,7 +191,12 @@ export function DesktopNavigation({ profile }: { profile: ShellProfile }) {
               collapsed ? "grid h-12 place-items-center rounded-xl p-0" : "rounded-2xl p-4",
             )}
           >
-            <div className={cn("flex items-center gap-2 text-sm font-semibold", collapsed ? "justify-center" : "")}>
+            <div
+              className={cn(
+                "flex items-center gap-2 text-sm font-semibold",
+                collapsed ? "justify-center" : "",
+              )}
+            >
               <Bot className="h-4 w-4 text-[#2f7cf6]" aria-hidden="true" />
               {!collapsed ? "Provider mesh" : <span className="sr-only">Provider mesh</span>}
             </div>

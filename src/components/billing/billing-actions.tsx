@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, ExternalLink, Loader2 } from "lucide-react";
+import { CreditCard, ExternalLink, Loader2 } from "@/components/ui/huge-icons";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { errorMessage, parseApiResponse } from "@/lib/api/client";
@@ -61,7 +61,11 @@ export function BillingActions({ workspaceId }: { workspaceId: string }) {
 
   return (
     <div className="grid gap-2">
-      <Button onClick={() => openCheckout("pro")} disabled={Boolean(loading)} className="w-full justify-start">
+      <Button
+        onClick={() => openCheckout("pro")}
+        disabled={Boolean(loading)}
+        className="w-full justify-start"
+      >
         {loading === "pro" ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
         ) : (

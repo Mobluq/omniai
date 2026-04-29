@@ -2,7 +2,14 @@
 
 import { FormEvent, KeyboardEvent, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { Loader2, MessageSquare, Plus, Search, SendHorizontal, Trash2 } from "lucide-react";
+import {
+  Loader2,
+  MessageSquare,
+  Plus,
+  Search,
+  SendHorizontal,
+  Trash2,
+} from "@/components/ui/huge-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";

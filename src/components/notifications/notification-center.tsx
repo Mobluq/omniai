@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { Bell, CheckCheck, ExternalLink, Inbox, Loader2, X } from "lucide-react";
+import { Bell, CheckCheck, ExternalLink, Inbox, Loader2, X } from "@/components/ui/huge-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
@@ -143,7 +143,11 @@ export function NotificationCenter() {
       setItems((current) => current.map((item) => (item.id === id ? updated : item)));
       setUnreadCount((current) => Math.max(0, current - 1));
     } catch (markError: unknown) {
-      toast({ title: "Could not mark as read", description: errorMessage(markError), variant: "error" });
+      toast({
+        title: "Could not mark as read",
+        description: errorMessage(markError),
+        variant: "error",
+      });
     }
   }
 
@@ -157,18 +161,28 @@ export function NotificationCenter() {
       });
       toast({ title: "Notification archived", variant: "success" });
     } catch (archiveError: unknown) {
-      toast({ title: "Could not archive notification", description: errorMessage(archiveError), variant: "error" });
+      toast({
+        title: "Could not archive notification",
+        description: errorMessage(archiveError),
+        variant: "error",
+      });
     }
   }
 
   async function onMarkAllRead() {
     try {
       await markAllRead();
-      setItems((current) => current.map((item) => ({ ...item, readAt: item.readAt ?? new Date().toISOString() })));
+      setItems((current) =>
+        current.map((item) => ({ ...item, readAt: item.readAt ?? new Date().toISOString() })),
+      );
       setUnreadCount(0);
       toast({ title: "Notifications marked as read", variant: "success" });
     } catch (markAllError: unknown) {
-      toast({ title: "Could not update notifications", description: errorMessage(markAllError), variant: "error" });
+      toast({
+        title: "Could not update notifications",
+        description: errorMessage(markAllError),
+        variant: "error",
+      });
     }
   }
 
@@ -225,9 +239,13 @@ export function NotificationCenter() {
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-medium">{item.title}</p>
-                        {!item.readAt ? <Badge className="bg-primary/10 text-primary">New</Badge> : null}
+                        {!item.readAt ? (
+                          <Badge className="bg-primary/10 text-primary">New</Badge>
+                        ) : null}
                       </div>
-                      <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#667381]">{item.body}</p>
+                      <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#667381]">
+                        {item.body}
+                      </p>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#667381]">
                         <span>{formatNotificationTime(item.createdAt)}</span>
                         <span className="capitalize">{item.type}</span>
@@ -281,7 +299,12 @@ export function NotificationCenter() {
           </div>
 
           <div className="border-t border-[#d9e3eb] p-2">
-            <Button asChild variant="ghost" className="h-10 w-full justify-center rounded-xl" onClick={() => setOpen(false)}>
+            <Button
+              asChild
+              variant="ghost"
+              className="h-10 w-full justify-center rounded-xl"
+              onClick={() => setOpen(false)}
+            >
               <Link href="/notifications">View notification inbox</Link>
             </Button>
           </div>

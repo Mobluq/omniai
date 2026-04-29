@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles } from "lucide-react";
+import { Sparkles } from "@/components/ui/huge-icons";
 import { Button } from "@/components/ui/button";
 
 export type RecommendationViewModel = {

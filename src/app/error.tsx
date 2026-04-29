@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { TriangleAlert } from "lucide-react";
+import { TriangleAlert } from "@/components/ui/huge-icons";
 import { Button } from "@/components/ui/button";
 
 export default function AppError({

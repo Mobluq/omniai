@@ -11,7 +11,7 @@ import {
   Save,
   ShieldCheck,
   UserRound,
-} from "lucide-react";
+} from "@/components/ui/huge-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -377,7 +377,11 @@ export function AccountSettings() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="companyName">Company</Label>
-                  <Input id="companyName" name="companyName" defaultValue={profile.companyName ?? ""} />
+                  <Input
+                    id="companyName"
+                    name="companyName"
+                    defaultValue={profile.companyName ?? ""}
+                  />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="timezone">Timezone</Label>
@@ -455,15 +459,22 @@ export function AccountSettings() {
               <Bell className="h-5 w-5 text-primary" aria-hidden="true" />
               <CardTitle>Notifications</CardTitle>
             </div>
-            <CardDescription>Email preferences for account, usage, billing, and providers.</CardDescription>
+            <CardDescription>
+              Email preferences for account, usage, billing, and providers.
+            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
             <div className="grid gap-3 md:grid-cols-2">
               {notificationLabels.map((item) => (
-                <label key={item.key} className="flex min-h-24 items-start justify-between gap-4 rounded-md border p-4">
+                <label
+                  key={item.key}
+                  className="flex min-h-24 items-start justify-between gap-4 rounded-md border p-4"
+                >
                   <span>
                     <span className="block text-sm font-medium">{item.title}</span>
-                    <span className="mt-1 block text-sm text-muted-foreground">{item.description}</span>
+                    <span className="mt-1 block text-sm text-muted-foreground">
+                      {item.description}
+                    </span>
                   </span>
                   <input
                     type="checkbox"
@@ -478,7 +489,11 @@ export function AccountSettings() {
                 </label>
               ))}
             </div>
-            <Button onClick={saveNotifications} disabled={savingNotifications} className="w-full sm:w-auto">
+            <Button
+              onClick={saveNotifications}
+              disabled={savingNotifications}
+              className="w-full sm:w-auto"
+            >
               {savingNotifications ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
               ) : (
@@ -498,7 +513,11 @@ export function AccountSettings() {
                 <ShieldCheck className="h-5 w-5 text-secondary" aria-hidden="true" />
                 <CardTitle>Security</CardTitle>
               </div>
-              <Badge className={security.twoFactorEnabled ? "bg-secondary/10 text-secondary" : "bg-muted"}>
+              <Badge
+                className={
+                  security.twoFactorEnabled ? "bg-secondary/10 text-secondary" : "bg-muted"
+                }
+              >
                 {securityBadge}
               </Badge>
             </div>
@@ -506,7 +525,11 @@ export function AccountSettings() {
           </CardHeader>
           <CardContent className="grid gap-4">
             {!security.twoFactorEnabled ? (
-              <Button onClick={startTwoFactorSetup} disabled={updatingSecurity} className="w-full sm:w-auto">
+              <Button
+                onClick={startTwoFactorSetup}
+                disabled={updatingSecurity}
+                className="w-full sm:w-auto"
+              >
                 {updatingSecurity ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : (
@@ -547,7 +570,9 @@ export function AccountSettings() {
               <div className="grid gap-3 rounded-md border bg-muted/30 p-4">
                 <div className="grid gap-1">
                   <Label>Manual setup key</Label>
-                  <code className="break-all rounded-md bg-background p-3 text-sm">{twoFactorSetup.secret}</code>
+                  <code className="break-all rounded-md bg-background p-3 text-sm">
+                    {twoFactorSetup.secret}
+                  </code>
                 </div>
                 <div className="grid gap-1">
                   <Label>Authenticator URI</Label>
@@ -644,7 +669,8 @@ export function AccountSettings() {
                 <div key={event.id} className="rounded-md border p-3">
                   <div className="text-sm font-medium">{event.action.replaceAll("_", " ")}</div>
                   <div className="mt-1 text-xs text-muted-foreground">
-                    {new Date(event.createdAt).toLocaleString()} {event.ipAddress ? `- ${event.ipAddress}` : ""}
+                    {new Date(event.createdAt).toLocaleString()}{" "}
+                    {event.ipAddress ? `- ${event.ipAddress}` : ""}
                   </div>
                 </div>
               ))

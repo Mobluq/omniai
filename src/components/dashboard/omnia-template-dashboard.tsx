@@ -19,7 +19,7 @@ import {
   SearchCheck,
   Settings2,
   Zap,
-} from "lucide-react";
+} from "@/components/ui/huge-icons";
 import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { cn } from "@/lib/utils";
 

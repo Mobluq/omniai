@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink } from "@/components/ui/huge-icons";
 import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";

@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, UserCheck } from "lucide-react";
+import { Loader2, UserCheck } from "@/components/ui/huge-icons";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { parseApiResponse, errorMessage, ClientApiError } from "@/lib/api/client";
@@ -50,11 +50,14 @@ export function AcceptInviteForm({ token }: { token?: string }) {
       });
       router.push("/dashboard");
     } catch (acceptError: unknown) {
-      const isUnauthorized = acceptError instanceof ClientApiError && acceptError.code === "UNAUTHORIZED";
+      const isUnauthorized =
+        acceptError instanceof ClientApiError && acceptError.code === "UNAUTHORIZED";
       setStatus(isUnauthorized ? "unauthorized" : "error");
       toast({
         title: isUnauthorized ? "Sign in required" : "Invite could not be accepted",
-        description: isUnauthorized ? "Sign in with the invited email address, then reopen the invite link." : errorMessage(acceptError),
+        description: isUnauthorized
+          ? "Sign in with the invited email address, then reopen the invite link."
+          : errorMessage(acceptError),
         variant: isUnauthorized ? "warning" : "error",
       });
     }
@@ -63,7 +66,8 @@ export function AcceptInviteForm({ token }: { token?: string }) {
   return (
     <form className="mt-6 grid gap-4" onSubmit={acceptInvite}>
       <p className="text-sm text-muted-foreground">
-        Accept this invite to join the workspace. The invite can only be used by the email address it was sent to.
+        Accept this invite to join the workspace. The invite can only be used by the email address
+        it was sent to.
       </p>
       {status === "unauthorized" ? (
         <div className="rounded-md border bg-muted/40 p-3 text-sm">

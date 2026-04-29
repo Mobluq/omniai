@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Bell, CheckCheck, ExternalLink, Loader2, X } from "lucide-react";
+import { Bell, CheckCheck, ExternalLink, Loader2, X } from "@/components/ui/huge-icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -111,7 +111,11 @@ export function NotificationInbox() {
       setUnreadCount((current) => Math.max(0, current - 1));
       toast({ title: "Notification marked as read", variant: "success" });
     } catch (markError: unknown) {
-      toast({ title: "Could not mark as read", description: errorMessage(markError), variant: "error" });
+      toast({
+        title: "Could not mark as read",
+        description: errorMessage(markError),
+        variant: "error",
+      });
     }
   }
 
@@ -123,18 +127,28 @@ export function NotificationInbox() {
       setUnreadCount((current) => (archived?.readAt ? current : Math.max(0, current - 1)));
       toast({ title: "Notification archived", variant: "success" });
     } catch (archiveError: unknown) {
-      toast({ title: "Could not archive notification", description: errorMessage(archiveError), variant: "error" });
+      toast({
+        title: "Could not archive notification",
+        description: errorMessage(archiveError),
+        variant: "error",
+      });
     }
   }
 
   async function onMarkAllRead() {
     try {
       await markAllRead();
-      setItems((current) => current.map((item) => ({ ...item, readAt: item.readAt ?? new Date().toISOString() })));
+      setItems((current) =>
+        current.map((item) => ({ ...item, readAt: item.readAt ?? new Date().toISOString() })),
+      );
       setUnreadCount(0);
       toast({ title: "Notifications marked as read", variant: "success" });
     } catch (markAllError: unknown) {
-      toast({ title: "Could not update notifications", description: errorMessage(markAllError), variant: "error" });
+      toast({
+        title: "Could not update notifications",
+        description: errorMessage(markAllError),
+        variant: "error",
+      });
     }
   }
 
@@ -169,7 +183,13 @@ export function NotificationInbox() {
               <option value="workspace">Workspace</option>
               <option value="system">System</option>
             </Select>
-            <Button type="button" variant="outline" size="sm" onClick={onMarkAllRead} disabled={!unreadCount}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={onMarkAllRead}
+              disabled={!unreadCount}
+            >
               <CheckCheck className="h-4 w-4" aria-hidden="true" />
               Read all
             </Button>
@@ -193,14 +213,19 @@ export function NotificationInbox() {
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-sm font-semibold">{item.title}</h2>
-                      {!item.readAt ? <Badge className="bg-primary/10 text-primary">Unread</Badge> : null}
+                      {!item.readAt ? (
+                        <Badge className="bg-primary/10 text-primary">Unread</Badge>
+                      ) : null}
                       <Badge className="bg-muted capitalize">{item.type}</Badge>
                     </div>
                     <p className="mt-2 text-sm text-muted-foreground">{item.body}</p>
                     <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                       <span>{formatDate(item.createdAt)}</span>
                       {item.actionUrl ? (
-                        <Link href={item.actionUrl} className="inline-flex items-center gap-1 font-medium text-primary">
+                        <Link
+                          href={item.actionUrl}
+                          className="inline-flex items-center gap-1 font-medium text-primary"
+                        >
                           Open related page
                           <ExternalLink className="h-3 w-3" aria-hidden="true" />
                         </Link>
@@ -209,12 +234,22 @@ export function NotificationInbox() {
                   </div>
                   <div className="flex shrink-0 gap-2">
                     {!item.readAt ? (
-                      <Button type="button" size="sm" variant="outline" onClick={() => onMarkRead(item.id)}>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onMarkRead(item.id)}
+                      >
                         <CheckCheck className="h-4 w-4" aria-hidden="true" />
                         Mark read
                       </Button>
                     ) : null}
-                    <Button type="button" size="sm" variant="ghost" onClick={() => onArchive(item.id)}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onArchive(item.id)}
+                    >
                       <X className="h-4 w-4" aria-hidden="true" />
                       Archive
                     </Button>

@@ -9,7 +9,7 @@ import {
   SlidersHorizontal,
   TriangleAlert,
   X,
-} from "lucide-react";
+} from "@/components/ui/huge-icons";
 import { AppShell } from "@/components/layout/app-shell";
 import { BillingActions } from "@/components/billing/billing-actions";
 import { ProviderLogo } from "@/components/integrations/provider-logo";

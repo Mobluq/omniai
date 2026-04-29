@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SearchX } from "lucide-react";
+import { SearchX } from "@/components/ui/huge-icons";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {

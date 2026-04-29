@@ -1,4 +1,11 @@
-import { Activity, ArrowUpRight, CheckCircle2, CircleAlert, Gauge, Route } from "lucide-react";
+import {
+  Activity,
+  ArrowUpRight,
+  CheckCircle2,
+  CircleAlert,
+  Gauge,
+  Route,
+} from "@/components/ui/huge-icons";
 import { Badge } from "@/components/ui/badge";
 
 type IntelligenceSignalPanelProps = {
