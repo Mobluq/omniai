@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/toast";
 import { ModelControls } from "@/components/chat/model-controls";
 import { useChatStore, type RoutingMode } from "@/components/chat/chat-store";
 import { errorMessage } from "@/lib/api/client";
+import { modelRegistry } from "@/modules/ai/registry/model-registry";
 import {
   RecommendationBanner,
   type RecommendationViewModel,
@@ -41,7 +42,12 @@ type ConversationListItem = {
 };
 
 type WorkspacePayload = {
-  workspaces: Array<{ id: string; name: string }>;
+  workspaces: Array<{
+    id: string;
+    name: string;
+    defaultRoutingMode?: RoutingMode;
+    defaultModelId?: string | null;
+  }>;
 };
 
 type ConversationPayload = {
@@ -191,7 +197,15 @@ export function ChatWorkspace() {
     setStatus("idle");
   }
 
-  async function createConversation(workspaceId = workspace?.id, activeProjectId = projectId) {
+  async function createConversation(
+    workspaceId = workspace?.id,
+    activeProjectId = projectId,
+    defaults?: {
+      routingMode?: RoutingMode;
+      provider?: string;
+      modelId?: string;
+    },
+  ) {
     if (!workspaceId) {
       return;
     }
@@ -205,9 +219,9 @@ export function ChatWorkspace() {
         workspaceId,
         projectId: activeProjectId ?? undefined,
         title: "New conversation",
-        routingMode,
-        provider: selectedModel.provider,
-        modelId: selectedModel.modelId,
+        routingMode: defaults?.routingMode ?? routingMode,
+        provider: defaults?.provider ?? selectedModel.provider,
+        modelId: defaults?.modelId ?? selectedModel.modelId,
       }),
     });
     const envelope = await parseEnvelope<ConversationPayload>(response);
@@ -276,6 +290,13 @@ export function ChatWorkspace() {
       }
 
       const activeWorkspace = workspaceEnvelope.data.workspaces[0];
+      const defaultModel = activeWorkspace.defaultModelId
+        ? modelRegistry.find((model) => model.modelId === activeWorkspace.defaultModelId)
+        : null;
+      const initialRoutingMode = activeWorkspace.defaultRoutingMode ?? routingMode;
+      const initialModel = defaultModel
+        ? { provider: defaultModel.provider, modelId: defaultModel.modelId }
+        : selectedModel;
       const requestedProjectId =
         typeof window === "undefined"
           ? null
@@ -286,6 +307,8 @@ export function ChatWorkspace() {
 
       setWorkspace(activeWorkspace);
       setProjectId(requestedProjectId);
+      setRoutingMode(initialRoutingMode);
+      setSelectedModel(initialModel);
       const list = await refreshConversations(activeWorkspace.id);
 
       if (cancelled) {
@@ -302,7 +325,11 @@ export function ChatWorkspace() {
       if (initialConversation) {
         await openConversation(initialConversation.id);
       } else {
-        await createConversation(activeWorkspace.id, requestedProjectId);
+        await createConversation(activeWorkspace.id, requestedProjectId, {
+          routingMode: initialRoutingMode,
+          provider: initialModel.provider,
+          modelId: initialModel.modelId,
+        });
       }
     }
 

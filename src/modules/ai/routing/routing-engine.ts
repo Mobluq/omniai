@@ -17,6 +17,7 @@ export type RoutingRequest = {
   context?: string[];
   userId?: string;
   workspaceId?: string;
+  allowedProviders?: string[];
 };
 
 export type RoutingDecision = {
@@ -34,15 +35,27 @@ export class RoutingEngine {
   private readonly providerConfigs = new ProviderConfigurationService();
 
   decide(request: RoutingRequest): RoutingDecision {
+    if (request.allowedProviders && request.allowedProviders.length === 0) {
+      throw badRequest("Connect at least one provider key in Settings before chatting.");
+    }
+
     const recommendation = this.recommendations.evaluate({
       prompt: request.prompt,
       currentProvider: request.currentProvider,
       currentModelId: request.currentModelId,
+      allowedProviders: request.allowedProviders,
     });
 
     if (request.routingMode === "manual") {
       if (!request.selectedProvider || !request.selectedModelId) {
         throw badRequest("Manual routing requires a selected provider and model.");
+      }
+
+      if (
+        request.allowedProviders &&
+        !request.allowedProviders.includes(request.selectedProvider)
+      ) {
+        throw badRequest("The selected provider is not connected or enabled for this workspace.");
       }
 
       const selected = this.registry.getByProviderAndModel(
@@ -68,7 +81,22 @@ export class RoutingEngine {
         request.currentProvider && request.currentModelId
           ? this.registry.getByProviderAndModel(request.currentProvider, request.currentModelId)
           : this.registry.getDefaultModel();
-      const fallback = current ?? this.registry.getDefaultModel();
+      const currentAllowed =
+        current &&
+        (!request.allowedProviders || request.allowedProviders.includes(current.provider));
+      const fallback =
+        (currentAllowed ? current : null) ??
+        this.registry
+          .list()
+          .find(
+            (model) =>
+              model.status === "available" &&
+              (!request.allowedProviders || request.allowedProviders.includes(model.provider)),
+          );
+
+      if (!fallback) {
+        throw badRequest("Connect at least one provider key in Settings before chatting.");
+      }
 
       return {
         mode: "suggest",
@@ -100,7 +128,12 @@ export class RoutingEngine {
   }
 
   async route(request: RoutingRequest) {
-    const decision = this.decide(request);
+    const allowedProviders =
+      request.allowedProviders ??
+      (request.userId && request.workspaceId
+        ? await this.providerConfigs.listRunnableProviderIds(request.userId, request.workspaceId)
+        : undefined);
+    const decision = this.decide({ ...request, allowedProviders });
 
     if (!isProviderId(decision.provider)) {
       throw badRequest("Unsupported provider.");

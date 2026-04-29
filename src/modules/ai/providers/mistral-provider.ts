@@ -4,6 +4,7 @@ import type {
   TextGenerationInput,
   TextGenerationOutput,
 } from "@/modules/ai/providers/types";
+import { throwProviderResponseError } from "@/modules/ai/providers/provider-errors";
 
 export class MistralProvider extends BaseProvider {
   id = "mistral";
@@ -36,11 +37,12 @@ export class MistralProvider extends BaseProvider {
       body: JSON.stringify({
         model: process.env.MISTRAL_MODEL ?? "mistral-large-latest",
         messages: [{ role: "user", content: prompt }],
+        max_tokens: input.maxOutputTokens ?? 2048,
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Mistral request failed with ${response.status}.`);
+      await throwProviderResponseError("Mistral", response);
     }
 
     const payload = (await response.json()) as {

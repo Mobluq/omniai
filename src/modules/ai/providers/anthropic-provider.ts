@@ -4,6 +4,7 @@ import type {
   TextGenerationInput,
   TextGenerationOutput,
 } from "@/modules/ai/providers/types";
+import { throwProviderResponseError } from "@/modules/ai/providers/provider-errors";
 
 export class AnthropicProvider extends BaseProvider {
   id = "anthropic";
@@ -38,13 +39,13 @@ export class AnthropicProvider extends BaseProvider {
       },
       body: JSON.stringify({
         model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5",
-        max_tokens: 2048,
+        max_tokens: input.maxOutputTokens ?? 2048,
         messages: [{ role: "user", content: prompt }],
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Anthropic request failed with ${response.status}.`);
+      await throwProviderResponseError("Anthropic", response);
     }
 
     const payload = (await response.json()) as {

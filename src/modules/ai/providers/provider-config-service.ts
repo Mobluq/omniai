@@ -6,7 +6,7 @@ import { badRequest } from "@/lib/errors/app-error";
 import { decryptSecret, encryptSecret } from "@/lib/security/encryption";
 import { assertWorkspaceAccess } from "@/lib/security/workspace-authorization";
 import type { ProviderConfig } from "@/modules/ai/providers/base-provider";
-import { isProviderId } from "@/modules/ai/providers/provider-factory";
+import { createProvider, isProviderId } from "@/modules/ai/providers/provider-factory";
 import type { ProviderId } from "@/modules/ai/providers/types";
 import { ModelRegistryService } from "@/modules/ai/registry/model-registry";
 
@@ -76,6 +76,15 @@ export type UpsertProviderConfigurationInput = {
   provider: string;
   apiKey?: string;
   isEnabled: boolean;
+};
+
+export type ProviderRuntimeTestResult = {
+  provider: ProviderId;
+  configured: boolean;
+  live: boolean;
+  status: "ready" | "missing_credentials" | "disabled" | "configured_unverified";
+  message: string;
+  modelId?: string;
 };
 
 function envProviderConfigured(provider: ProviderId) {
@@ -231,5 +240,86 @@ export class ProviderConfigurationService {
     }
 
     return {};
+  }
+
+  async listRunnableProviderIds(userId: string, workspaceId: string): Promise<ProviderId[]> {
+    const providers = await this.listWorkspaceConnections(userId, workspaceId);
+
+    return providers
+      .filter(
+        (provider) =>
+          provider.isEnabled && (provider.envConfigured || provider.workspaceConfigured),
+      )
+      .map((provider) => provider.provider);
+  }
+
+  async testWorkspaceProvider(input: {
+    userId: string;
+    workspaceId: string;
+    provider: ProviderId;
+  }): Promise<ProviderRuntimeTestResult> {
+    const providers = await this.listWorkspaceConnections(input.userId, input.workspaceId);
+    const connection = providers.find((provider) => provider.provider === input.provider);
+
+    if (!connection?.isEnabled) {
+      return {
+        provider: input.provider,
+        configured: false,
+        live: false,
+        status: "disabled",
+        message: `${connection?.displayName ?? input.provider} is disabled for this workspace.`,
+      };
+    }
+
+    if (!connection.envConfigured && !connection.workspaceConfigured) {
+      return {
+        provider: input.provider,
+        configured: false,
+        live: false,
+        status: "missing_credentials",
+        message: "Add a workspace key or configure the provider environment variables.",
+      };
+    }
+
+    const textModel = this.registry
+      .list()
+      .find(
+        (model) =>
+          model.provider === input.provider &&
+          model.status === "available" &&
+          model.capabilities.includes("text_generation"),
+      );
+
+    if (!textModel) {
+      return {
+        provider: input.provider,
+        configured: true,
+        live: false,
+        status: "configured_unverified",
+        message:
+          "Credentials are available server-side. This provider does not expose a low-cost text test in OmniAI yet.",
+      };
+    }
+
+    const runtimeConfig = await this.getRuntimeConfig({
+      userId: input.userId,
+      workspaceId: input.workspaceId,
+      provider: input.provider,
+    });
+    const provider = createProvider(input.provider, runtimeConfig);
+    await provider.generateText({
+      prompt: "Reply with the exact word: OK",
+      modelId: textModel.modelId,
+      maxOutputTokens: 16,
+    });
+
+    return {
+      provider: input.provider,
+      configured: true,
+      live: true,
+      status: "ready",
+      modelId: textModel.modelId,
+      message: `${connection.displayName} accepted a live test request.`,
+    };
   }
 }

@@ -5,6 +5,7 @@ export type ApiErrorCode =
   | "NOT_FOUND"
   | "CONFLICT"
   | "RATE_LIMITED"
+  | "PROVIDER_ERROR"
   | "VALIDATION_ERROR"
   | "INTERNAL_ERROR";
 
@@ -30,3 +31,4 @@ export const notFound = (message = "The requested resource was not found.") =>
 export const conflict = (message: string) => new AppError("CONFLICT", message, 409);
 export const rateLimited = (message = "Too many requests. Please try again later.") =>
   new AppError("RATE_LIMITED", message, 429);
+export const providerError = (message: string) => new AppError("PROVIDER_ERROR", message, 502);

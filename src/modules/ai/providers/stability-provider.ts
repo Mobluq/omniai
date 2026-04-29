@@ -6,6 +6,7 @@ import type {
   TextGenerationInput,
   TextGenerationOutput,
 } from "@/modules/ai/providers/types";
+import { throwProviderResponseError } from "@/modules/ai/providers/provider-errors";
 
 export class StabilityProvider extends BaseProvider {
   id = "stability";
@@ -53,7 +54,7 @@ export class StabilityProvider extends BaseProvider {
     });
 
     if (!response.ok) {
-      throw new Error(`Stability AI request failed with ${response.status}.`);
+      await throwProviderResponseError("Stability AI", response);
     }
 
     const payload = (await response.json()) as { image?: string };

@@ -71,9 +71,7 @@ export class RecommendationEngine {
 
   evaluate(request: RecommendationRequest): RecommendationResult {
     const classification = this.classifier.classify(request.prompt);
-    const allowedProviders = request.allowedProviders?.length
-      ? new Set(request.allowedProviders)
-      : undefined;
+    const allowedProviders = request.allowedProviders ? new Set(request.allowedProviders) : undefined;
 
     const candidates = this.registry
       .list()

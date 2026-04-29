@@ -4,6 +4,7 @@ import type {
   TextGenerationInput,
   TextGenerationOutput,
 } from "@/modules/ai/providers/types";
+import { throwProviderResponseError } from "@/modules/ai/providers/provider-errors";
 
 export class GeminiProvider extends BaseProvider {
   id = "google";
@@ -36,12 +37,15 @@ export class GeminiProvider extends BaseProvider {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            maxOutputTokens: input.maxOutputTokens ?? 2048,
+          },
         }),
       },
     );
 
     if (!response.ok) {
-      throw new Error(`Gemini request failed with ${response.status}.`);
+      await throwProviderResponseError("Gemini", response);
     }
 
     const payload = (await response.json()) as {

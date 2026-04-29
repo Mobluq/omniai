@@ -6,6 +6,7 @@ import { MemoryService } from "@/modules/memory/memory-service";
 import { RecommendationEngine } from "@/modules/ai/recommendation/recommendation-engine";
 import { ModelRegistryService } from "@/modules/ai/registry/model-registry";
 import { RoutingEngine } from "@/modules/ai/routing/routing-engine";
+import { ProviderConfigurationService } from "@/modules/ai/providers/provider-config-service";
 import { ArtifactService } from "@/modules/artifact/artifact-service";
 import { UsageService } from "@/modules/usage/usage-service";
 
@@ -24,6 +25,7 @@ export class ChatOrchestrator {
   private readonly recommendations = new RecommendationEngine();
   private readonly registry = new ModelRegistryService();
   private readonly routing = new RoutingEngine();
+  private readonly providerConfigs = new ProviderConfigurationService();
   private readonly artifacts = new ArtifactService();
   private readonly usage = new UsageService();
 
@@ -48,10 +50,15 @@ export class ChatOrchestrator {
       await this.conversations.renameFromPrompt(conversation.id, content);
     }
 
+    const allowedProviders = await this.providerConfigs.listRunnableProviderIds(
+      userId,
+      conversation.workspaceId,
+    );
     const recommendation = this.recommendations.evaluate({
       prompt: content,
       currentProvider: conversation.activeProvider ?? input.selectedProvider,
       currentModelId: conversation.activeModelId ?? input.selectedModelId,
+      allowedProviders,
     });
 
     await prisma.recommendationLog.create({
@@ -102,7 +109,7 @@ export class ChatOrchestrator {
         }),
       ),
     ];
-    const routed = await this.routing.route({
+    const routeInput = {
       prompt: content,
       routingMode: input.routingMode,
       selectedProvider: input.selectedProvider,
@@ -113,6 +120,28 @@ export class ChatOrchestrator {
       userId,
       workspaceId: conversation.workspaceId,
       context,
+      allowedProviders,
+    };
+    const routed = await this.routing.route(routeInput).catch(async (routeError: unknown) => {
+      const fallbackModel = this.registry.getByProviderAndModel(
+        recommendation.recommendedProvider,
+        recommendation.recommendedModel,
+      );
+      await this.usage
+        .record({
+          userId,
+          workspaceId: conversation.workspaceId,
+          conversationId: conversation.id,
+          provider: fallbackModel?.provider ?? input.selectedProvider ?? "unknown",
+          modelId: fallbackModel?.modelId ?? input.selectedModelId ?? "unknown",
+          requestType: fallbackModel?.imageGeneration ? "image_generation" : "text_generation",
+          tokenInputEstimate: Math.ceil(content.length / 4),
+          tokenOutputEstimate: 0,
+          success: false,
+          errorCode: routeError instanceof Error ? routeError.name : "route_error",
+        })
+        .catch(() => undefined);
+      throw routeError;
     });
 
     const assistantMessage = await this.conversations.addMessage({

@@ -51,6 +51,7 @@ export const routeRequestSchema = z.object({
   routingMode: routingModeSchema.default("suggest"),
   selectedProvider: z.string().min(1).optional(),
   selectedModelId: z.string().min(1).optional(),
+  acceptRecommendation: z.boolean().optional(),
 });
 
 export const providerConfigurationSchema = z.object({

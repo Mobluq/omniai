@@ -26,6 +26,7 @@ export async function POST(request: NextRequest) {
       routingMode: body.routingMode,
       selectedProvider: body.selectedProvider,
       selectedModelId: body.selectedModelId,
+      acceptRecommendation: body.acceptRecommendation,
       userId: user.id,
       workspaceId: body.workspaceId,
     });

@@ -6,6 +6,10 @@ import type {
   TextGenerationInput,
   TextGenerationOutput,
 } from "@/modules/ai/providers/types";
+import {
+  isLikelyModelAccessError,
+  throwProviderResponseError,
+} from "@/modules/ai/providers/provider-errors";
 
 function extractOpenAIText(payload: unknown): string | null {
   if (typeof payload !== "object" || payload === null) {
@@ -60,34 +64,49 @@ export class OpenAIProvider extends BaseProvider {
       return this.placeholderTextOutput(input);
     }
 
-    const model = process.env.OPENAI_TEXT_MODEL ?? "gpt-5-mini";
     const prompt = this.buildPromptWithContext(input);
-    const response = await fetch("https://api.openai.com/v1/responses", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model,
-        input: prompt,
-      }),
-    });
+    const models = getOpenAITextModelFallbacks();
+    let lastError: unknown;
 
-    if (!response.ok) {
-      throw new Error(`OpenAI request failed with ${response.status}.`);
+    for (const model of models) {
+      try {
+        const response = await fetch("https://api.openai.com/v1/responses", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model,
+            input: prompt,
+            max_output_tokens: input.maxOutputTokens ?? 2048,
+          }),
+        });
+
+        if (!response.ok) {
+          await throwProviderResponseError("OpenAI", response);
+        }
+
+        const payload = (await response.json()) as unknown;
+        const content = extractOpenAIText(payload) ?? "OpenAI returned an empty response.";
+
+        return {
+          content,
+          modelId: input.modelId,
+          provider: this.id,
+          tokenInputEstimate: Math.ceil(prompt.length / 4),
+          tokenOutputEstimate: Math.ceil(content.length / 4),
+        };
+      } catch (error: unknown) {
+        lastError = error;
+
+        if (!isLikelyModelAccessError(error)) {
+          throw error;
+        }
+      }
     }
 
-    const payload = (await response.json()) as unknown;
-    const content = extractOpenAIText(payload) ?? "OpenAI returned an empty response.";
-
-    return {
-      content,
-      modelId: input.modelId,
-      provider: this.id,
-      tokenInputEstimate: Math.ceil(prompt.length / 4),
-      tokenOutputEstimate: Math.ceil(content.length / 4),
-    };
+    throw lastError instanceof Error ? lastError : new Error("OpenAI request failed.");
   }
 
   async generateImage(input: ImageGenerationInput): Promise<ImageGenerationOutput> {
@@ -113,7 +132,7 @@ export class OpenAIProvider extends BaseProvider {
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI image request failed with ${response.status}.`);
+      await throwProviderResponseError("OpenAI image generation", response);
     }
 
     const payload = (await response.json()) as {
@@ -128,4 +147,8 @@ export class OpenAIProvider extends BaseProvider {
       revisedPrompt: image?.revised_prompt ?? input.prompt,
     };
   }
+}
+
+function getOpenAITextModelFallbacks() {
+  return Array.from(new Set([process.env.OPENAI_TEXT_MODEL, "gpt-5-mini", "gpt-4o-mini"].filter(Boolean) as string[]));
 }

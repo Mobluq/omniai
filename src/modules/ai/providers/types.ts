@@ -22,6 +22,7 @@ export type TextGenerationInput = {
   modelId: string;
   context?: string[];
   temperature?: number;
+  maxOutputTokens?: number;
 };
 
 export type TextGenerationOutput = {

@@ -2,6 +2,7 @@ import {
   BedrockRuntimeClient,
   ConverseCommand,
 } from "@aws-sdk/client-bedrock-runtime";
+import { providerError } from "@/lib/errors/app-error";
 import { BaseProvider, type ProviderConfig } from "@/modules/ai/providers/base-provider";
 import type {
   ModelCapabilityId,
@@ -45,17 +46,25 @@ export class AmazonProvider extends BaseProvider {
           : undefined,
     });
     const prompt = this.buildPromptWithContext(input);
-    const response = await client.send(
-      new ConverseCommand({
-        modelId,
-        messages: [
-          {
-            role: "user",
-            content: [{ text: prompt }],
+    const response = await client
+      .send(
+        new ConverseCommand({
+          modelId,
+          messages: [
+            {
+              role: "user",
+              content: [{ text: prompt }],
+            },
+          ],
+          inferenceConfig: {
+            maxTokens: input.maxOutputTokens ?? 2048,
           },
-        ],
-      }),
-    );
+        }),
+      )
+      .catch((error: unknown) => {
+        const message = error instanceof Error ? error.message : "Unknown Bedrock error.";
+        throw providerError(`Amazon Bedrock rejected the request. ${message}`);
+      });
     const content =
       response.output?.message?.content
         ?.map((part) => part.text)
