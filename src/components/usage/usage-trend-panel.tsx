@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
 
 type DailyUsagePoint = {
   date: string;
@@ -13,68 +12,21 @@ type DailyUsagePoint = {
   costEstimate: number;
 };
 
-type MetricDefinition = {
-  key: "requests" | "tokens" | "cost" | "failures";
+type ChartPoint = DailyUsagePoint & {
+  x: number;
+  y: number;
   label: string;
-  shortLabel: string;
-  color: string;
-  softColor: string;
-  description: string;
-  value: (point: DailyUsagePoint) => number;
-  format: (value: number) => string;
+  totalTokens: number;
 };
 
-type ActiveMeasurement = {
-  metric: MetricDefinition;
-  date: string;
-  formattedDate: string;
-  value: number;
-  formattedValue: string;
-  height: number;
+const chart = {
+  width: 1000,
+  height: 270,
+  left: 52,
+  right: 52,
+  top: 34,
+  baseline: 214,
 };
-
-const metrics: MetricDefinition[] = [
-  {
-    key: "requests",
-    label: "Requests",
-    shortLabel: "Req",
-    color: "#ffd426",
-    softColor: "rgba(255, 212, 38, 0.28)",
-    description: "Total model calls recorded for the workspace on this day.",
-    value: (point) => point.requestCount,
-    format: formatNumber,
-  },
-  {
-    key: "tokens",
-    label: "Estimated tokens",
-    shortLabel: "Tok",
-    color: "#ff7a42",
-    softColor: "rgba(255, 122, 66, 0.24)",
-    description: "Estimated input plus output tokens captured from provider responses.",
-    value: (point) => point.tokenInputEstimate + point.tokenOutputEstimate,
-    format: formatNumber,
-  },
-  {
-    key: "cost",
-    label: "Estimated cost",
-    shortLabel: "Cost",
-    color: "#1ed87e",
-    softColor: "rgba(30, 216, 126, 0.24)",
-    description: "Approximate provider spend prepared for future billing enforcement.",
-    value: (point) => point.costEstimate,
-    format: formatCurrency,
-  },
-  {
-    key: "failures",
-    label: "Failed requests",
-    shortLabel: "Fail",
-    color: "#ff4658",
-    softColor: "rgba(255, 70, 88, 0.22)",
-    description: "Requests that failed and should be reviewed for provider or routing issues.",
-    value: (point) => point.failureCount,
-    format: formatNumber,
-  },
-];
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -93,22 +45,64 @@ function formatDateLabel(value: string) {
   return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(date);
 }
 
-function buildMeasurement(
-  metric: MetricDefinition,
-  point: DailyUsagePoint,
-  maxValue: number,
-): ActiveMeasurement {
-  const value = metric.value(point);
-  const height = value === 0 ? 6 : Math.max(18, Math.round((value / Math.max(maxValue, 1)) * 100));
+function buildChartPoints(daily: DailyUsagePoint[]) {
+  const days = daily.slice(-8);
+  const maxRequests = Math.max(...days.map((day) => day.requestCount), 1);
+  const plotWidth = chart.width - chart.left - chart.right;
+  const plotHeight = chart.baseline - chart.top;
 
-  return {
-    metric,
-    date: point.date,
-    formattedDate: formatDateLabel(point.date),
-    value,
-    formattedValue: metric.format(value),
-    height,
-  };
+  return days.map((day, index) => {
+    const x =
+      days.length === 1
+        ? chart.left + plotWidth / 2
+        : chart.left + (index / (days.length - 1)) * plotWidth;
+    const y = chart.baseline - (day.requestCount / maxRequests) * (plotHeight * 0.82);
+
+    return {
+      ...day,
+      x,
+      y,
+      label: formatDateLabel(day.date),
+      totalTokens: day.tokenInputEstimate + day.tokenOutputEstimate,
+    };
+  });
+}
+
+function buildPath(points: ChartPoint[]) {
+  return points
+    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+    .join(" ");
+}
+
+function Tooltip({ point }: { point: ChartPoint }) {
+  const tooltipWidth = 248;
+  const tooltipHeight = 94;
+  const x = Math.min(Math.max(point.x - tooltipWidth / 2, 18), chart.width - tooltipWidth - 18);
+  const y = point.y > chart.top + tooltipHeight + 18 ? point.y - tooltipHeight - 18 : point.y + 22;
+
+  return (
+    <g transform={`translate(${x} ${y})`} pointerEvents="none">
+      <rect
+        width={tooltipWidth}
+        height={tooltipHeight}
+        rx="16"
+        fill="#2f3839"
+        stroke="rgba(255,255,255,0.18)"
+      />
+      <text x="16" y="25" fill="#f2f7f4" fontSize="15" fontWeight="700">
+        {point.label}
+      </text>
+      <text x="16" y="49" fill="rgba(255,255,255,0.72)" fontSize="13">
+        {formatNumber(point.requestCount)} requests, {formatNumber(point.successCount)} successful
+      </text>
+      <text x="16" y="70" fill="rgba(255,255,255,0.72)" fontSize="13">
+        {formatNumber(point.totalTokens)} tokens, {formatCurrency(point.costEstimate)}
+      </text>
+      <text x="16" y="88" fill="rgba(255,255,255,0.62)" fontSize="12">
+        {formatNumber(point.failureCount)} failed request(s)
+      </text>
+    </g>
+  );
 }
 
 export function UsageTrendPanel({
@@ -122,25 +116,14 @@ export function UsageTrendPanel({
   requestCount: number;
   costEstimate: number;
 }) {
-  const days = useMemo(() => daily.slice(-8), [daily]);
-  const maxByMetric = useMemo(
-    () =>
-      new Map(
-        metrics.map((metric) => [
-          metric.key,
-          Math.max(...days.map((point) => metric.value(point)), 1),
-        ]),
-      ),
-    [days],
-  );
-
-  const firstMeasurement = days[days.length - 1]
-    ? buildMeasurement(metrics[0], days[days.length - 1], maxByMetric.get(metrics[0].key) ?? 1)
-    : null;
-  const [active, setActive] = useState<ActiveMeasurement | null>(firstMeasurement);
-  const columnTemplate = {
-    gridTemplateColumns: `repeat(${Math.max(days.length, 1)}, minmax(64px, 1fr))`,
-  };
+  const points = useMemo(() => buildChartPoints(daily), [daily]);
+  const [activeIndex, setActiveIndex] = useState(Math.max(0, points.length - 1));
+  const activePoint = points[activeIndex] ?? null;
+  const path = buildPath(points);
+  const bandWidth =
+    points.length > 1
+      ? (chart.width - chart.left - chart.right) / (points.length - 1)
+      : chart.width - chart.left - chart.right;
 
   return (
     <section className="operational-panel mt-6 overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f2f7f4] shadow-[0_28px_90px_rgba(20,31,33,0.22)]">
@@ -153,8 +136,8 @@ export function UsageTrendPanel({
             Request, token, provider, and cost movement
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
-            Each lane is scaled independently so requests, tokens, cost, and failures remain
-            readable even when values differ by orders of magnitude.
+            The billing layer is prepared for provider-by-provider limits, subscription enforcement,
+            and future live cost benchmarking.
           </p>
         </div>
         <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-center">
@@ -172,126 +155,143 @@ export function UsageTrendPanel({
       </div>
 
       <div className="p-5 lg:p-6">
-        <div className="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="flex flex-wrap items-center gap-2 text-xs text-white/60">
-            {metrics.map((metric) => (
-              <span
-                key={metric.key}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5"
-              >
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: metric.color }}
-                  aria-hidden="true"
-                />
-                {metric.label}
-              </span>
-            ))}
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/10 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/50">
-              Hover metric
-            </p>
-            {active ? (
-              <div className="mt-2">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold">{active.metric.label}</h3>
-                  <span className="font-mono text-sm font-semibold">{active.formattedValue}</span>
-                </div>
-                <p className="mt-1 text-xs text-white/50">{active.formattedDate}</p>
-                <p className="mt-2 text-xs leading-5 text-white/60">{active.metric.description}</p>
-              </div>
-            ) : (
-              <p className="mt-2 text-xs leading-5 text-white/60">
-                Hover or focus a bar to inspect what is being measured.
-              </p>
-            )}
-          </div>
-        </div>
+        {points.length ? (
+          <>
+            <svg
+              viewBox={`0 0 ${chart.width} ${chart.height}`}
+              className="h-[280px] w-full"
+              role="img"
+              aria-label="Usage trend over the current billing window. Hover or focus a point to inspect requests, tokens, cost, and failures."
+            >
+              <defs>
+                <linearGradient id="usage-line" x1="0%" x2="100%" y1="0%" y2="0%">
+                  <stop offset="0%" stopColor="#ffd426" />
+                  <stop offset="45%" stopColor="#ff6f42" />
+                  <stop offset="100%" stopColor="#09d970" />
+                </linearGradient>
+                <linearGradient id="usage-fill" x1="0%" x2="0%" y1="0%" y2="100%">
+                  <stop offset="0%" stopColor="rgba(255,212,38,0.28)" />
+                  <stop offset="100%" stopColor="rgba(9,217,112,0.03)" />
+                </linearGradient>
+              </defs>
 
-        {days.length ? (
-          <div className="thin-scrollbar overflow-x-auto pb-1">
-            <div className="w-full min-w-[760px] overflow-hidden rounded-2xl border border-white/10 bg-[rgba(16,24,25,0.38)]">
-              {metrics.map((metric) => {
-                const maxValue = maxByMetric.get(metric.key) ?? 1;
+              {[chart.baseline, 166, 118, 70].map((y, index) => (
+                <path
+                  key={y}
+                  d={`M${chart.left} ${y} H${chart.width - chart.right}`}
+                  stroke={index === 0 ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.12)"}
+                  strokeDasharray={index === 0 ? undefined : "4 7"}
+                  strokeWidth="1"
+                />
+              ))}
+
+              {points.map((point, index) => {
+                const isActive = activeIndex === index;
+                const x = Math.max(chart.left, point.x - bandWidth / 2);
+                const width = Math.min(
+                  bandWidth,
+                  chart.width - chart.right - x + (index === points.length - 1 ? bandWidth / 2 : 0),
+                );
 
                 return (
-                  <div
-                    key={metric.key}
-                    className="grid min-h-[92px] grid-cols-[132px_minmax(0,1fr)] border-b border-white/10 last:border-b-0"
-                  >
-                    <div className="flex flex-col justify-center border-r border-white/10 px-4">
-                      <span className="text-sm font-semibold">{metric.label}</span>
-                      <span className="mt-1 text-[0.68rem] uppercase tracking-[0.14em] text-white/40">
-                        {metric.shortLabel}
-                      </span>
-                    </div>
-                    <div className="grid gap-2 px-4 py-4" style={columnTemplate}>
-                      {days.map((point) => {
-                        const measurement = buildMeasurement(metric, point, maxValue);
-                        const isActive =
-                          active?.metric.key === metric.key && active.date === point.date;
-
-                        return (
-                          <button
-                            key={`${metric.key}-${point.date}`}
-                            type="button"
-                            className="group relative flex h-16 min-w-0 items-end rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/45"
-                            aria-label={`${metric.label}: ${measurement.formattedValue} on ${measurement.formattedDate}. ${metric.description}`}
-                            title={`${metric.label}: ${measurement.formattedValue} on ${measurement.formattedDate}. ${metric.description}`}
-                            onFocus={() => setActive(measurement)}
-                            onMouseEnter={() => setActive(measurement)}
-                          >
-                            <span className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
-                            <span
-                              className={cn(
-                                "relative block w-full rounded-t-xl border border-white/10 shadow-[0_18px_34px_rgba(0,0,0,0.22)] transition duration-200 ease-out group-hover:-translate-y-1 group-hover:brightness-110 group-focus-visible:-translate-y-1",
-                                isActive ? "-translate-y-1 brightness-110" : "",
-                              )}
-                              style={{
-                                height: `${measurement.height}%`,
-                                background: `linear-gradient(180deg, ${metric.color}, ${metric.softColor})`,
-                                opacity: measurement.value === 0 ? 0.42 : 1,
-                              }}
-                            >
-                              <span
-                                className={cn(
-                                  "absolute inset-x-1 top-1 h-2 rounded-full bg-white/20 opacity-0 transition group-hover:opacity-100 group-focus-visible:opacity-100",
-                                  isActive ? "opacity-100" : "",
-                                )}
-                                aria-hidden="true"
-                              />
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  <rect
+                    key={`hit-${point.date}`}
+                    x={x}
+                    y={chart.top}
+                    width={width}
+                    height={chart.baseline - chart.top}
+                    rx="14"
+                    fill={isActive ? "rgba(255,255,255,0.07)" : "transparent"}
+                    stroke={isActive ? "rgba(255,255,255,0.10)" : "transparent"}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`${point.label}: ${formatNumber(point.requestCount)} requests, ${formatNumber(point.totalTokens)} tokens, ${formatCurrency(point.costEstimate)}, ${formatNumber(point.failureCount)} failed requests.`}
+                    onFocus={() => setActiveIndex(index)}
+                    onMouseEnter={() => setActiveIndex(index)}
+                  />
                 );
               })}
-              <div className="grid grid-cols-[132px_minmax(0,1fr)] bg-white/[0.03]">
-                <div className="border-r border-white/10 px-4 py-3 text-xs text-white/40">
-                  Day
-                </div>
-                <div className="grid gap-2 px-4 py-3" style={columnTemplate}>
-                  {days.map((point) => (
-                    <span
-                      key={point.date}
-                      className="truncate text-center text-[0.68rem] font-medium text-white/40"
+
+              <path
+                d={`${path} L ${points.at(-1)?.x ?? chart.width - chart.right} ${chart.baseline} L ${points[0]?.x ?? chart.left} ${chart.baseline} Z`}
+                fill="url(#usage-fill)"
+              />
+              <path
+                d={path}
+                fill="none"
+                stroke="url(#usage-line)"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="8"
+              />
+
+              {points.map((point, index) => {
+                const isActive = activeIndex === index;
+
+                return (
+                  <g key={point.date}>
+                    <line
+                      x1={point.x}
+                      x2={point.x}
+                      y1={chart.top}
+                      y2={chart.baseline}
+                      stroke="rgba(255,255,255,0.18)"
+                      strokeDasharray="4 7"
+                      opacity={isActive ? 1 : 0}
+                    />
+                    <circle
+                      cx={point.x}
+                      cy={point.y}
+                      r={isActive ? "10" : "7"}
+                      fill={index === points.length - 1 ? "#09d970" : "#ffd426"}
+                      stroke="#20282a"
+                      strokeWidth="4"
+                    />
+                    <text
+                      x={point.x}
+                      y={chart.height - 18}
+                      textAnchor="middle"
+                      fill="rgba(255,255,255,0.45)"
+                      fontSize="12"
+                      fontWeight={isActive ? "700" : "500"}
                     >
-                      {formatDateLabel(point.date)}
-                    </span>
-                  ))}
-                </div>
-              </div>
+                      {point.label}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {activePoint ? <Tooltip point={activePoint} /> : null}
+            </svg>
+
+            <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/60">
+              {[
+                ["Requests", "Model calls stored in usage logs.", "#ffd426"],
+                ["Tokens", "Input plus output token estimates.", "#ff6f42"],
+                ["Cost", "Provider cost estimate for billing.", "#09d970"],
+                ["Failures", "Provider or routing calls that failed.", "#ff4658"],
+              ].map(([label, description, color]) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5"
+                  title={`${label}: ${description}`}
+                >
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: color }}
+                    aria-hidden="true"
+                  />
+                  {label}
+                </span>
+              ))}
             </div>
-          </div>
+          </>
         ) : (
           <div className="grid min-h-[260px] place-items-center rounded-2xl border border-dashed border-white/15 bg-white/[0.03] p-6 text-center">
             <div>
               <p className="text-sm font-semibold">No metered usage yet</p>
               <p className="mt-2 max-w-sm text-sm leading-6 text-white/60">
-                Send a chat request through a connected provider and this chart will show requests,
+                Send a chat request through a connected provider and this panel will show requests,
                 tokens, cost, and failures across the billing window.
               </p>
             </div>
