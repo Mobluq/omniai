@@ -45,8 +45,44 @@ function formatDateLabel(value: string) {
   return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(date);
 }
 
+function selectDisplayDays(daily: DailyUsagePoint[]) {
+  if (daily.length <= 8) {
+    return daily;
+  }
+
+  const importantIndexes = daily
+    .map((day, index) =>
+      day.requestCount ||
+      day.successCount ||
+      day.failureCount ||
+      day.tokenInputEstimate ||
+      day.tokenOutputEstimate ||
+      day.costEstimate
+        ? index
+        : -1,
+    )
+    .filter((index) => index >= 0);
+  const selected = new Set([0, ...importantIndexes, daily.length - 1]);
+
+  if (selected.size > 8) {
+    const important = Array.from(selected).sort((left, right) => left - right);
+    return Array.from({ length: 8 }, (_, index) => {
+      const sourceIndex = Math.round((index * (important.length - 1)) / 7);
+      return daily[important[sourceIndex]];
+    });
+  }
+
+  for (let index = 0; selected.size < 8 && index < 8; index += 1) {
+    selected.add(Math.round((index * (daily.length - 1)) / 7));
+  }
+
+  return Array.from(selected)
+    .sort((left, right) => left - right)
+    .map((index) => daily[index]);
+}
+
 function buildChartPoints(daily: DailyUsagePoint[]) {
-  const days = daily.slice(-8);
+  const days = selectDisplayDays(daily);
   const maxRequests = Math.max(...days.map((day) => day.requestCount), 1);
   const plotWidth = chart.width - chart.left - chart.right;
   const plotHeight = chart.baseline - chart.top;
@@ -120,10 +156,6 @@ export function UsageTrendPanel({
   const [activeIndex, setActiveIndex] = useState(Math.max(0, points.length - 1));
   const activePoint = points[activeIndex] ?? null;
   const path = buildPath(points);
-  const bandWidth =
-    points.length > 1
-      ? (chart.width - chart.left - chart.right) / (points.length - 1)
-      : chart.width - chart.left - chart.right;
 
   return (
     <section className="operational-panel mt-6 overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f2f7f4] shadow-[0_28px_90px_rgba(20,31,33,0.22)]">
@@ -185,33 +217,6 @@ export function UsageTrendPanel({
                 />
               ))}
 
-              {points.map((point, index) => {
-                const isActive = activeIndex === index;
-                const x = Math.max(chart.left, point.x - bandWidth / 2);
-                const width = Math.min(
-                  bandWidth,
-                  chart.width - chart.right - x + (index === points.length - 1 ? bandWidth / 2 : 0),
-                );
-
-                return (
-                  <rect
-                    key={`hit-${point.date}`}
-                    x={x}
-                    y={chart.top}
-                    width={width}
-                    height={chart.baseline - chart.top}
-                    rx="14"
-                    fill={isActive ? "rgba(255,255,255,0.07)" : "transparent"}
-                    stroke={isActive ? "rgba(255,255,255,0.10)" : "transparent"}
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`${point.label}: ${formatNumber(point.requestCount)} requests, ${formatNumber(point.totalTokens)} tokens, ${formatCurrency(point.costEstimate)}, ${formatNumber(point.failureCount)} failed requests.`}
-                    onFocus={() => setActiveIndex(index)}
-                    onMouseEnter={() => setActiveIndex(index)}
-                  />
-                );
-              })}
-
               <path
                 d={`${path} L ${points.at(-1)?.x ?? chart.width - chart.right} ${chart.baseline} L ${points[0]?.x ?? chart.left} ${chart.baseline} Z`}
                 fill="url(#usage-fill)"
@@ -246,6 +251,19 @@ export function UsageTrendPanel({
                       fill={index === points.length - 1 ? "#09d970" : "#ffd426"}
                       stroke="#20282a"
                       strokeWidth="4"
+                    />
+                    <circle
+                      cx={point.x}
+                      cy={point.y}
+                      r="28"
+                      fill="transparent"
+                      pointerEvents="all"
+                      tabIndex={0}
+                      aria-label={`${point.label}: ${formatNumber(point.requestCount)} requests, ${formatNumber(point.totalTokens)} tokens, ${formatCurrency(point.costEstimate)}, ${formatNumber(point.failureCount)} failed requests.`}
+                      className="cursor-default focus:outline-none"
+                      style={{ outline: "none" }}
+                      onFocus={() => setActiveIndex(index)}
+                      onMouseEnter={() => setActiveIndex(index)}
                     />
                     <text
                       x={point.x}

@@ -1,4 +1,4 @@
-import type { RequestType } from "@prisma/client";
+import type { Prisma, RequestType } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { forbidden } from "@/lib/errors/app-error";
 
@@ -15,6 +15,36 @@ export type RecordUsageInput = {
   success: boolean;
   errorCode?: string;
 };
+
+export const usageRequestTypes = [
+  "text_generation",
+  "image_generation",
+  "embedding",
+  "routing",
+  "recommendation",
+] as const satisfies readonly RequestType[];
+
+export const usageStatusFilters = ["success", "failed"] as const;
+
+export type UsageStatusFilter = (typeof usageStatusFilters)[number];
+
+export type UsageSummaryOptions = {
+  days?: number;
+  provider?: string;
+  modelId?: string;
+  requestType?: RequestType;
+  status?: UsageStatusFilter;
+};
+
+export function parseUsageRequestType(value?: string | null): RequestType | undefined {
+  return usageRequestTypes.includes(value as RequestType) ? (value as RequestType) : undefined;
+}
+
+export function parseUsageStatus(value?: string | null): UsageStatusFilter | undefined {
+  return usageStatusFilters.includes(value as UsageStatusFilter)
+    ? (value as UsageStatusFilter)
+    : undefined;
+}
 
 export class UsageService {
   async assertWorkspaceWithinLimits(workspaceId: string) {
@@ -79,10 +109,21 @@ export class UsageService {
     });
   }
 
-  async summarize(workspaceId: string, days = 30) {
+  async summarize(workspaceId: string, input: number | UsageSummaryOptions = 30) {
+    const options = typeof input === "number" ? { days: input } : input;
+    const days = clampUsageDays(options.days ?? 30);
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    const where: Prisma.UsageLogWhereInput = {
+      workspaceId,
+      createdAt: { gte: since },
+      ...(options.provider ? { provider: options.provider } : {}),
+      ...(options.modelId ? { modelId: options.modelId } : {}),
+      ...(options.requestType ? { requestType: options.requestType } : {}),
+      ...(options.status === "success" ? { success: true } : {}),
+      ...(options.status === "failed" ? { success: false } : {}),
+    };
     const logs = await prisma.usageLog.findMany({
-      where: { workspaceId, createdAt: { gte: since } },
+      where,
       orderBy: { createdAt: "desc" },
       take: 1000,
     });
@@ -118,7 +159,7 @@ export class UsageService {
       byProvider: sortRollups(byProvider),
       byModel: sortRollups(byModel),
       byRequestType: sortRollups(byRequestType),
-      daily: Array.from(daily.values()).sort((left, right) => left.date.localeCompare(right.date)),
+      daily: fillDailyRollups(daily, days),
       recent: logs.slice(0, 20).map((log) => ({
         id: log.id,
         provider: log.provider,
@@ -133,6 +174,10 @@ export class UsageService {
       })),
     };
   }
+}
+
+function clampUsageDays(value: number) {
+  return Number.isFinite(value) ? Math.min(Math.max(Math.trunc(value), 1), 365) : 30;
 }
 
 type UsageRollup = {
@@ -181,4 +226,17 @@ function addRollup<TExtra extends object>(
 
 function sortRollups<T extends UsageRollup>(map: Map<string, T>) {
   return Array.from(map.values()).sort((left, right) => right.requestCount - left.requestCount);
+}
+
+function fillDailyRollups(map: Map<string, UsageRollup & { date: string }>, days: number) {
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  return Array.from({ length: days }, (_, index) => {
+    const date = new Date(today);
+    date.setUTCDate(today.getUTCDate() - (days - 1 - index));
+    const key = date.toISOString().slice(0, 10);
+
+    return map.get(key) ?? emptyRollup(key, { date: key });
+  });
 }

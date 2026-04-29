@@ -3,9 +3,13 @@ import {
   Activity,
   BarChart3,
   Bot,
+  CalendarDays,
   CheckCircle2,
+  ChevronRight,
   CircleDollarSign,
+  SlidersHorizontal,
   TriangleAlert,
+  X,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { BillingActions } from "@/components/billing/billing-actions";
@@ -13,9 +17,49 @@ import { UsageTrendPanel } from "@/components/usage/usage-trend-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { requireUser } from "@/lib/auth/session";
-import { UsageService } from "@/modules/usage/usage-service";
+import {
+  parseUsageRequestType,
+  parseUsageStatus,
+  UsageService,
+  usageRequestTypes,
+} from "@/modules/usage/usage-service";
 import { WorkspaceService } from "@/modules/workspace/workspace-service";
+
+type UsagePageProps = {
+  searchParams?:
+    | Promise<{
+        days?: string;
+        provider?: string;
+        model?: string;
+        requestType?: string;
+        status?: string;
+      }>
+    | {
+        days?: string;
+        provider?: string;
+        model?: string;
+        requestType?: string;
+        status?: string;
+      };
+};
+
+type UsageQuery = {
+  days: number;
+  provider?: string;
+  model?: string;
+  requestType?: string;
+  status?: string;
+};
+
+const rangeOptions = [
+  { label: "7 days", value: 7 },
+  { label: "30 days", value: 30 },
+  { label: "90 days", value: 90 },
+  { label: "1 year", value: 365 },
+];
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -29,10 +73,72 @@ function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
-export default async function UsagePage() {
+function parseDays(value?: string) {
+  const rawDays = Number(value ?? "30");
+  return Number.isFinite(rawDays) ? Math.min(Math.max(Math.trunc(rawDays), 1), 365) : 30;
+}
+
+function cleanFilter(value?: string) {
+  const trimmed = value?.trim();
+  return trimmed && trimmed !== "all" ? trimmed.slice(0, 140) : undefined;
+}
+
+function formatRequestType(value: string) {
+  return value
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function usageHref(current: UsageQuery, updates: Partial<UsageQuery>) {
+  const next = { ...current, ...updates };
+  const params = new URLSearchParams();
+
+  params.set("days", String(next.days));
+
+  if (next.provider) {
+    params.set("provider", next.provider);
+  }
+
+  if (next.model) {
+    params.set("model", next.model);
+  }
+
+  if (next.requestType) {
+    params.set("requestType", next.requestType);
+  }
+
+  if (next.status) {
+    params.set("status", next.status);
+  }
+
+  return `/usage?${params.toString()}`;
+}
+
+export default async function UsagePage({ searchParams }: UsagePageProps) {
   const user = await requireUser();
   const workspaces = await new WorkspaceService().listForUser(user.id);
   const workspace = workspaces[0];
+  const params = await searchParams;
+  const days = parseDays(params?.days);
+  const provider = cleanFilter(params?.provider);
+  const model = cleanFilter(params?.model);
+  const requestType = parseUsageRequestType(params?.requestType);
+  const status = parseUsageStatus(params?.status);
+  const currentQuery: UsageQuery = {
+    days,
+    provider,
+    model,
+    requestType,
+    status,
+  };
+  const hasNarrowFilters = Boolean(provider || model || requestType || status);
+  const activeFilterCount =
+    Number(days !== 30) +
+    Number(Boolean(provider)) +
+    Number(Boolean(model)) +
+    Number(Boolean(requestType)) +
+    Number(Boolean(status));
 
   if (!workspace) {
     return (
@@ -44,15 +150,39 @@ export default async function UsagePage() {
     );
   }
 
-  const summary = await new UsageService().summarize(workspace.id, 30);
+  const usageService = new UsageService();
+  const baseSummary = await usageService.summarize(workspace.id, { days });
+  const summary = hasNarrowFilters
+    ? await usageService.summarize(workspace.id, {
+        days,
+        provider,
+        modelId: model,
+        requestType,
+        status,
+      })
+    : baseSummary;
   const totalTokens = summary.tokenInputEstimate + summary.tokenOutputEstimate;
 
   return (
     <AppShell>
-      <div className="page-shell mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      <div className="page-shell mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
+          <nav aria-label="Breadcrumb" className="mb-3 flex flex-wrap items-center gap-2 text-xs text-[#6d7784]">
+            <Link href="/dashboard" className="font-medium text-[#52606d] transition hover:text-[#111418]">
+              Dashboard
+            </Link>
+            <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="font-medium text-[#111418]">Usage & Cost</span>
+          </nav>
           <p className="page-kicker">Metering</p>
-          <h1 className="page-title mt-2">Usage</h1>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <h1 className="page-title">Usage</h1>
+            {activeFilterCount ? (
+              <Badge className="bg-[#e8f2ff] text-[#245b93]">
+                {activeFilterCount} active filter{activeFilterCount === 1 ? "" : "s"}
+              </Badge>
+            ) : null}
+          </div>
           <p className="page-copy">
             Provider, model, request type, token, and cost estimates for {workspace.name}.
           </p>
@@ -61,6 +191,121 @@ export default async function UsagePage() {
           <Link href="/settings">Manage providers</Link>
         </Button>
       </div>
+
+      <section className="page-shell mb-5 rounded-[1.25rem] border border-[#d8e5ed] bg-white p-4 shadow-[0_18px_40px_-30px_rgba(25,45,68,0.35)]">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <SlidersHorizontal className="h-4 w-4 text-primary" aria-hidden="true" />
+              Usage filters
+            </div>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
+              Scope the dashboard by billing window, provider, model, request type, and outcome.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
+              Range
+            </span>
+            <div className="flex flex-wrap gap-1 rounded-xl border border-[#d9e3eb] bg-[#f7fafd] p-1">
+              {rangeOptions.map((option) => (
+                <Link
+                  key={option.value}
+                  href={usageHref(currentQuery, { days: option.value })}
+                  className={
+                    days === option.value
+                      ? "rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-[#111418] shadow-sm"
+                      : "rounded-lg px-3 py-1.5 text-xs font-semibold text-[#53606d] transition hover:bg-white hover:text-[#111418]"
+                  }
+                >
+                  {option.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <form method="get" className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[120px_repeat(4,minmax(0,1fr))_auto] xl:items-end">
+          <div>
+            <Label htmlFor="usage-days" className="text-xs text-muted-foreground">
+              Days
+            </Label>
+            <Select id="usage-days" name="days" defaultValue={String(days)} className="mt-1 w-full rounded-xl">
+              {rangeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.value === 365 ? "Last year" : `Last ${option.label}`}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="usage-provider" className="text-xs text-muted-foreground">
+              Provider
+            </Label>
+            <Select id="usage-provider" name="provider" defaultValue={provider ?? "all"} className="mt-1 w-full rounded-xl">
+              <option value="all">All providers</option>
+              {baseSummary.byProvider.map((item) => (
+                <option key={item.key} value={item.key}>
+                  {item.key}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="usage-model" className="text-xs text-muted-foreground">
+              Model
+            </Label>
+            <Select id="usage-model" name="model" defaultValue={model ?? "all"} className="mt-1 w-full rounded-xl">
+              <option value="all">All models</option>
+              {baseSummary.byModel.map((item) => (
+                <option key={item.key} value={item.modelId}>
+                  {item.modelId}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="usage-request-type" className="text-xs text-muted-foreground">
+              Request type
+            </Label>
+            <Select
+              id="usage-request-type"
+              name="requestType"
+              defaultValue={requestType ?? "all"}
+              className="mt-1 w-full rounded-xl"
+            >
+              <option value="all">All request types</option>
+              {usageRequestTypes.map((item) => (
+                <option key={item} value={item}>
+                  {formatRequestType(item)}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="usage-status" className="text-xs text-muted-foreground">
+              Status
+            </Label>
+            <Select id="usage-status" name="status" defaultValue={status ?? "all"} className="mt-1 w-full rounded-xl">
+              <option value="all">All outcomes</option>
+              <option value="success">Successful only</option>
+              <option value="failed">Failed only</option>
+            </Select>
+          </div>
+          <div className="flex gap-2 md:col-span-2 xl:col-span-1">
+            <Button type="submit" className="flex-1 rounded-xl xl:flex-none">
+              Apply
+            </Button>
+            <Button asChild variant="outline" className="rounded-xl">
+              <Link href="/usage" aria-label="Clear usage filters">
+                <X className="h-4 w-4" aria-hidden="true" />
+                Clear
+              </Link>
+            </Button>
+          </div>
+        </form>
+      </section>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card className="rounded-[1.25rem]">
