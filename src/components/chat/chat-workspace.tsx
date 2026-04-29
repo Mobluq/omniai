@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast";
 import { ModelControls } from "@/components/chat/model-controls";
+import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { useChatStore, type RoutingMode } from "@/components/chat/chat-store";
 import { errorMessage } from "@/lib/api/client";
 import { modelRegistry } from "@/modules/ai/registry/model-registry";
@@ -490,7 +491,12 @@ export function ChatWorkspace() {
               <h2 className="text-sm font-semibold tracking-tight">History</h2>
               <p className="mt-1 text-xs text-muted-foreground">{workspace?.name ?? "Workspace"}</p>
             </div>
-            <Button size="sm" variant="outline" className="rounded-xl" onClick={() => createConversation()}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="rounded-xl"
+              onClick={() => createConversation()}
+            >
               <Plus className="h-4 w-4" aria-hidden="true" />
               New
             </Button>
@@ -498,7 +504,9 @@ export function ChatWorkspace() {
 
           <div className="mt-3 flex min-h-10 items-center gap-2 rounded-xl border border-border/70 bg-white px-3 text-sm text-muted-foreground">
             <Search className="h-4 w-4" aria-hidden="true" />
-            <span className="truncate">{conversations.length} threads in {routingMode} mode</span>
+            <span className="truncate">
+              {conversations.length} threads in {routingMode} mode
+            </span>
           </div>
 
           <div className="thin-scrollbar mt-3 grid max-h-[calc(100svh-18rem)] gap-1.5 overflow-auto pr-1">
@@ -525,7 +533,9 @@ export function ChatWorkspace() {
                       <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground">
                         <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
                       </span>
-                      <p className="truncate text-sm font-semibold">{getConversationTitle(conversation)}</p>
+                      <p className="truncate text-sm font-semibold">
+                        {getConversationTitle(conversation)}
+                      </p>
                     </div>
                     <p className="mt-2 line-clamp-2 text-xs leading-5 text-muted-foreground">
                       {getConversationPreview(conversation)}
@@ -567,7 +577,12 @@ export function ChatWorkspace() {
                   {workspace?.name ?? "Workspace"}
                 </p>
               </div>
-              <Button size="sm" variant="outline" className="rounded-xl" onClick={() => createConversation()}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="rounded-xl"
+                onClick={() => createConversation()}
+              >
                 <Plus className="h-4 w-4" aria-hidden="true" />
                 New
               </Button>
@@ -594,13 +609,18 @@ export function ChatWorkspace() {
           </div>
           <div className="border-b border-border/70 bg-white px-4 py-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="min-w-0">
-                <h2 className="truncate text-sm font-semibold tracking-tight">
-                  {activeConversation ? getConversationTitle(activeConversation) : "New conversation"}
-                </h2>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {selectedModel.provider} / {selectedModel.modelId}
-                </p>
+              <div className="group/provider flex min-w-0 items-center gap-3">
+                <ProviderLogo provider={selectedModel.provider} className="h-9 w-9 rounded-lg" />
+                <div className="min-w-0">
+                  <h2 className="truncate text-sm font-semibold tracking-tight">
+                    {activeConversation
+                      ? getConversationTitle(activeConversation)
+                      : "New conversation"}
+                  </h2>
+                  <p className="mt-1 truncate text-xs text-muted-foreground">
+                    {selectedModel.provider} / {selectedModel.modelId}
+                  </p>
+                </div>
               </div>
               <Badge
                 className={

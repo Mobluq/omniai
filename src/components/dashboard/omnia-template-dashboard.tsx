@@ -6,26 +6,21 @@ import type { ReactNode } from "react";
 import { gsap } from "gsap";
 import {
   ArrowRight,
-  Bot,
-  BrainCircuit,
   CheckCircle2,
   ChevronRight,
   CircleAlert,
-  Code2,
   Database,
   FileStack,
   Gauge,
-  Globe2,
-  Image,
   Layers3,
   LockKeyhole,
   MessageSquarePlus,
   Route,
   SearchCheck,
   Settings2,
-  Sparkles,
   Zap,
 } from "lucide-react";
+import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { cn } from "@/lib/utils";
 
 type ProviderConnection = {
@@ -94,8 +89,6 @@ const statusColors = {
   route: "#22a65a",
   blue: "#4f88ff",
 };
-
-const providerIcons = [Sparkles, BrainCircuit, Globe2, Code2, Image, Bot];
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
@@ -221,7 +214,11 @@ function MobileRoutingSteps({ lens }: { lens: RoutingLens }) {
     ["Prompt stored", "The user message is saved before a provider call.", statusColors.intake],
     ["Intent classified", "Task type, context need, and risk are scored.", statusColors.classify],
     [
-      lens === "auto" ? "Best model selected" : lens === "manual" ? "Selected model checked" : "Switch suggested",
+      lens === "auto"
+        ? "Best model selected"
+        : lens === "manual"
+          ? "Selected model checked"
+          : "Switch suggested",
       lens === "auto"
         ? "The router can choose without pausing the conversation."
         : lens === "manual"
@@ -229,7 +226,11 @@ function MobileRoutingSteps({ lens }: { lens: RoutingLens }) {
           : "The user sees why a better provider may help.",
       statusColors.review,
     ],
-    ["Response logged", "Usage, model metadata, and memory hooks are recorded.", statusColors.route],
+    [
+      "Response logged",
+      "Usage, model metadata, and memory hooks are recorded.",
+      statusColors.route,
+    ],
   ];
 
   return (
@@ -321,7 +322,15 @@ function RoutingFlow({ lens }: { lens: RoutingLens }) {
             ["Call provider + log usage", 820, 138],
           ].map(([label, x, y]) => (
             <g key={label}>
-              <rect x={Number(x) - 18} y={Number(y) - 24} width="190" height="36" rx="18" fill="#111418" opacity="0.82" />
+              <rect
+                x={Number(x) - 18}
+                y={Number(y) - 24}
+                width="190"
+                height="36"
+                rx="18"
+                fill="#111418"
+                opacity="0.82"
+              />
               <text x={x} y={y} fill="white" fontSize="13" fontWeight="600">
                 {label}
               </text>
@@ -352,18 +361,16 @@ function ProviderFeed({
   providers: ProviderConnection[];
   filter: ProviderFilter;
 }) {
-  const rows = providers.map((provider, index) => {
+  const rows = providers.map((provider) => {
     const status = getProviderStatus(provider);
     const capabilities = Array.from(
       new Set(provider.models.flatMap((model) => model.capabilities)),
     ).slice(0, 3);
-    const Icon = providerIcons[index] ?? Bot;
 
     return {
       provider,
       status,
       capabilities,
-      Icon,
     };
   });
   const filteredRows = rows.filter((row) => {
@@ -388,16 +395,14 @@ function ProviderFeed({
 
   return (
     <div className="divide-y divide-[#dce6ee]">
-      {filteredRows.map(({ provider, status, capabilities, Icon }) => (
+      {filteredRows.map(({ provider, status, capabilities }) => (
         <Link
           key={provider.provider}
           href="/settings"
-          className="grid min-h-[4.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-3 transition hover:bg-[#f7fafd] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
+          className="group/provider grid min-h-[4.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-3 transition hover:bg-[#f7fafd] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
         >
           <div className="flex min-w-0 items-center gap-3">
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-[#e7f1ff] text-[#3674c7]">
-              <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
-            </span>
+            <ProviderLogo provider={provider.provider} className="h-9 w-9" />
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold">{provider.displayName}</span>
               <span className="mt-1 flex flex-wrap gap-1.5">
@@ -493,15 +498,21 @@ function UsageByProvider({ rows }: { rows: UsageRollup[] }) {
               <div>
                 <p className="text-sm font-semibold capitalize">{row.key}</p>
                 <p className="mt-1 text-xs text-[#667381]">
-                  {formatNumber(row.successCount)} successful / {formatNumber(row.failureCount)} failed
+                  {formatNumber(row.successCount)} successful / {formatNumber(row.failureCount)}{" "}
+                  failed
                 </p>
               </div>
               <div className="text-right">
-                <p className="font-mono text-sm font-semibold">{formatCurrency(row.costEstimate)}</p>
+                <p className="font-mono text-sm font-semibold">
+                  {formatCurrency(row.costEstimate)}
+                </p>
                 <p className="text-xs text-[#7f8a96]">{formatNumber(row.requestCount)} calls</p>
               </div>
             </div>
-            <ProgressBar value={(row.requestCount / max) * 100} color={failureRate > 20 ? statusColors.review : statusColors.route} />
+            <ProgressBar
+              value={(row.requestCount / max) * 100}
+              color={failureRate > 20 ? statusColors.review : statusColors.route}
+            />
           </Link>
         );
       })}
@@ -743,7 +754,9 @@ function ActionQueue({
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold tracking-[-0.02em]">Operations Queue</h2>
-          <p className="mt-1 text-sm text-[#667381]">The next useful actions, not generic activity.</p>
+          <p className="mt-1 text-sm text-[#667381]">
+            The next useful actions, not generic activity.
+          </p>
         </div>
         <Link
           href="/settings"
@@ -776,7 +789,10 @@ function ActionQueue({
               <span className="block truncate text-sm font-semibold">{action.title}</span>
               <span className="mt-1 block text-xs leading-5 text-[#667381]">{action.body}</span>
             </span>
-            <ChevronRight className="h-4 w-4 text-[#88939f] transition group-hover:translate-x-0.5" aria-hidden="true" />
+            <ChevronRight
+              className="h-4 w-4 text-[#88939f] transition group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
           </Link>
         ))}
       </div>
@@ -815,9 +831,16 @@ export function OmniTemplateDashboard({
     const memoryScore = knowledgeSourceCount > 0 ? 20 : 0;
     const usageScore = requestCount > 0 ? 20 : 0;
     const recommendationScore = routingDecisionCount > 0 ? 15 : 0;
-    const reliabilityScore = requestCount === 0 || failureCount === 0 ? 10 : Math.max(0, 10 - failureCount * 2);
+    const reliabilityScore =
+      requestCount === 0 || failureCount === 0 ? 10 : Math.max(0, 10 - failureCount * 2);
     return providerScore + memoryScore + usageScore + recommendationScore + reliabilityScore;
-  }, [connectedProviderCount, failureCount, knowledgeSourceCount, requestCount, routingDecisionCount]);
+  }, [
+    connectedProviderCount,
+    failureCount,
+    knowledgeSourceCount,
+    requestCount,
+    routingDecisionCount,
+  ]);
 
   useEffect(() => {
     if (!rootRef.current) {
@@ -839,7 +862,11 @@ export function OmniTemplateDashboard({
       timeline
         .from(".metric-tile", { y: 12, autoAlpha: 0, duration: 0.42, stagger: 0.035 })
         .from(".dashboard-panel", { y: 18, autoAlpha: 0, duration: 0.5, stagger: 0.04 }, "-=0.2")
-        .from(".dashboard-flow", { scaleX: 0.84, autoAlpha: 0, transformOrigin: "left center", duration: 0.72 }, "-=0.28");
+        .from(
+          ".dashboard-flow",
+          { scaleX: 0.84, autoAlpha: 0, transformOrigin: "left center", duration: 0.72 },
+          "-=0.28",
+        );
     }, rootRef);
 
     return () => context.revert();
@@ -892,12 +919,42 @@ export function OmniTemplateDashboard({
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
           {[
-            ["Readiness", `${readinessScore}%`, "Provider, memory, usage, and routing setup.", "/settings"],
-            ["Conversations", formatNumber(conversationsCount), "Stored history in this workspace.", "/chat"],
-            ["Routing checks", formatNumber(routingDecisionCount), "Auditable model recommendations.", "/routing"],
-            ["Connected providers", `${connectedProviderCount}/${providers.length || 0}`, "Server-side model access.", "/settings"],
-            ["Memory sources", formatNumber(knowledgeSourceCount), "Knowledge available for context injection.", "/knowledge"],
-            ["Estimated spend", formatCurrency(estimatedCost), `${successRate}% success rate in usage logs.`, "/usage"],
+            [
+              "Readiness",
+              `${readinessScore}%`,
+              "Provider, memory, usage, and routing setup.",
+              "/settings",
+            ],
+            [
+              "Conversations",
+              formatNumber(conversationsCount),
+              "Stored history in this workspace.",
+              "/chat",
+            ],
+            [
+              "Routing checks",
+              formatNumber(routingDecisionCount),
+              "Auditable model recommendations.",
+              "/routing",
+            ],
+            [
+              "Connected providers",
+              `${connectedProviderCount}/${providers.length || 0}`,
+              "Server-side model access.",
+              "/settings",
+            ],
+            [
+              "Memory sources",
+              formatNumber(knowledgeSourceCount),
+              "Knowledge available for context injection.",
+              "/knowledge",
+            ],
+            [
+              "Estimated spend",
+              formatCurrency(estimatedCost),
+              `${successRate}% success rate in usage logs.`,
+              "/usage",
+            ],
           ].map(([label, value, helper, href]) => (
             <div key={label} className="metric-tile h-full">
               <MetricTile label={label} value={value} helper={helper} href={href} />
@@ -930,12 +987,23 @@ export function OmniTemplateDashboard({
               <div className="grid gap-4 lg:grid-cols-4">
                 {[
                   ["Manual mode", "User selects model; OmniAI records fit.", statusColors.intake],
-                  ["Suggest mode", "Recommendation appears before switching.", statusColors.classify],
+                  [
+                    "Suggest mode",
+                    "Recommendation appears before switching.",
+                    statusColors.classify,
+                  ],
                   ["Auto mode", "Policy selects the best available model.", statusColors.review],
-                  ["Evidence log", "Provider, confidence, usage, and outcome saved.", statusColors.route],
+                  [
+                    "Evidence log",
+                    "Provider, confidence, usage, and outcome saved.",
+                    statusColors.route,
+                  ],
                 ].map(([label, body, color]) => (
                   <div key={label} className="rounded-2xl border border-[#dde7ef] p-4">
-                    <span className="block h-1.5 w-12 rounded-full" style={{ backgroundColor: color }} />
+                    <span
+                      className="block h-1.5 w-12 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
                     <p className="mt-3 text-sm font-semibold">{label}</p>
                     <p className="mt-1 text-xs leading-5 text-[#667381]">{body}</p>
                   </div>
@@ -1007,10 +1075,7 @@ export function OmniTemplateDashboard({
         </div>
 
         <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.55fr)]">
-          <RecentWork
-            conversations={recentConversations}
-            recommendations={recentRecommendations}
-          />
+          <RecentWork conversations={recentConversations} recommendations={recentRecommendations} />
 
           <section className="dashboard-panel p-5 sm:p-6">
             <div className="flex items-start gap-3">
@@ -1034,8 +1099,12 @@ export function OmniTemplateDashboard({
                       className="grid gap-2 rounded-2xl border border-[#dde7ef] p-4 transition hover:border-[#b9cfe0] hover:bg-[#f7fafd]"
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-semibold capitalize">{formatCapability(row.key)}</p>
-                        <p className="font-mono text-sm font-semibold">{formatNumber(row.requestCount)}</p>
+                        <p className="text-sm font-semibold capitalize">
+                          {formatCapability(row.key)}
+                        </p>
+                        <p className="font-mono text-sm font-semibold">
+                          {formatNumber(row.requestCount)}
+                        </p>
                       </div>
                       <ProgressBar
                         value={taskTotal ? (row.requestCount / taskTotal) * 100 : 0}
@@ -1061,7 +1130,8 @@ export function OmniTemplateDashboard({
                 <div>
                   <p className="text-sm font-semibold">Artifacts saved</p>
                   <p className="mt-1 text-xs text-[#667381]">
-                    {formatNumber(artifactCount)} output{artifactCount === 1 ? "" : "s"} stored for review or reuse.
+                    {formatNumber(artifactCount)} output{artifactCount === 1 ? "" : "s"} stored for
+                    review or reuse.
                   </p>
                 </div>
               </div>
@@ -1071,8 +1141,8 @@ export function OmniTemplateDashboard({
 
         <div className="sr-only">
           Workspace {workspaceName}, {formatNumber(requestCount)} requests,{" "}
-          {formatCurrency(estimatedCost)} estimated cost, {formatNumber(failureCount)} failed
-          calls, {formatNumber(successCount)} successful calls, {connectedProviderCount} connected
+          {formatCurrency(estimatedCost)} estimated cost, {formatNumber(failureCount)} failed calls,{" "}
+          {formatNumber(successCount)} successful calls, {connectedProviderCount} connected
           providers.
         </div>
       </div>

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, KeyRound, Loader2, PlugZap, Save, ShieldCheck } from "lucide-react";
+import { CheckCircle2, KeyRound, Loader2, Save, ShieldCheck } from "lucide-react";
+import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -286,10 +287,8 @@ export function SettingsWorkspace() {
                   >
                     <CardHeader>
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <span className="grid h-9 w-9 place-items-center rounded-xl bg-primary/10 text-primary">
-                            <PlugZap className="h-4 w-4" aria-hidden="true" />
-                          </span>
+                        <div className="group/provider flex items-center gap-2">
+                          <ProviderLogo provider={provider.provider} className="h-9 w-9" />
                           <div>
                             <CardTitle className="text-base">{provider.displayName}</CardTitle>
                             <CardDescription>

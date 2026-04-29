@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Bot, Braces, CloudCog, ExternalLink, Image, SearchCode, Sparkles } from "lucide-react";
+import { ExternalLink } from "lucide-react";
+import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -18,15 +19,6 @@ type ProviderFeedPanelProps = {
       capabilities: string[];
     }>;
   }>;
-};
-
-const providerIcons = {
-  openai: Sparkles,
-  anthropic: Braces,
-  google: SearchCode,
-  mistral: Bot,
-  stability: Image,
-  amazon: CloudCog,
 };
 
 function MiniDonut({ connected, coverage }: { connected: boolean; coverage: number }) {
@@ -69,7 +61,6 @@ export function ProviderFeedPanel({ providers }: ProviderFeedPanelProps) {
 
       <div className="divide-y divide-border/70">
         {providers.map((provider) => {
-          const Icon = providerIcons[provider.provider as keyof typeof providerIcons] ?? Bot;
           const connected =
             provider.isEnabled && (provider.envConfigured || provider.workspaceConfigured);
           const capabilityCount = new Set(provider.models.flatMap((model) => model.capabilities))
@@ -87,12 +78,10 @@ export function ProviderFeedPanel({ providers }: ProviderFeedPanelProps) {
             <Link
               key={provider.provider}
               href="/settings"
-              className="grid gap-3 px-5 py-3.5 transition hover:bg-muted/40 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+              className="group/provider grid gap-3 px-5 py-3.5 transition hover:bg-muted/40 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
             >
               <div className="flex min-w-0 items-center gap-3">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#eaf3ff] text-[#3677c7] ring-1 ring-[#cfe2ff]">
-                  <Icon className="h-4 w-4" aria-hidden="true" />
-                </span>
+                <ProviderLogo provider={provider.provider} />
                 <div className="min-w-0">
                   <div className="flex min-w-0 flex-wrap items-center gap-2">
                     <p className="truncate text-sm font-semibold">{provider.displayName}</p>

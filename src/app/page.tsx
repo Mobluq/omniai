@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Bot, CheckCircle2, Database, Lock, Route, Sparkles } from "lucide-react";
+import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -17,6 +18,8 @@ const features = [
     text: "Workspace-scoped knowledge architecture prepared for vector search and context injection.",
   },
 ];
+
+const providerStrip = ["openai", "anthropic", "google", "mistral", "stability", "amazon"];
 
 export default function LandingPage() {
   return (
@@ -114,6 +117,21 @@ export default function LandingPage() {
             <Button asChild variant="outline">
               <Link href="/auth/sign-in">Sign in</Link>
             </Button>
+          </div>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Integrations
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {providerStrip.map((provider) => (
+                <ProviderLogo
+                  key={provider}
+                  provider={provider}
+                  className="h-9 w-9 rounded-lg"
+                  decorative={false}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>

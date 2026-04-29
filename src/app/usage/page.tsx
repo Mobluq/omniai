@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   Activity,
   BarChart3,
-  Bot,
   CalendarDays,
   CheckCircle2,
   ChevronRight,
@@ -13,6 +12,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { BillingActions } from "@/components/billing/billing-actions";
+import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { UsageTrendPanel } from "@/components/usage/usage-trend-panel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -167,8 +167,14 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
     <AppShell>
       <div className="page-shell mb-5 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <nav aria-label="Breadcrumb" className="mb-3 flex flex-wrap items-center gap-2 text-xs text-[#6d7784]">
-            <Link href="/dashboard" className="font-medium text-[#52606d] transition hover:text-[#111418]">
+          <nav
+            aria-label="Breadcrumb"
+            className="mb-3 flex flex-wrap items-center gap-2 text-xs text-[#6d7784]"
+          >
+            <Link
+              href="/dashboard"
+              className="font-medium text-[#52606d] transition hover:text-[#111418]"
+            >
               Dashboard
             </Link>
             <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -226,12 +232,20 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
           </div>
         </div>
 
-        <form method="get" className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[120px_repeat(4,minmax(0,1fr))_auto] xl:items-end">
+        <form
+          method="get"
+          className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-[120px_repeat(4,minmax(0,1fr))_auto] xl:items-end"
+        >
           <div>
             <Label htmlFor="usage-days" className="text-xs text-muted-foreground">
               Days
             </Label>
-            <Select id="usage-days" name="days" defaultValue={String(days)} className="mt-1 w-full rounded-xl">
+            <Select
+              id="usage-days"
+              name="days"
+              defaultValue={String(days)}
+              className="mt-1 w-full rounded-xl"
+            >
               {rangeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.value === 365 ? "Last year" : `Last ${option.label}`}
@@ -243,7 +257,12 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
             <Label htmlFor="usage-provider" className="text-xs text-muted-foreground">
               Provider
             </Label>
-            <Select id="usage-provider" name="provider" defaultValue={provider ?? "all"} className="mt-1 w-full rounded-xl">
+            <Select
+              id="usage-provider"
+              name="provider"
+              defaultValue={provider ?? "all"}
+              className="mt-1 w-full rounded-xl"
+            >
               <option value="all">All providers</option>
               {baseSummary.byProvider.map((item) => (
                 <option key={item.key} value={item.key}>
@@ -256,7 +275,12 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
             <Label htmlFor="usage-model" className="text-xs text-muted-foreground">
               Model
             </Label>
-            <Select id="usage-model" name="model" defaultValue={model ?? "all"} className="mt-1 w-full rounded-xl">
+            <Select
+              id="usage-model"
+              name="model"
+              defaultValue={model ?? "all"}
+              className="mt-1 w-full rounded-xl"
+            >
               <option value="all">All models</option>
               {baseSummary.byModel.map((item) => (
                 <option key={item.key} value={item.modelId}>
@@ -287,7 +311,12 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
             <Label htmlFor="usage-status" className="text-xs text-muted-foreground">
               Status
             </Label>
-            <Select id="usage-status" name="status" defaultValue={status ?? "all"} className="mt-1 w-full rounded-xl">
+            <Select
+              id="usage-status"
+              name="status"
+              defaultValue={status ?? "all"}
+              className="mt-1 w-full rounded-xl"
+            >
               <option value="all">All outcomes</option>
               <option value="success">Successful only</option>
               <option value="failed">Failed only</option>
@@ -366,7 +395,18 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
           <Card className="rounded-[1.25rem]">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5 text-primary" aria-hidden="true" />
+                <div className="flex -space-x-2">
+                  {(summary.byProvider.length
+                    ? summary.byProvider.slice(0, 3).map((provider) => provider.key)
+                    : ["openai", "anthropic", "google"]
+                  ).map((provider) => (
+                    <ProviderLogo
+                      key={provider}
+                      provider={provider}
+                      className="h-8 w-8 rounded-lg ring-2 ring-white"
+                    />
+                  ))}
+                </div>
                 <CardTitle>Usage by AI provider</CardTitle>
               </div>
               <CardDescription>Requests and estimated spend per provider.</CardDescription>
@@ -379,7 +419,10 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
                     className="grid gap-2 rounded-xl border border-border/70 p-4"
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <div className="font-medium capitalize">{provider.key}</div>
+                      <div className="group/provider flex min-w-0 items-center gap-3">
+                        <ProviderLogo provider={provider.key} className="h-8 w-8 rounded-lg" />
+                        <div className="truncate font-medium capitalize">{provider.key}</div>
+                      </div>
                       <Badge className="bg-muted">
                         {formatNumber(provider.requestCount)} requests
                       </Badge>
