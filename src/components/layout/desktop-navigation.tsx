@@ -79,7 +79,7 @@ export function DesktopNavigation({ profile }: { profile: ShellProfile }) {
         <div
           className={cn(
             "flex items-center border-b border-[#e5edf3]",
-            collapsed ? "justify-center gap-2 px-3 py-4" : "justify-between gap-3 px-5 py-5",
+            collapsed ? "flex-col justify-center gap-2 px-3 py-4" : "justify-between gap-3 px-5 py-5",
           )}
         >
           <Link

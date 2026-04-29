@@ -139,7 +139,7 @@ export function NotificationInbox() {
   }
 
   return (
-    <Card>
+    <Card className="page-shell">
       <CardHeader>
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
