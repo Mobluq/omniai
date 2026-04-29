@@ -195,7 +195,7 @@ export function NotificationCenter() {
         onClick={() => setOpen((current) => !current)}
         aria-label="Open notifications"
         aria-expanded={open}
-        className="relative h-10 w-10 rounded-xl border-[#d9e3eb] bg-white"
+        className="relative h-10 w-10 rounded-xl border-[#c9d8dc] bg-white"
       >
         <Bell className="h-4 w-4" aria-hidden="true" />
         {unreadCount ? (
@@ -206,11 +206,11 @@ export function NotificationCenter() {
       </Button>
 
       {open ? (
-        <div className="fixed left-3 right-3 top-[74px] z-50 overflow-hidden rounded-2xl border border-[#d9e3eb] bg-white shadow-[0_22px_70px_rgba(17,20,24,0.16)] sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[min(92vw,420px)]">
-          <div className="flex min-h-[68px] items-center justify-between border-b border-[#d9e3eb] px-4">
+        <div className="fixed left-3 right-3 top-[74px] z-50 overflow-hidden rounded-2xl border border-[#c9d8dc] bg-white shadow-[0_22px_70px_rgba(17,20,24,0.16)] sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[min(92vw,420px)]">
+          <div className="flex min-h-[68px] items-center justify-between border-b border-[#c9d8dc] px-4">
             <div>
               <div className="text-sm font-semibold">Notifications</div>
-              <div className="mt-1 text-xs text-[#667381]">
+              <div className="mt-1 text-xs text-[#56666b]">
                 {unreadCount ? `${unreadCount} unread` : "All caught up"}
               </div>
             </div>
@@ -230,11 +230,11 @@ export function NotificationCenter() {
           <div className="thin-scrollbar max-h-[min(62dvh,440px)] overflow-auto p-2">
             {loading ? (
               <div className="grid min-h-[220px] place-items-center">
-                <Loader2 className="h-4 w-4 animate-spin text-[#667381]" aria-hidden="true" />
+                <Loader2 className="h-4 w-4 animate-spin text-[#56666b]" aria-hidden="true" />
               </div>
             ) : items.length ? (
               items.map((item) => (
-                <article key={item.id} className="rounded-xl p-3 hover:bg-[#f7fafd]">
+                <article key={item.id} className="rounded-xl p-3 hover:bg-[#edf7f9]">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
@@ -243,10 +243,10 @@ export function NotificationCenter() {
                           <Badge className="bg-primary/10 text-primary">New</Badge>
                         ) : null}
                       </div>
-                      <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#667381]">
+                      <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#56666b]">
                         {item.body}
                       </p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#667381]">
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#56666b]">
                         <span>{formatNotificationTime(item.createdAt)}</span>
                         <span className="capitalize">{item.type}</span>
                         {item.actionUrl ? (
@@ -289,16 +289,16 @@ export function NotificationCenter() {
                 </article>
               ))
             ) : (
-              <div className="grid min-h-[220px] place-items-center rounded-xl border border-dashed border-[#cfdbe5] text-center">
+              <div className="grid min-h-[220px] place-items-center rounded-xl border border-dashed border-[#c9d8dc] text-center">
                 <div>
-                  <Inbox className="mx-auto h-5 w-5 text-[#667381]" aria-hidden="true" />
-                  <p className="mt-2 text-sm text-[#667381]">No notifications yet.</p>
+                  <Inbox className="mx-auto h-5 w-5 text-[#56666b]" aria-hidden="true" />
+                  <p className="mt-2 text-sm text-[#56666b]">No notifications yet.</p>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="border-t border-[#d9e3eb] p-2">
+          <div className="border-t border-[#c9d8dc] p-2">
             <Button
               asChild
               variant="ghost"

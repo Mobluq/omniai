@@ -50,11 +50,11 @@ export default function RoutingPage() {
         </p>
       </div>
 
-      <section className="page-shell operational-panel mb-6 overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f2f7f4] shadow-[0_28px_90px_rgba(20,31,33,0.22)]">
+      <section className="page-shell operational-panel mb-6 overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f7fbfc] shadow-[0_28px_90px_rgba(20,31,33,0.22)]">
         <div className="grid gap-6 border-b border-white/10 p-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:p-6">
           <div>
             <div className="flex items-center gap-2">
-              <Route className="h-5 w-5 text-[#ffd426]" aria-hidden="true" />
+              <Route className="h-5 w-5 text-[#c93a29]" aria-hidden="true" />
               <h2 className="text-lg font-semibold tracking-[-0.02em]">Task context path</h2>
             </div>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
@@ -81,19 +81,19 @@ export default function RoutingPage() {
               {
                 title: "Classify prompt",
                 copy: "Detect intent and likely capability.",
-                color: "#ffd426",
+                color: "#c93a29",
               },
               {
                 title: "Score models",
                 copy: "Balance quality, speed, cost, and context.",
-                color: "#ff4352",
+                color: "#c93a29",
               },
               {
                 title: "Apply policy",
                 copy: "Respect workspace providers and routing mode.",
-                color: "#09d970",
+                color: "#c93a29",
               },
-              { title: "Execute safely", copy: "Inject context and log usage.", color: "#ffd426" },
+              { title: "Execute safely", copy: "Inject context and log usage.", color: "#c93a29" },
             ].map((stage, index) => (
               <div key={stage.title} className="contents">
                 <div className="rounded-2xl border border-white/10 bg-white/10 p-4">

@@ -50,7 +50,7 @@ function MiniLine({ points, color }: { points: number[]; color: SignalCard["colo
   const path = coordinates
     .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
     .join(" ");
-  const stroke = color === "green" ? "#20b96b" : color === "red" ? "#ff4654" : "#f6be15";
+  const stroke = color === "green" ? "#c93a29" : color === "red" ? "#c93a29" : "#d85a49";
 
   return (
     <svg viewBox="0 0 210 100" className="h-24 w-full" role="img" aria-label="Activity trend">
@@ -90,7 +90,7 @@ function ProgressRow({
   tone: "yellow" | "red" | "green";
 }) {
   const barClass =
-    tone === "green" ? "bg-[#22b86a]" : tone === "red" ? "bg-[#ff4a55]" : "bg-[#f8c517]";
+    tone === "green" ? "bg-[#c93a29]" : tone === "red" ? "bg-[#c93a29]" : "bg-[#d85a49]";
 
   return (
     <div>

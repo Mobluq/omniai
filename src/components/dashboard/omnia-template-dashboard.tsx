@@ -83,11 +83,11 @@ type ProviderFilter = "all" | "connected" | "needs_key";
 type RoutingLens = "suggest" | "auto" | "manual";
 
 const statusColors = {
-  intake: "#f5bd19",
-  classify: "#fb8b24",
-  review: "#ef4351",
-  route: "#22a65a",
-  blue: "#4f88ff",
+  intake: "#d85a49",
+  classify: "#d85a49",
+  review: "#c93a29",
+  route: "#c93a29",
+  blue: "#c93a29",
 };
 
 function formatNumber(value: number) {
@@ -142,7 +142,7 @@ function getProviderStatus(provider: ProviderConnection) {
 
 function ProgressBar({ value, color = statusColors.route }: { value: number; color?: string }) {
   return (
-    <div className="h-2 overflow-hidden rounded-full bg-[#e8eef4]">
+    <div className="h-2 overflow-hidden rounded-full bg-[#e4eff1]">
       <div
         className="h-full rounded-full transition-all duration-300"
         style={{ width: `${Math.min(100, Math.max(0, value))}%`, backgroundColor: color }}
@@ -165,20 +165,20 @@ function MetricTile({
   return (
     <Link
       href={href}
-      className="group flex h-full min-h-[9.75rem] flex-col justify-between rounded-[1.15rem] border border-[#d8e5ed] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#b9cfe0] hover:shadow-[0_18px_44px_-32px_rgba(22,43,65,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
+      className="group flex h-full min-h-[9.75rem] flex-col justify-between rounded-[1.15rem] border border-[#c9d8dc] bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#aebfc4] hover:shadow-[0_18px_44px_-32px_rgba(22,43,65,0.5)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c93a29]/30"
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-xs font-medium text-[#75818d]">{label}</p>
+        <p className="text-xs font-medium text-[#627177]">{label}</p>
         <ArrowRight
-          className="h-4 w-4 text-[#9aa6b2] transition group-hover:translate-x-0.5 group-hover:text-[#111418]"
+          className="h-4 w-4 text-[#7c8b91] transition group-hover:translate-x-0.5 group-hover:text-[#171314]"
           aria-hidden="true"
         />
       </div>
       <div>
-        <p className="mt-4 font-mono text-[1.75rem] font-semibold tracking-[-0.06em] text-[#111418]">
+        <p className="mt-4 font-mono text-[1.75rem] font-semibold tracking-[-0.06em] text-[#171314]">
           {value}
         </p>
-        <p className="mt-3 text-xs leading-5 text-[#677380]">{helper}</p>
+        <p className="mt-3 text-xs leading-5 text-[#56666b]">{helper}</p>
       </div>
     </Link>
   );
@@ -198,10 +198,10 @@ function PillButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "min-h-10 shrink-0 rounded-xl px-3 text-sm font-medium transition active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30",
+        "min-h-10 shrink-0 rounded-xl px-3 text-sm font-medium transition active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c93a29]/30",
         active
-          ? "bg-[#dcecff] text-[#111418]"
-          : "bg-[#f0f4f8] text-[#53606d] hover:bg-[#e7eef5] hover:text-[#111418]",
+          ? "bg-[#f6ded9] text-[#171314]"
+          : "bg-[#edf7f9] text-[#56666b] hover:bg-[#e4eff1] hover:text-[#171314]",
       )}
     >
       {children}
@@ -244,11 +244,11 @@ function MobileRoutingSteps({ lens }: { lens: RoutingLens }) {
             >
               {index + 1}
             </span>
-            {index < steps.length - 1 ? <span className="h-full w-px bg-[#d7e3ec]" /> : null}
+            {index < steps.length - 1 ? <span className="h-full w-px bg-[#c9d8dc]" /> : null}
           </div>
           <div className="pb-4">
             <p className="text-sm font-semibold">{title}</p>
-            <p className="mt-1 text-xs leading-5 text-[#667381]">{body}</p>
+            <p className="mt-1 text-xs leading-5 text-[#56666b]">{body}</p>
           </div>
         </div>
       ))}
@@ -278,9 +278,9 @@ function RoutingFlow({ lens }: { lens: RoutingLens }) {
               <stop offset="100%" stopColor={statusColors.route} />
             </linearGradient>
             <linearGradient id="omni-route-soft" x1="0%" x2="100%" y1="0%" y2="0%">
-              <stop offset="0%" stopColor="#ffedb1" />
-              <stop offset="48%" stopColor="#ffc6ca" />
-              <stop offset="100%" stopColor="#ccefcf" />
+              <stop offset="0%" stopColor="#f6ded9" />
+              <stop offset="48%" stopColor="#ecc3bc" />
+              <stop offset="100%" stopColor="#e4eff1" />
             </linearGradient>
           </defs>
           <path
@@ -310,7 +310,7 @@ function RoutingFlow({ lens }: { lens: RoutingLens }) {
             <path
               key={x}
               d={`M${x} 20 V248`}
-              stroke="#b7c7d3"
+              stroke="#aebfc4"
               strokeDasharray="4 8"
               opacity="0.72"
             />
@@ -328,7 +328,7 @@ function RoutingFlow({ lens }: { lens: RoutingLens }) {
                 width="190"
                 height="36"
                 rx="18"
-                fill="#111418"
+                fill="#171314"
                 opacity="0.82"
               />
               <text x={x} y={y} fill="white" fontSize="13" fontWeight="600">
@@ -336,16 +336,16 @@ function RoutingFlow({ lens }: { lens: RoutingLens }) {
               </text>
             </g>
           ))}
-          <text x="86" y="68" fill="#667381" fontSize="12">
+          <text x="86" y="68" fill="#56666b" fontSize="12">
             1. Data is tenant-scoped
           </text>
-          <text x="332" y="66" fill="#667381" fontSize="12">
+          <text x="332" y="66" fill="#56666b" fontSize="12">
             2. Capability matrix + context
           </text>
-          <text x="586" y="66" fill="#667381" fontSize="12">
+          <text x="586" y="66" fill="#56666b" fontSize="12">
             3. User or policy decision
           </text>
-          <text x="824" y="66" fill="#667381" fontSize="12">
+          <text x="824" y="66" fill="#56666b" fontSize="12">
             4. Evidence saved
           </text>
         </svg>
@@ -387,19 +387,19 @@ function ProviderFeed({
 
   if (!providers.length) {
     return (
-      <div className="rounded-2xl border border-dashed border-[#cfdbe5] p-5 text-sm text-[#667381]">
+      <div className="rounded-2xl border border-dashed border-[#c9d8dc] p-5 text-sm text-[#56666b]">
         No providers are registered yet. Connect your first provider to activate model routing.
       </div>
     );
   }
 
   return (
-    <div className="divide-y divide-[#dce6ee]">
+    <div className="divide-y divide-[#c9d8dc]">
       {filteredRows.map(({ provider, status, capabilities }) => (
         <Link
           key={provider.provider}
           href="/settings"
-          className="group/provider grid min-h-[4.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-3 transition hover:bg-[#f7fafd] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
+          className="group/provider grid min-h-[4.75rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-3 transition hover:bg-[#edf7f9] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c93a29]/30"
         >
           <div className="flex min-w-0 items-center gap-3">
             <ProviderLogo provider={provider.provider} className="h-9 w-9" />
@@ -410,13 +410,13 @@ function ProviderFeed({
                   capabilities.map((capability) => (
                     <span
                       key={capability}
-                      className="rounded bg-[#f0f4f8] px-1.5 py-0.5 text-[0.65rem] capitalize text-[#65717d]"
+                      className="rounded bg-[#edf7f9] px-1.5 py-0.5 text-[0.65rem] capitalize text-[#627177]"
                     >
                       {formatCapability(capability)}
                     </span>
                   ))
                 ) : (
-                  <span className="text-xs text-[#7f8a96]">Capabilities pending</span>
+                  <span className="text-xs text-[#627177]">Capabilities pending</span>
                 )}
               </span>
             </span>
@@ -426,15 +426,15 @@ function ProviderFeed({
               className={cn(
                 "rounded-full px-2.5 py-1 text-xs font-semibold",
                 status.tone === "green"
-                  ? "bg-[#e5f6eb] text-[#1b7a45]"
+                  ? "bg-[#f6ded9] text-[#8f2a20]"
                   : status.tone === "amber"
-                    ? "bg-[#fff3d0] text-[#8a6200]"
-                    : "bg-[#eef3f7] text-[#687480]",
+                    ? "bg-[#f6ded9] text-[#8f2a20]"
+                    : "bg-[#edf7f9] text-[#627177]",
               )}
             >
               {status.label}
             </span>
-            <ChevronRight className="h-4 w-4 text-[#7c8792]" aria-hidden="true" />
+            <ChevronRight className="h-4 w-4 text-[#7c8b91]" aria-hidden="true" />
           </div>
         </Link>
       ))}
@@ -454,13 +454,13 @@ function EmptyState({
   action: string;
 }) {
   return (
-    <div className="grid min-h-[12rem] place-items-center rounded-2xl border border-dashed border-[#cfdbe5] p-6 text-center">
+    <div className="grid min-h-[12rem] place-items-center rounded-2xl border border-dashed border-[#c9d8dc] p-6 text-center">
       <div>
         <p className="font-semibold">{title}</p>
-        <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#667381]">{body}</p>
+        <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-[#56666b]">{body}</p>
         <Link
           href={href}
-          className="mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#111418] px-4 text-sm font-semibold text-white transition hover:bg-[#202833] active:translate-y-px"
+          className="mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[#171314] px-4 text-sm font-semibold text-white transition hover:bg-[#241c1b] active:translate-y-px"
         >
           {action}
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -492,12 +492,12 @@ function UsageByProvider({ rows }: { rows: UsageRollup[] }) {
           <Link
             key={row.key}
             href="/usage"
-            className="grid gap-3 rounded-2xl border border-[#dde7ef] p-4 transition hover:border-[#b9cfe0] hover:bg-[#f7fafd]"
+            className="grid gap-3 rounded-2xl border border-[#c9d8dc] p-4 transition hover:border-[#aebfc4] hover:bg-[#edf7f9]"
           >
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold capitalize">{row.key}</p>
-                <p className="mt-1 text-xs text-[#667381]">
+                <p className="mt-1 text-xs text-[#56666b]">
                   {formatNumber(row.successCount)} successful / {formatNumber(row.failureCount)}{" "}
                   failed
                 </p>
@@ -506,7 +506,7 @@ function UsageByProvider({ rows }: { rows: UsageRollup[] }) {
                 <p className="font-mono text-sm font-semibold">
                   {formatCurrency(row.costEstimate)}
                 </p>
-                <p className="text-xs text-[#7f8a96]">{formatNumber(row.requestCount)} calls</p>
+                <p className="text-xs text-[#627177]">{formatNumber(row.requestCount)} calls</p>
               </div>
             </div>
             <ProgressBar
@@ -532,13 +532,13 @@ function RecentWork({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h2 className="text-base font-semibold tracking-[-0.02em]">Recent Work</h2>
-          <p className="mt-1 text-sm text-[#667381]">
+          <p className="mt-1 text-sm text-[#56666b]">
             Conversation history and routing decisions stay visible from the same workspace.
           </p>
         </div>
         <Link
           href="/chat"
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#cfdbe5] bg-white px-3 text-sm font-semibold transition hover:bg-[#f3f7fb]"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#c9d8dc] bg-white px-3 text-sm font-semibold transition hover:bg-[#edf7f9]"
         >
           Open chat
           <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -547,29 +547,29 @@ function RecentWork({
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
         <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#7d8894]">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#627177]">
             Conversations
           </p>
           {conversations.length ? (
-            <div className="divide-y divide-[#dce6ee]">
+            <div className="divide-y divide-[#c9d8dc]">
               {conversations.map((conversation) => (
                 <Link
                   key={conversation.id}
                   href={`/chat?conversationId=${conversation.id}`}
-                  className="block py-3 transition hover:bg-[#f7fafd]"
+                  className="block py-3 transition hover:bg-[#edf7f9]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold">{conversation.title}</p>
-                      <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#667381]">
+                      <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#56666b]">
                         {conversation.lastMessage ?? "No message preview yet."}
                       </p>
                     </div>
-                    <span className="shrink-0 rounded bg-[#eef3f7] px-2 py-1 text-[0.68rem] font-semibold uppercase text-[#65717d]">
+                    <span className="shrink-0 rounded bg-[#edf7f9] px-2 py-1 text-[0.68rem] font-semibold uppercase text-[#627177]">
                       {conversation.routingMode}
                     </span>
                   </div>
-                  <p className="mt-2 text-[0.7rem] text-[#8b96a2]">
+                  <p className="mt-2 text-[0.7rem] text-[#6b797f]">
                     {conversation.activeProvider ?? "No provider yet"} /{" "}
                     {conversation.activeModelId ?? "No model selected"} /{" "}
                     {formatRelative(conversation.updatedAt)}
@@ -588,7 +588,7 @@ function RecentWork({
         </div>
 
         <div>
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#7d8894]">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#627177]">
             Recommendation audit
           </p>
           {recommendations.length ? (
@@ -597,14 +597,14 @@ function RecentWork({
                 <Link
                   key={recommendation.id}
                   href="/routing"
-                  className="rounded-2xl border border-[#dde7ef] p-4 transition hover:border-[#b9cfe0] hover:bg-[#f7fafd]"
+                  className="rounded-2xl border border-[#c9d8dc] p-4 transition hover:border-[#aebfc4] hover:bg-[#edf7f9]"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="truncate text-sm font-semibold capitalize">
                         {formatCapability(recommendation.detectedIntent)}
                       </p>
-                      <p className="mt-1 text-xs text-[#667381]">
+                      <p className="mt-1 text-xs text-[#56666b]">
                         {recommendation.recommendedProvider} / {recommendation.recommendedModelId}
                       </p>
                     </div>
@@ -612,7 +612,7 @@ function RecentWork({
                       {Math.round(recommendation.confidence * 100)}%
                     </span>
                   </div>
-                  <p className="mt-3 line-clamp-2 text-xs leading-5 text-[#667381]">
+                  <p className="mt-3 line-clamp-2 text-xs leading-5 text-[#56666b]">
                     {recommendation.reason}
                   </p>
                 </Link>
@@ -644,12 +644,12 @@ function DecisionModelPanel() {
   return (
     <section className="dashboard-panel p-5 sm:p-6">
       <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#e7f1ff] text-[#3674c7]">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f6ded9] text-[#c93a29]">
           <SearchCheck className="h-5 w-5" aria-hidden="true" />
         </span>
         <div>
           <h2 className="text-base font-semibold tracking-[-0.02em]">How OmniAI Picks a Model</h2>
-          <p className="mt-1 text-sm leading-6 text-[#667381]">
+          <p className="mt-1 text-sm leading-6 text-[#56666b]">
             The first version is rule-based by design: explainable, testable, and ready to be
             upgraded with an LLM classifier once enough decision data exists.
           </p>
@@ -661,7 +661,7 @@ function DecisionModelPanel() {
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold">{label}</p>
-                <p className="mt-0.5 text-xs text-[#667381]">{description}</p>
+                <p className="mt-0.5 text-xs text-[#56666b]">{description}</p>
               </div>
               <span className="font-mono text-sm font-semibold">{weight}%</span>
             </div>
@@ -754,13 +754,13 @@ function ActionQueue({
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold tracking-[-0.02em]">Operations Queue</h2>
-          <p className="mt-1 text-sm text-[#667381]">
+          <p className="mt-1 text-sm text-[#56666b]">
             The next useful actions, not generic activity.
           </p>
         </div>
         <Link
           href="/settings"
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#cfdbe5] bg-white px-3 text-sm font-semibold transition hover:bg-[#f3f7fb]"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-[#c9d8dc] bg-white px-3 text-sm font-semibold transition hover:bg-[#edf7f9]"
         >
           Settings
           <Settings2 className="h-4 w-4" aria-hidden="true" />
@@ -771,26 +771,26 @@ function ActionQueue({
           <Link
             key={action.title}
             href={action.href}
-            className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[#dde7ef] p-3 transition hover:border-[#b9cfe0] hover:bg-[#f7fafd]"
+            className="group grid grid-cols-[2.5rem_minmax(0,1fr)_auto] items-center gap-3 rounded-2xl border border-[#c9d8dc] p-3 transition hover:border-[#aebfc4] hover:bg-[#edf7f9]"
           >
             <span
               className={cn(
                 "grid h-10 w-10 place-items-center rounded-xl",
                 action.tone === "urgent"
-                  ? "bg-[#ffe8ea] text-[#c93a46]"
+                  ? "bg-[#f6ded9] text-[#c93a29]"
                   : action.tone === "good"
-                    ? "bg-[#e5f6eb] text-[#1b7a45]"
-                    : "bg-[#e7f1ff] text-[#3674c7]",
+                    ? "bg-[#f6ded9] text-[#8f2a20]"
+                    : "bg-[#f6ded9] text-[#c93a29]",
               )}
             >
               <action.icon className="h-5 w-5" aria-hidden="true" />
             </span>
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold">{action.title}</span>
-              <span className="mt-1 block text-xs leading-5 text-[#667381]">{action.body}</span>
+              <span className="mt-1 block text-xs leading-5 text-[#56666b]">{action.body}</span>
             </span>
             <ChevronRight
-              className="h-4 w-4 text-[#88939f] transition group-hover:translate-x-0.5"
+              className="h-4 w-4 text-[#7c8b91] transition group-hover:translate-x-0.5"
               aria-hidden="true"
             />
           </Link>
@@ -875,26 +875,26 @@ export function OmniTemplateDashboard({
   return (
     <div
       ref={rootRef}
-      className="min-h-[calc(100dvh-66px)] bg-[#f5f8fb] px-3 py-4 sm:px-5 lg:px-8 lg:py-7"
+      className="min-h-[calc(100dvh-66px)] bg-[#edf7f9] px-3 py-4 sm:px-5 lg:px-8 lg:py-7"
     >
       <div className="mx-auto max-w-[1660px]">
         <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="grid h-5 w-5 grid-cols-2 gap-1" aria-hidden="true">
-                <span className="rounded-sm border border-[#9aa6b2]" />
-                <span className="rounded-sm border border-[#9aa6b2]" />
-                <span className="rounded-sm border border-[#9aa6b2]" />
-                <span className="rounded-sm border border-[#9aa6b2]" />
+                <span className="rounded-sm border border-[#7c8b91]" />
+                <span className="rounded-sm border border-[#7c8b91]" />
+                <span className="rounded-sm border border-[#7c8b91]" />
+                <span className="rounded-sm border border-[#7c8b91]" />
               </span>
-              <span className="text-[#8b96a2]">Dashboards</span>
-              <span className="text-[#a4aeb8]">/</span>
+              <span className="text-[#6b797f]">Dashboards</span>
+              <span className="text-[#7c8b91]">/</span>
               <span className="font-semibold">AI Operations</span>
             </div>
-            <h1 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#111418] sm:text-3xl">
+            <h1 className="mt-4 text-2xl font-semibold tracking-[-0.04em] text-[#171314] sm:text-3xl">
               {workspaceName}
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-[#667381]">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-[#56666b]">
               A control center for model readiness, routing decisions, usage, memory, and the next
               action your workspace should take.
             </p>
@@ -902,14 +902,14 @@ export function OmniTemplateDashboard({
           <div className="flex flex-wrap gap-2">
             <Link
               href="/chat"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#111418] px-4 text-sm font-semibold text-white transition hover:bg-[#202833] active:translate-y-px"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-[#171314] px-4 text-sm font-semibold text-white transition hover:bg-[#241c1b] active:translate-y-px"
             >
               <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
               New routed chat
             </Link>
             <Link
               href="/settings"
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#cfdbe5] bg-white px-4 text-sm font-semibold transition hover:bg-[#f3f7fb] active:translate-y-px"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#c9d8dc] bg-white px-4 text-sm font-semibold transition hover:bg-[#edf7f9] active:translate-y-px"
             >
               <Settings2 className="h-4 w-4" aria-hidden="true" />
               Connect provider
@@ -964,10 +964,10 @@ export function OmniTemplateDashboard({
 
         <div className="mt-4 grid gap-4 2xl:grid-cols-[minmax(0,1fr)_440px]">
           <section className="dashboard-panel overflow-hidden">
-            <div className="flex flex-col gap-4 border-b border-[#e0e9f0] p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 border-b border-[#c9d8dc] p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="text-base font-semibold tracking-[-0.02em]">Live Routing Funnel</h2>
-                <p className="mt-1 text-sm text-[#667381]">
+                <p className="mt-1 text-sm text-[#56666b]">
                   The core product behavior: store first, understand task, then route with evidence.
                 </p>
               </div>
@@ -999,13 +999,13 @@ export function OmniTemplateDashboard({
                     statusColors.route,
                   ],
                 ].map(([label, body, color]) => (
-                  <div key={label} className="rounded-2xl border border-[#dde7ef] p-4">
+                  <div key={label} className="rounded-2xl border border-[#c9d8dc] p-4">
                     <span
                       className="block h-1.5 w-12 rounded-full"
                       style={{ backgroundColor: color }}
                     />
                     <p className="mt-3 text-sm font-semibold">{label}</p>
-                    <p className="mt-1 text-xs leading-5 text-[#667381]">{body}</p>
+                    <p className="mt-1 text-xs leading-5 text-[#56666b]">{body}</p>
                   </div>
                 ))}
               </div>
@@ -1019,7 +1019,7 @@ export function OmniTemplateDashboard({
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h2 className="text-base font-semibold tracking-[-0.02em]">Provider Readiness</h2>
-                <p className="mt-1 text-sm text-[#667381]">
+                <p className="mt-1 text-sm text-[#56666b]">
                   Every row opens the provider settings.
                 </p>
               </div>
@@ -1050,12 +1050,12 @@ export function OmniTemplateDashboard({
 
           <section className="dashboard-panel p-5 sm:p-6">
             <div className="flex items-start gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#e5f6eb] text-[#1b7a45]">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f6ded9] text-[#8f2a20]">
                 <Route className="h-5 w-5" aria-hidden="true" />
               </span>
               <div>
                 <h2 className="text-base font-semibold tracking-[-0.02em]">Usage by Provider</h2>
-                <p className="mt-1 text-sm text-[#667381]">
+                <p className="mt-1 text-sm text-[#56666b]">
                   Shows where model traffic and cost are actually going.
                 </p>
               </div>
@@ -1079,12 +1079,12 @@ export function OmniTemplateDashboard({
 
           <section className="dashboard-panel p-5 sm:p-6">
             <div className="flex items-start gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#fff3d0] text-[#8a6200]">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-[#f6ded9] text-[#8f2a20]">
                 <Layers3 className="h-5 w-5" aria-hidden="true" />
               </span>
               <div>
                 <h2 className="text-base font-semibold tracking-[-0.02em]">Task Mix</h2>
-                <p className="mt-1 text-sm text-[#667381]">
+                <p className="mt-1 text-sm text-[#56666b]">
                   Useful once limits, billing, and routing policy become plan-aware.
                 </p>
               </div>
@@ -1096,7 +1096,7 @@ export function OmniTemplateDashboard({
                     <Link
                       key={row.key}
                       href="/usage"
-                      className="grid gap-2 rounded-2xl border border-[#dde7ef] p-4 transition hover:border-[#b9cfe0] hover:bg-[#f7fafd]"
+                      className="grid gap-2 rounded-2xl border border-[#c9d8dc] p-4 transition hover:border-[#aebfc4] hover:bg-[#edf7f9]"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <p className="text-sm font-semibold capitalize">
@@ -1122,14 +1122,14 @@ export function OmniTemplateDashboard({
                 />
               )}
             </div>
-            <div className="mt-6 rounded-2xl border border-[#dde7ef] p-4">
+            <div className="mt-6 rounded-2xl border border-[#c9d8dc] p-4">
               <div className="flex items-center gap-3">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#f0f4f8] text-[#53606d]">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-[#edf7f9] text-[#56666b]">
                   <Zap className="h-4 w-4" aria-hidden="true" />
                 </span>
                 <div>
                   <p className="text-sm font-semibold">Artifacts saved</p>
-                  <p className="mt-1 text-xs text-[#667381]">
+                  <p className="mt-1 text-xs text-[#56666b]">
                     {formatNumber(artifactCount)} output{artifactCount === 1 ? "" : "s"} stored for
                     review or reuse.
                   </p>

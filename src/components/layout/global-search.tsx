@@ -200,23 +200,23 @@ export function GlobalSearch() {
           <button
             type="button"
             className={cn(
-              "flex h-10 w-full items-center gap-3 rounded-xl border border-[#d9e3eb] bg-white px-3 text-left text-sm text-[#667381] transition hover:border-[#b9cfe0] hover:bg-[#f7fafd] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2f7cf6]/15",
-              open ? "border-[#2f7cf6]/50 bg-white" : null,
+              "flex h-10 w-full items-center gap-3 rounded-xl border border-[#c9d8dc] bg-white px-3 text-left text-sm text-[#56666b] transition hover:border-[#aebfc4] hover:bg-[#edf7f9] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#c93a29]/15",
+              open ? "border-[#c93a29]/50 bg-white" : null,
             )}
             onClick={openSearch}
           >
             <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="truncate">Search chats, knowledge, projects...</span>
-            <span className="ml-auto hidden rounded border border-[#d9e3eb] bg-[#f7fafd] px-1.5 py-0.5 font-mono text-[0.65rem] text-[#7a8591] lg:inline">
+            <span className="ml-auto hidden rounded border border-[#c9d8dc] bg-[#edf7f9] px-1.5 py-0.5 font-mono text-[0.65rem] text-[#627177] lg:inline">
               Ctrl K
             </span>
           </button>
           {open ? (
-            <div className="absolute left-0 right-0 top-12 z-40 overflow-hidden rounded-2xl border border-[#d9e3eb] bg-white shadow-[0_22px_70px_rgba(17,20,24,0.16)]">
-              <div className="border-b border-[#d9e3eb] p-3">
+            <div className="absolute left-0 right-0 top-12 z-40 overflow-hidden rounded-2xl border border-[#c9d8dc] bg-white shadow-[0_22px_70px_rgba(17,20,24,0.16)]">
+              <div className="border-b border-[#c9d8dc] p-3">
                 <div className="relative">
                   <Search
-                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8591]"
+                    className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#627177]"
                     aria-hidden="true"
                   />
                   <Input
@@ -224,18 +224,18 @@ export function GlobalSearch() {
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="Search your workspace..."
-                    className="h-11 rounded-xl border-[#d9e3eb] pl-9 pr-12"
+                    className="h-11 rounded-xl border-[#c9d8dc] pl-9 pr-12"
                   />
                   <button
                     type="button"
-                    className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-[#667381] transition hover:bg-[#eef3f7] hover:text-[#111418] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
+                    className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-[#56666b] transition hover:bg-[#edf7f9] hover:text-[#171314] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c93a29]/30"
                     onClick={() => setOpen(false)}
                     aria-label="Close search"
                   >
                     <X className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
-                <p className="mt-2 text-xs text-[#667381]">
+                <p className="mt-2 text-xs text-[#56666b]">
                   {activeWorkspace
                     ? `Searching ${activeWorkspace.name}`
                     : "Open a workspace to search."}
@@ -257,7 +257,7 @@ export function GlobalSearch() {
         type="button"
         variant="ghost"
         size="icon"
-        className="h-10 w-10 rounded-xl border border-[#d9e3eb] bg-white md:hidden"
+        className="h-10 w-10 rounded-xl border border-[#c9d8dc] bg-white md:hidden"
         onClick={openSearch}
         aria-label="Search"
       >
@@ -265,11 +265,11 @@ export function GlobalSearch() {
       </Button>
 
       {open ? (
-        <div className="fixed inset-x-3 top-[74px] z-50 overflow-hidden rounded-2xl border border-[#d9e3eb] bg-white shadow-[0_22px_70px_rgba(17,20,24,0.16)] md:hidden">
-          <form className="border-b border-[#d9e3eb] p-3" onSubmit={onSubmit}>
+        <div className="fixed inset-x-3 top-[74px] z-50 overflow-hidden rounded-2xl border border-[#c9d8dc] bg-white shadow-[0_22px_70px_rgba(17,20,24,0.16)] md:hidden">
+          <form className="border-b border-[#c9d8dc] p-3" onSubmit={onSubmit}>
             <div className="relative">
               <Search
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7a8591]"
+                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#627177]"
                 aria-hidden="true"
               />
               <Input
@@ -277,11 +277,11 @@ export function GlobalSearch() {
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search OmniAI..."
-                className="h-11 rounded-xl border-[#d9e3eb] pl-9 pr-12"
+                className="h-11 rounded-xl border-[#c9d8dc] pl-9 pr-12"
               />
               <button
                 type="button"
-                className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-[#667381] transition hover:bg-[#eef3f7] hover:text-[#111418] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30"
+                className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-[#56666b] transition hover:bg-[#edf7f9] hover:text-[#171314] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c93a29]/30"
                 onClick={() => setOpen(false)}
                 aria-label="Close search"
               >
@@ -318,7 +318,7 @@ function SearchResults({
   if (status === "loading") {
     return (
       <div className="grid min-h-[220px] place-items-center">
-        <Loader2 className="h-5 w-5 animate-spin text-[#667381]" aria-hidden="true" />
+        <Loader2 className="h-5 w-5 animate-spin text-[#56666b]" aria-hidden="true" />
       </div>
     );
   }
@@ -333,7 +333,7 @@ function SearchResults({
 
   if (query.length < 2) {
     return (
-      <div className="grid min-h-[220px] place-items-center p-6 text-center text-sm leading-6 text-[#667381]">
+      <div className="grid min-h-[220px] place-items-center p-6 text-center text-sm leading-6 text-[#56666b]">
         Type at least two characters to search conversations, messages, projects, knowledge, and
         artifacts.
       </div>
@@ -342,7 +342,7 @@ function SearchResults({
 
   if (!results.length && status !== "searching") {
     return (
-      <div className="grid min-h-[220px] place-items-center p-6 text-center text-sm text-[#667381]">
+      <div className="grid min-h-[220px] place-items-center p-6 text-center text-sm text-[#56666b]">
         No matches found for {query}.
       </div>
     );
@@ -351,27 +351,27 @@ function SearchResults({
   return (
     <div className="thin-scrollbar min-h-[220px] max-h-[min(62dvh,420px)] overflow-auto">
       {status === "searching" ? (
-        <div className="flex items-center gap-2 border-b border-[#d9e3eb] px-4 py-2 text-xs text-[#667381]">
+        <div className="flex items-center gap-2 border-b border-[#c9d8dc] px-4 py-2 text-xs text-[#56666b]">
           <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
           Searching
         </div>
       ) : null}
-      <div className="divide-y divide-[#e5edf3]">
+      <div className="divide-y divide-[#d5e4e7]">
         {results.map((result) => (
           <Link
             key={`${result.type}:${result.id}`}
             href={result.href}
             onClick={onNavigate}
-            className="block px-4 py-3 transition hover:bg-[#f7fafd]"
+            className="block px-4 py-3 transition hover:bg-[#edf7f9]"
           >
             <div className="flex items-start gap-3">
               <Badge className="mt-0.5 bg-muted">{result.label}</Badge>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold">{result.title}</p>
-                <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#667381]">
+                <p className="mt-1 line-clamp-2 text-xs leading-5 text-[#56666b]">
                   {result.excerpt}
                 </p>
-                <p className="mt-2 flex items-center gap-1 text-[0.7rem] text-[#667381]">
+                <p className="mt-2 flex items-center gap-1 text-[0.7rem] text-[#56666b]">
                   <Clock3 className="h-3 w-3" aria-hidden="true" />
                   {formatRelative(result.updatedAt)}
                 </p>
@@ -383,7 +383,7 @@ function SearchResults({
       <Link
         href={`/search?q=${encodeURIComponent(query)}`}
         onClick={onNavigate}
-        className="flex min-h-12 items-center justify-between border-t border-[#d9e3eb] px-4 py-3 text-sm font-semibold hover:bg-[#f7fafd]"
+        className="flex min-h-12 items-center justify-between border-t border-[#c9d8dc] px-4 py-3 text-sm font-semibold hover:bg-[#edf7f9]"
       >
         View all search results
         <ArrowRight className="h-4 w-4" aria-hidden="true" />

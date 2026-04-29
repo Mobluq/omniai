@@ -93,7 +93,7 @@ export function RoutingFunnel({
   ];
 
   return (
-    <section className="operational-panel overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f2f7f4] shadow-[0_28px_90px_rgba(20,31,33,0.28)]">
+    <section className="operational-panel overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f7fbfc] shadow-[0_28px_90px_rgba(20,31,33,0.28)]">
       <div className="border-b border-white/10 px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
@@ -133,9 +133,9 @@ export function RoutingFunnel({
               <span
                 className={cn(
                   "grid h-8 w-8 place-items-center rounded-lg border",
-                  stat.tone === "green" && "border-[#21d878]/25 bg-[#21d878]/10 text-[#31e184]",
-                  stat.tone === "yellow" && "border-[#ffd426]/25 bg-[#ffd426]/10 text-[#ffd426]",
-                  stat.tone === "red" && "border-[#ff4352]/25 bg-[#ff4352]/10 text-[#ff5361]",
+                  stat.tone === "green" && "border-[#c93a29]/25 bg-[#c93a29]/10 text-[#c93a29]",
+                  stat.tone === "yellow" && "border-[#c93a29]/25 bg-[#c93a29]/10 text-[#c93a29]",
+                  stat.tone === "red" && "border-[#c93a29]/25 bg-[#c93a29]/10 text-[#c93a29]",
                 )}
               >
                 <stat.icon className="h-4 w-4" aria-hidden="true" />
@@ -150,11 +150,11 @@ export function RoutingFunnel({
       <div className="relative">
         <div className="thin-scrollbar overflow-x-auto">
           <div className="relative min-w-[920px] px-6 py-8">
-            <div className="absolute left-[27%] top-[4.6rem] rounded-lg border border-white/10 bg-[#232b2e]/95 px-3 py-2 text-sm font-medium shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
-              <span className="mr-2 inline-block h-3 w-3 rounded-sm bg-[#ffd426]" />
+            <div className="absolute left-[27%] top-[4.6rem] rounded-lg border border-white/10 bg-[#171314]/95 px-3 py-2 text-sm font-medium shadow-[0_14px_30px_rgba(0,0,0,0.28)]">
+              <span className="mr-2 inline-block h-3 w-3 rounded-sm bg-[#c93a29]" />
               Intent classified
               <span className="mx-2 text-white/50">to</span>
-              <span className="mr-2 inline-block h-3 w-3 rounded-sm bg-[#ff4352]" />
+              <span className="mr-2 inline-block h-3 w-3 rounded-sm bg-[#c93a29]" />
               Review needed {reviewShare}%
             </div>
             <svg
@@ -165,24 +165,24 @@ export function RoutingFunnel({
             >
               <defs>
                 <linearGradient id="funnel-yellow-red" x1="0%" x2="100%" y1="0%" y2="0%">
-                  <stop offset="0%" stopColor="#ffd426" />
-                  <stop offset="48%" stopColor="#ff982a" />
-                  <stop offset="100%" stopColor="#ff4352" />
+                  <stop offset="0%" stopColor="#c93a29" />
+                  <stop offset="48%" stopColor="#d85a49" />
+                  <stop offset="100%" stopColor="#c93a29" />
                 </linearGradient>
                 <linearGradient id="funnel-yellow-green" x1="0%" x2="100%" y1="0%" y2="0%">
-                  <stop offset="0%" stopColor="#ffd426" />
-                  <stop offset="42%" stopColor="#7cc943" />
-                  <stop offset="100%" stopColor="#08d96f" />
+                  <stop offset="0%" stopColor="#c93a29" />
+                  <stop offset="42%" stopColor="#e4eff1" />
+                  <stop offset="100%" stopColor="#c93a29" />
                 </linearGradient>
                 <linearGradient id="funnel-red-green" x1="0%" x2="100%" y1="0%" y2="0%">
-                  <stop offset="0%" stopColor="#ff4352" />
-                  <stop offset="54%" stopColor="#bf8f45" />
-                  <stop offset="100%" stopColor="#08d96f" />
+                  <stop offset="0%" stopColor="#c93a29" />
+                  <stop offset="54%" stopColor="#d85a49" />
+                  <stop offset="100%" stopColor="#c93a29" />
                 </linearGradient>
                 <linearGradient id="funnel-green-yellow" x1="0%" x2="100%" y1="0%" y2="0%">
-                  <stop offset="0%" stopColor="#08d96f" />
-                  <stop offset="64%" stopColor="#94c83e" />
-                  <stop offset="100%" stopColor="#ffd426" />
+                  <stop offset="0%" stopColor="#c93a29" />
+                  <stop offset="64%" stopColor="#ecc3bc" />
+                  <stop offset="100%" stopColor="#c93a29" />
                 </linearGradient>
               </defs>
 
@@ -191,7 +191,7 @@ export function RoutingFunnel({
                 x2="88"
                 y1="134"
                 y2="214"
-                stroke="#ffd426"
+                stroke="#c93a29"
                 strokeWidth="12"
                 strokeLinecap="round"
               />
@@ -200,7 +200,7 @@ export function RoutingFunnel({
                 x2="472"
                 y1="74"
                 y2="154"
-                stroke="#ff4352"
+                stroke="#c93a29"
                 strokeWidth="12"
                 strokeLinecap="round"
               />
@@ -209,7 +209,7 @@ export function RoutingFunnel({
                 x2="472"
                 y1="210"
                 y2="290"
-                stroke="#08d96f"
+                stroke="#c93a29"
                 strokeWidth="12"
                 strokeLinecap="round"
               />
@@ -218,7 +218,7 @@ export function RoutingFunnel({
                 x2="870"
                 y1="42"
                 y2="122"
-                stroke="#08d96f"
+                stroke="#c93a29"
                 strokeWidth="12"
                 strokeLinecap="round"
               />
@@ -227,7 +227,7 @@ export function RoutingFunnel({
                 x2="870"
                 y1="150"
                 y2="230"
-                stroke="#ffd426"
+                stroke="#c93a29"
                 strokeWidth="12"
                 strokeLinecap="round"
               />
@@ -236,7 +236,7 @@ export function RoutingFunnel({
                 x2="870"
                 y1="252"
                 y2="318"
-                stroke="#ff4352"
+                stroke="#c93a29"
                 strokeWidth="12"
                 strokeLinecap="round"
               />
@@ -285,19 +285,19 @@ export function RoutingFunnel({
               <text x="900" y="56" fill="rgba(242,247,244,0.68)" fontSize="16" fontWeight="600">
                 Routed automatically
               </text>
-              <text x="900" y="83" fill="#f2f7f4" fontSize="22" fontWeight="700">
+              <text x="900" y="83" fill="#f7fbfc" fontSize="22" fontWeight="700">
                 {fitScore}%
               </text>
               <text x="900" y="170" fill="rgba(242,247,244,0.68)" fontSize="16" fontWeight="600">
                 Suggested switch
               </text>
-              <text x="900" y="197" fill="#f2f7f4" fontSize="22" fontWeight="700">
+              <text x="900" y="197" fill="#f7fbfc" fontSize="22" fontWeight="700">
                 {Math.max(0, 100 - fitScore - reviewShare)}%
               </text>
               <text x="900" y="270" fill="rgba(242,247,244,0.68)" fontSize="16" fontWeight="600">
                 Needs review
               </text>
-              <text x="900" y="297" fill="#f2f7f4" fontSize="22" fontWeight="700">
+              <text x="900" y="297" fill="#f7fbfc" fontSize="22" fontWeight="700">
                 {reviewShare}%
               </text>
             </svg>
@@ -307,15 +307,15 @@ export function RoutingFunnel({
         <div className="flex flex-col gap-4 border-t border-white/10 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex flex-wrap gap-4 text-sm text-white/70">
             <span className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-sm bg-[#ffd426]" />
+              <span className="h-3 w-3 rounded-sm bg-[#c93a29]" />
               Captured
             </span>
             <span className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-sm bg-[#ff4352]" />
+              <span className="h-3 w-3 rounded-sm bg-[#c93a29]" />
               Review
             </span>
             <span className="flex items-center gap-2">
-              <span className="h-3 w-3 rounded-sm bg-[#08d96f]" />
+              <span className="h-3 w-3 rounded-sm bg-[#c93a29]" />
               Routed
             </span>
           </div>

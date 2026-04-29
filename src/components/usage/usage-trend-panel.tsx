@@ -105,9 +105,7 @@ function buildChartPoints(daily: DailyUsagePoint[]) {
 }
 
 function buildPath(points: ChartPoint[]) {
-  return points
-    .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
-    .join(" ");
+  return points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
 }
 
 function Tooltip({ point }: { point: ChartPoint }) {
@@ -122,10 +120,10 @@ function Tooltip({ point }: { point: ChartPoint }) {
         width={tooltipWidth}
         height={tooltipHeight}
         rx="16"
-        fill="#2f3839"
+        fill="#171314"
         stroke="rgba(255,255,255,0.18)"
       />
-      <text x="16" y="25" fill="#f2f7f4" fontSize="15" fontWeight="700">
+      <text x="16" y="25" fill="#f7fbfc" fontSize="15" fontWeight="700">
         {point.label}
       </text>
       <text x="16" y="49" fill="rgba(255,255,255,0.72)" fontSize="13">
@@ -158,7 +156,7 @@ export function UsageTrendPanel({
   const path = buildPath(points);
 
   return (
-    <section className="operational-panel mt-6 overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f2f7f4] shadow-[0_28px_90px_rgba(20,31,33,0.22)]">
+    <section className="operational-panel mt-6 overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f7fbfc] shadow-[0_28px_90px_rgba(20,31,33,0.22)]">
       <div className="grid gap-6 border-b border-white/10 p-5 lg:grid-cols-[minmax(0,1fr)_420px] lg:p-6">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
@@ -197,13 +195,13 @@ export function UsageTrendPanel({
             >
               <defs>
                 <linearGradient id="usage-line" x1="0%" x2="100%" y1="0%" y2="0%">
-                  <stop offset="0%" stopColor="#ffd426" />
-                  <stop offset="45%" stopColor="#ff6f42" />
-                  <stop offset="100%" stopColor="#09d970" />
+                  <stop offset="0%" stopColor="#c93a29" />
+                  <stop offset="45%" stopColor="#d85a49" />
+                  <stop offset="100%" stopColor="#c93a29" />
                 </linearGradient>
                 <linearGradient id="usage-fill" x1="0%" x2="0%" y1="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(255,212,38,0.28)" />
-                  <stop offset="100%" stopColor="rgba(9,217,112,0.03)" />
+                  <stop offset="0%" stopColor="rgba(201,58,41,0.28)" />
+                  <stop offset="100%" stopColor="rgba(228,239,241,0.06)" />
                 </linearGradient>
               </defs>
 
@@ -248,8 +246,8 @@ export function UsageTrendPanel({
                       cx={point.x}
                       cy={point.y}
                       r={isActive ? "10" : "7"}
-                      fill={index === points.length - 1 ? "#09d970" : "#ffd426"}
-                      stroke="#20282a"
+                      fill={index === points.length - 1 ? "#c93a29" : "#c93a29"}
+                      stroke="#201a19"
                       strokeWidth="4"
                     />
                     <circle
@@ -284,10 +282,10 @@ export function UsageTrendPanel({
 
             <div className="mt-4 flex flex-wrap gap-2 text-xs text-white/60">
               {[
-                ["Requests", "Model calls stored in usage logs.", "#ffd426"],
-                ["Tokens", "Input plus output token estimates.", "#ff6f42"],
-                ["Cost", "Provider cost estimate for billing.", "#09d970"],
-                ["Failures", "Provider or routing calls that failed.", "#ff4658"],
+                ["Requests", "Model calls stored in usage logs.", "#c93a29"],
+                ["Tokens", "Input plus output token estimates.", "#d85a49"],
+                ["Cost", "Provider cost estimate for billing.", "#c93a29"],
+                ["Failures", "Provider or routing calls that failed.", "#c93a29"],
               ].map(([label, description, color]) => (
                 <span
                   key={label}

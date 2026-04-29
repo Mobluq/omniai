@@ -492,7 +492,7 @@ export function ChatWorkspace() {
     <div className="page-shell overflow-hidden rounded-[1.35rem] border border-border/80 bg-card/95 shadow-panel">
       <ModelControls />
       <div className="grid min-h-[calc(100svh-12rem)] lg:min-h-[720px] lg:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="hidden border-b border-border/70 bg-[#f7fafd] p-3 lg:block lg:border-b-0 lg:border-r">
+        <aside className="hidden border-b border-border/70 bg-[#edf7f9] p-3 lg:block lg:border-b-0 lg:border-r">
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold tracking-tight">History</h2>
@@ -527,7 +527,7 @@ export function ChatWorkspace() {
                   key={conversation.id}
                   className={`group flex items-start gap-2 rounded-xl border p-3 transition-all ${
                     conversation.id === conversationId
-                      ? "border-[#2f7cf6]/35 bg-white shadow-[0_16px_38px_-30px_rgba(28,54,82,0.55)]"
+                      ? "border-[#c93a29]/35 bg-white shadow-[0_16px_38px_-30px_rgba(28,54,82,0.55)]"
                       : "border-transparent bg-transparent hover:border-border/70 hover:bg-white"
                   }`}
                 >
@@ -575,7 +575,7 @@ export function ChatWorkspace() {
           </div>
         </aside>
 
-        <section className="flex min-h-[calc(100svh-12rem)] flex-col bg-[#fbfdff] lg:min-h-[720px]">
+        <section className="flex min-h-[calc(100svh-12rem)] flex-col bg-[#f7fbfc] lg:min-h-[720px]">
           <div className="grid gap-3 border-b border-border/70 bg-white p-3 lg:hidden">
             <div className="flex items-center justify-between gap-2">
               <div className="min-w-0">
@@ -641,7 +641,7 @@ export function ChatWorkspace() {
             </div>
           </div>
 
-          <div className="thin-scrollbar flex-1 space-y-5 overflow-auto bg-[#fbfdff] px-3 py-4 sm:px-5 lg:px-8">
+          <div className="thin-scrollbar flex-1 space-y-5 overflow-auto bg-[#f7fbfc] px-3 py-4 sm:px-5 lg:px-8">
             {recommendation && pendingMessageId ? (
               <RecommendationBanner
                 recommendation={recommendation}
@@ -699,7 +699,7 @@ export function ChatWorkspace() {
                   <div
                     className={`max-w-[92%] rounded-2xl border px-4 py-3 shadow-line sm:max-w-[78%] ${
                       message.role === "user"
-                        ? "rounded-br-md border-[#dce7ef] bg-[#eef6ff]"
+                        ? "rounded-br-md border-[#c9d8dc] bg-[#f6ded9]"
                         : "rounded-bl-md border-border/70 bg-white"
                     }`}
                   >

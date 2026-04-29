@@ -52,18 +52,18 @@ export function MobileNavigation({ profile }: { profile: ShellProfile }) {
     >
       <button
         type="button"
-        className="absolute inset-0 bg-[#111418]/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-[#171314]/40 backdrop-blur-[2px]"
         onClick={() => setOpen(false)}
         aria-label="Close navigation overlay"
       />
-      <aside className="relative flex h-full w-[min(88vw,360px)] flex-col border-r border-[#d9e3eb] bg-white shadow-2xl">
-        <div className="flex h-16 items-center justify-between border-b border-[#e5edf3] px-4">
+      <aside className="relative flex h-full w-[min(88vw,360px)] flex-col border-r border-[#c9d8dc] bg-white shadow-2xl">
+        <div className="flex h-16 items-center justify-between border-b border-[#d5e4e7] px-4">
           <Link
             href="/dashboard"
             className="flex items-center gap-2 text-base font-semibold"
             onClick={() => setOpen(false)}
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#111418] text-white">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#171314] text-white">
               <Bot className="h-5 w-5" aria-hidden="true" />
             </span>
             OmniAI
@@ -82,17 +82,17 @@ export function MobileNavigation({ profile }: { profile: ShellProfile }) {
         <Link
           href="/account"
           onClick={() => setOpen(false)}
-          className="mx-3 mt-3 flex items-center gap-3 rounded-2xl border border-[#d9e3eb] bg-[#f7fafd] p-3 transition active:scale-[0.99]"
+          className="mx-3 mt-3 flex items-center gap-3 rounded-2xl border border-[#c9d8dc] bg-[#edf7f9] p-3 transition active:scale-[0.99]"
         >
-          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#2f3742] text-xs font-semibold text-white">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#2a1f1e] text-xs font-semibold text-white">
             {profile.initials}
           </span>
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold">{profile.name}</span>
-            <span className="mt-0.5 block truncate text-xs text-[#6d7784]">
+            <span className="mt-0.5 block truncate text-xs text-[#627177]">
               {profile.workspaceName}
             </span>
-            <span className="mt-2 inline-flex rounded bg-[#e8f2ff] px-1.5 py-0.5 text-[0.62rem] font-semibold capitalize text-[#245b93]">
+            <span className="mt-2 inline-flex rounded bg-[#f6ded9] px-1.5 py-0.5 text-[0.62rem] font-semibold capitalize text-[#8f2a20]">
               {profile.workspaceType} / {profile.role}
             </span>
           </span>
@@ -107,10 +107,10 @@ export function MobileNavigation({ profile }: { profile: ShellProfile }) {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2f7cf6]/30",
+                  "flex min-h-12 items-center gap-3 rounded-xl px-3 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c93a29]/30",
                   active
-                    ? "bg-[#eaf4ff] text-[#111418]"
-                    : "text-[#5f6975] hover:bg-[#f3f7fb] hover:text-[#111418]",
+                    ? "bg-[#f6ded9] text-[#171314]"
+                    : "text-[#56666b] hover:bg-[#edf7f9] hover:text-[#171314]",
                 )}
               >
                 <item.icon className="h-4 w-4" aria-hidden="true" />
@@ -129,7 +129,7 @@ export function MobileNavigation({ profile }: { profile: ShellProfile }) {
         type="button"
         variant="ghost"
         size="icon"
-        className="h-10 w-10 rounded-xl border border-[#d9e3eb] bg-white lg:hidden"
+        className="h-10 w-10 rounded-xl border border-[#c9d8dc] bg-white lg:hidden"
         onClick={() => setOpen((current) => !current)}
         aria-label="Open navigation"
         aria-controls="mobile-navigation-drawer"

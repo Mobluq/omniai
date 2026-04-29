@@ -216,16 +216,16 @@ export function AppAssistant() {
       {open ? (
         <div
           ref={panelRef}
-          className="fixed inset-x-3 bottom-3 flex h-[min(78dvh,620px)] flex-col overflow-hidden rounded-2xl border border-[#d9e3eb] bg-white shadow-[0_22px_80px_rgba(17,20,24,0.22)] sm:inset-x-auto sm:bottom-5 sm:right-5 sm:h-[min(72dvh,620px)] sm:w-[420px]"
+          className="fixed inset-x-3 bottom-3 flex h-[min(78dvh,620px)] flex-col overflow-hidden rounded-2xl border border-[#c9d8dc] bg-white shadow-[0_22px_80px_rgba(17,20,24,0.22)] sm:inset-x-auto sm:bottom-5 sm:right-5 sm:h-[min(72dvh,620px)] sm:w-[420px]"
           role="dialog"
           aria-label="OmniAI worker"
         >
-          <div className="flex min-h-[68px] items-center justify-between border-b border-[#d9e3eb] px-4">
+          <div className="flex min-h-[68px] items-center justify-between border-b border-[#c9d8dc] px-4">
             <div className="flex min-w-0 items-center gap-3">
               <span
                 className={cn(
                   "grid h-10 w-10 shrink-0 place-items-center rounded-xl",
-                  hasErrorContext ? "bg-[#fff1f2] text-[#c93a46]" : "bg-[#eaf4ff] text-[#2f7cf6]",
+                  hasErrorContext ? "bg-[#f6ded9] text-[#c93a29]" : "bg-[#f6ded9] text-[#c93a29]",
                 )}
               >
                 {hasErrorContext ? (
@@ -235,8 +235,8 @@ export function AppAssistant() {
                 )}
               </span>
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-[#111418]">OmniAI Worker</p>
-                <p className="mt-0.5 truncate text-xs text-[#667381]">
+                <p className="truncate text-sm font-semibold text-[#171314]">OmniAI Worker</p>
+                <p className="mt-0.5 truncate text-xs text-[#56666b]">
                   Product help, provider setup, and error guidance
                 </p>
               </div>
@@ -253,7 +253,7 @@ export function AppAssistant() {
             </Button>
           </div>
 
-          <div ref={listRef} className="thin-scrollbar flex-1 overflow-auto bg-[#f7fafd] px-4 py-4">
+          <div ref={listRef} className="thin-scrollbar flex-1 overflow-auto bg-[#edf7f9] px-4 py-4">
             <div className="grid gap-3">
               {messages.map((message) => (
                 <div
@@ -261,10 +261,10 @@ export function AppAssistant() {
                   className={cn(
                     "max-w-[92%] rounded-2xl border px-3.5 py-3 text-sm leading-6 shadow-sm",
                     message.role === "user"
-                      ? "ml-auto border-[#2f7cf6] bg-[#2f7cf6] text-white"
+                      ? "ml-auto border-[#c93a29] bg-[#c93a29] text-white"
                       : message.tone === "error"
-                        ? "mr-auto border-[#ffd7dc] bg-white text-[#111418]"
-                        : "mr-auto border-[#d9e3eb] bg-white text-[#111418]",
+                        ? "mr-auto border-[#ecc3bc] bg-white text-[#171314]"
+                        : "mr-auto border-[#c9d8dc] bg-white text-[#171314]",
                   )}
                 >
                   {message.body}
@@ -273,13 +273,13 @@ export function AppAssistant() {
             </div>
           </div>
 
-          <div className="border-t border-[#d9e3eb] bg-white p-3">
+          <div className="border-t border-[#c9d8dc] bg-white p-3">
             <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
               {quickQuestions.map((question) => (
                 <button
                   key={question}
                   type="button"
-                  className="shrink-0 rounded-full border border-[#d9e3eb] bg-[#f7fafd] px-3 py-1.5 text-xs font-medium text-[#404955] transition hover:border-[#b9cfe0] hover:bg-[#eef6ff]"
+                  className="shrink-0 rounded-full border border-[#c9d8dc] bg-[#edf7f9] px-3 py-1.5 text-xs font-medium text-[#3d474b] transition hover:border-[#aebfc4] hover:bg-[#f6ded9]"
                   onClick={() => submitQuestion(question)}
                 >
                   {question}
@@ -295,7 +295,7 @@ export function AppAssistant() {
                 value={input}
                 onChange={(event) => setInput(event.target.value)}
                 placeholder="Ask about setup, errors, routing, or history..."
-                className="min-h-11 flex-1 resize-none rounded-2xl border border-[#d9e3eb] bg-white px-3 py-2.5 text-sm leading-5 outline-none transition placeholder:text-[#8a95a1] focus:border-[#2f7cf6] focus:ring-4 focus:ring-[#2f7cf6]/10"
+                className="min-h-11 flex-1 resize-none rounded-2xl border border-[#c9d8dc] bg-white px-3 py-2.5 text-sm leading-5 outline-none transition placeholder:text-[#6b797f] focus:border-[#c93a29] focus:ring-4 focus:ring-[#c93a29]/10"
                 rows={1}
               />
               <Button
@@ -314,17 +314,17 @@ export function AppAssistant() {
       <button
         type="button"
         className={cn(
-          "flex h-12 items-center gap-2 rounded-full border border-[#d9e3eb] bg-white px-4 text-sm font-semibold text-[#111418] shadow-[0_16px_50px_rgba(17,20,24,0.16)] transition hover:-translate-y-0.5 hover:border-[#b9cfe0] hover:bg-[#f7fafd] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#2f7cf6]/20",
+          "flex h-12 items-center gap-2 rounded-full border border-[#c9d8dc] bg-white px-4 text-sm font-semibold text-[#171314] shadow-[0_16px_50px_rgba(17,20,24,0.16)] transition hover:-translate-y-0.5 hover:border-[#aebfc4] hover:bg-[#edf7f9] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#c93a29]/20",
           open ? "pointer-events-none opacity-0" : "opacity-100",
         )}
         onClick={() => setOpen(true)}
         aria-label="Open OmniAI worker"
       >
-        <span className="grid h-7 w-7 place-items-center rounded-full bg-[#eaf4ff] text-[#2f7cf6]">
+        <span className="grid h-7 w-7 place-items-center rounded-full bg-[#f6ded9] text-[#c93a29]">
           <HelpCircle className="h-4 w-4" aria-hidden="true" />
         </span>
         <span className="hidden sm:inline">OmniAI Worker</span>
-        <Sparkles className="hidden h-4 w-4 text-[#1aa65c] sm:block" aria-hidden="true" />
+        <Sparkles className="hidden h-4 w-4 text-[#c93a29] sm:block" aria-hidden="true" />
       </button>
     </div>
   );

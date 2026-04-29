@@ -22,9 +22,9 @@ type ProviderFeedPanelProps = {
 };
 
 function MiniDonut({ connected, coverage }: { connected: boolean; coverage: number }) {
-  const green = "#22c66f";
-  const yellow = "#f9c617";
-  const red = "#ff4b55";
+  const green = "#c93a29";
+  const yellow = "#d85a49";
+  const red = "#c93a29";
   const background = connected
     ? `conic-gradient(${green} 0 ${coverage}%, ${yellow} ${coverage}% ${Math.min(coverage + 16, 96)}%, ${red} ${Math.min(coverage + 16, 96)}% 100%)`
     : `conic-gradient(${yellow} 0 30%, ${red} 30% 74%, rgba(148,163,184,0.35) 74% 100%)`;
@@ -88,9 +88,9 @@ export function ProviderFeedPanel({ providers }: ProviderFeedPanelProps) {
                     <span
                       className={cn(
                         "rounded-md px-2 py-0.5 text-[0.68rem] font-semibold",
-                        connected && "bg-[#e8f8ef] text-[#147a42]",
-                        !connected && provider.status === "beta" && "bg-[#fff7db] text-[#87620a]",
-                        !connected && provider.status !== "beta" && "bg-[#fff0f1] text-[#a62e38]",
+                        connected && "bg-[#f6ded9] text-[#8f2a20]",
+                        !connected && provider.status === "beta" && "bg-[#f6ded9] text-[#8f2a20]",
+                        !connected && provider.status !== "beta" && "bg-[#f6ded9] text-[#8f2a20]",
                       )}
                     >
                       {connected ? "Routable" : provider.status === "beta" ? "Beta" : "Needs key"}

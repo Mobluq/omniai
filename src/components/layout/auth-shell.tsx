@@ -6,12 +6,12 @@ export function AuthShell({ children, title }: { children: ReactNode; title: str
   return (
     <main className="min-h-[100dvh] bg-background px-3 py-4 sm:px-6 sm:py-8">
       <div className="mx-auto grid min-h-[calc(100dvh-2rem)] w-full max-w-[1180px] overflow-hidden rounded-[1.75rem] border border-border/80 bg-card/95 shadow-panel lg:grid-cols-[minmax(0,1.08fr)_460px]">
-        <section className="operational-panel relative hidden min-h-[720px] border-r border-white/10 p-8 text-[#f2f7f4] lg:block">
+        <section className="operational-panel relative hidden min-h-[720px] border-r border-white/10 p-8 text-[#f7fbfc] lg:block">
           <Link
             href="/"
             className="inline-flex items-center gap-3 text-lg font-semibold tracking-tight"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#182023] shadow-line">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#171314] shadow-line">
               <Bot className="h-5 w-5" aria-hidden="true" />
             </span>
             OmniAI
@@ -48,14 +48,14 @@ export function AuthShell({ children, title }: { children: ReactNode; title: str
             >
               <defs>
                 <linearGradient id="auth-flow-a" x1="0%" x2="100%" y1="0%" y2="0%">
-                  <stop offset="0%" stopColor="#ffd426" />
-                  <stop offset="56%" stopColor="#ff614c" />
-                  <stop offset="100%" stopColor="#09d970" />
+                  <stop offset="0%" stopColor="#c93a29" />
+                  <stop offset="56%" stopColor="#d85a49" />
+                  <stop offset="100%" stopColor="#c93a29" />
                 </linearGradient>
                 <linearGradient id="auth-flow-b" x1="0%" x2="100%" y1="0%" y2="0%">
-                  <stop offset="0%" stopColor="#ffd426" />
-                  <stop offset="48%" stopColor="#9cc84e" />
-                  <stop offset="100%" stopColor="#09d970" />
+                  <stop offset="0%" stopColor="#c93a29" />
+                  <stop offset="48%" stopColor="#e4eff1" />
+                  <stop offset="100%" stopColor="#c93a29" />
                 </linearGradient>
               </defs>
               <line
@@ -63,7 +63,7 @@ export function AuthShell({ children, title }: { children: ReactNode; title: str
                 x2="42"
                 y1="72"
                 y2="130"
-                stroke="#ffd426"
+                stroke="#c93a29"
                 strokeLinecap="round"
                 strokeWidth="10"
               />
@@ -72,7 +72,7 @@ export function AuthShell({ children, title }: { children: ReactNode; title: str
                 x2="274"
                 y1="45"
                 y2="104"
-                stroke="#ff4352"
+                stroke="#c93a29"
                 strokeLinecap="round"
                 strokeWidth="10"
               />
@@ -81,7 +81,7 @@ export function AuthShell({ children, title }: { children: ReactNode; title: str
                 x2="274"
                 y1="114"
                 y2="172"
-                stroke="#09d970"
+                stroke="#c93a29"
                 strokeLinecap="round"
                 strokeWidth="10"
               />
@@ -90,7 +90,7 @@ export function AuthShell({ children, title }: { children: ReactNode; title: str
                 x2="470"
                 y1="46"
                 y2="104"
-                stroke="#09d970"
+                stroke="#c93a29"
                 strokeLinecap="round"
                 strokeWidth="10"
               />
@@ -99,7 +99,7 @@ export function AuthShell({ children, title }: { children: ReactNode; title: str
                 x2="470"
                 y1="118"
                 y2="174"
-                stroke="#ffd426"
+                stroke="#c93a29"
                 strokeLinecap="round"
                 strokeWidth="10"
               />
@@ -127,21 +127,21 @@ export function AuthShell({ children, title }: { children: ReactNode; title: str
                 { label: "Protect", icon: LockKeyhole },
               ].map((item) => (
                 <div key={item.label} className="rounded-xl border border-white/10 bg-white/10 p-3">
-                  <item.icon className="h-4 w-4 text-[#ffd426]" aria-hidden="true" />
+                  <item.icon className="h-4 w-4 text-[#c93a29]" aria-hidden="true" />
                   <p className="mt-3 text-sm font-medium">{item.label}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="absolute bottom-8 left-8 right-8 grid grid-cols-3 overflow-hidden rounded-2xl border border-white/10 bg-[#11191b]/40">
+          <div className="absolute bottom-8 left-8 right-8 grid grid-cols-3 overflow-hidden rounded-2xl border border-white/10 bg-[#171314]/40">
             {[
               ["Keys", "server-side"],
               ["Memory", "tenant scoped"],
               ["Access", "role checked"],
             ].map(([label, value]) => (
               <div key={label} className="border-r border-white/10 p-4 last:border-r-0">
-                <CheckCircle2 className="h-4 w-4 text-[#0ee077]" aria-hidden="true" />
+                <CheckCircle2 className="h-4 w-4 text-[#c93a29]" aria-hidden="true" />
                 <p className="mt-3 text-xs text-white/40">{label}</p>
                 <p className="mt-1 text-sm font-semibold">{value}</p>
               </div>

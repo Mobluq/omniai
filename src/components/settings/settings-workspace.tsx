@@ -230,7 +230,7 @@ export function SettingsWorkspace() {
 
   return (
     <div className="grid gap-6">
-      <section className="operational-panel overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f2f7f4] shadow-[0_28px_90px_rgba(20,31,33,0.18)]">
+      <section className="operational-panel overflow-hidden rounded-[1.75rem] border border-white/10 text-[#f7fbfc] shadow-[0_28px_90px_rgba(20,31,33,0.18)]">
         <div className="grid gap-5 border-b border-white/10 p-5 md:grid-cols-[minmax(0,1fr)_360px] md:p-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">

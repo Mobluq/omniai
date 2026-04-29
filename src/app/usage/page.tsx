@@ -169,22 +169,22 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
         <div>
           <nav
             aria-label="Breadcrumb"
-            className="mb-3 flex flex-wrap items-center gap-2 text-xs text-[#6d7784]"
+            className="mb-3 flex flex-wrap items-center gap-2 text-xs text-[#627177]"
           >
             <Link
               href="/dashboard"
-              className="font-medium text-[#52606d] transition hover:text-[#111418]"
+              className="font-medium text-[#56666b] transition hover:text-[#171314]"
             >
               Dashboard
             </Link>
             <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="font-medium text-[#111418]">Usage & Cost</span>
+            <span className="font-medium text-[#171314]">Usage & Cost</span>
           </nav>
           <p className="page-kicker">Metering</p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <h1 className="page-title">Usage</h1>
             {activeFilterCount ? (
-              <Badge className="bg-[#e8f2ff] text-[#245b93]">
+              <Badge className="bg-[#f6ded9] text-[#8f2a20]">
                 {activeFilterCount} active filter{activeFilterCount === 1 ? "" : "s"}
               </Badge>
             ) : null}
@@ -198,7 +198,7 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
         </Button>
       </div>
 
-      <section className="page-shell mb-5 rounded-[1.25rem] border border-[#d8e5ed] bg-white p-4 shadow-[0_18px_40px_-30px_rgba(25,45,68,0.35)]">
+      <section className="page-shell mb-5 rounded-[1.25rem] border border-[#c9d8dc] bg-white p-4 shadow-[0_18px_40px_-30px_rgba(25,45,68,0.35)]">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <div className="flex items-center gap-2 text-sm font-semibold">
@@ -214,15 +214,15 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
               <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />
               Range
             </span>
-            <div className="flex flex-wrap gap-1 rounded-xl border border-[#d9e3eb] bg-[#f7fafd] p-1">
+            <div className="flex flex-wrap gap-1 rounded-xl border border-[#c9d8dc] bg-[#edf7f9] p-1">
               {rangeOptions.map((option) => (
                 <Link
                   key={option.value}
                   href={usageHref(currentQuery, { days: option.value })}
                   className={
                     days === option.value
-                      ? "rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-[#111418] shadow-sm"
-                      : "rounded-lg px-3 py-1.5 text-xs font-semibold text-[#53606d] transition hover:bg-white hover:text-[#111418]"
+                      ? "rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-[#171314] shadow-sm"
+                      : "rounded-lg px-3 py-1.5 text-xs font-semibold text-[#56666b] transition hover:bg-white hover:text-[#171314]"
                   }
                 >
                   {option.label}
