@@ -180,7 +180,8 @@ export function NotificationCenter() {
         size="icon"
         onClick={() => setOpen((current) => !current)}
         aria-label="Open notifications"
-        className="relative"
+        aria-expanded={open}
+        className="relative h-10 w-10 rounded-xl border-[#d9e3eb] bg-white"
       >
         <Bell className="h-4 w-4" aria-hidden="true" />
         {unreadCount ? (
@@ -191,36 +192,43 @@ export function NotificationCenter() {
       </Button>
 
       {open ? (
-        <div className="fixed left-3 right-3 top-16 z-50 overflow-hidden rounded-lg border bg-card shadow-xl sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[min(92vw,420px)]">
-          <div className="flex items-center justify-between border-b p-4">
+        <div className="fixed left-3 right-3 top-[74px] z-50 overflow-hidden rounded-2xl border border-[#d9e3eb] bg-white shadow-[0_22px_70px_rgba(17,20,24,0.16)] sm:absolute sm:left-auto sm:right-0 sm:top-12 sm:w-[min(92vw,420px)]">
+          <div className="flex min-h-[68px] items-center justify-between border-b border-[#d9e3eb] px-4">
             <div>
               <div className="text-sm font-semibold">Notifications</div>
-              <div className="mt-1 text-xs text-muted-foreground">
+              <div className="mt-1 text-xs text-[#667381]">
                 {unreadCount ? `${unreadCount} unread` : "All caught up"}
               </div>
             </div>
-            <Button type="button" size="sm" variant="ghost" onClick={onMarkAllRead} disabled={!unreadCount}>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="h-10 rounded-xl"
+              onClick={onMarkAllRead}
+              disabled={!unreadCount}
+            >
               <CheckCheck className="h-4 w-4" aria-hidden="true" />
               Read all
             </Button>
           </div>
 
-          <div className="max-h-[440px] overflow-auto p-2">
+          <div className="thin-scrollbar max-h-[min(62dvh,440px)] overflow-auto p-2">
             {loading ? (
-              <div className="grid h-32 place-items-center">
-                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" aria-hidden="true" />
+              <div className="grid min-h-[220px] place-items-center">
+                <Loader2 className="h-4 w-4 animate-spin text-[#667381]" aria-hidden="true" />
               </div>
             ) : items.length ? (
               items.map((item) => (
-                <article key={item.id} className="rounded-md p-3 hover:bg-muted">
+                <article key={item.id} className="rounded-xl p-3 hover:bg-[#f7fafd]">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="text-sm font-medium">{item.title}</p>
                         {!item.readAt ? <Badge className="bg-primary/10 text-primary">New</Badge> : null}
                       </div>
-                      <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{item.body}</p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <p className="mt-1 line-clamp-2 text-sm leading-5 text-[#667381]">{item.body}</p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#667381]">
                         <span>{formatNotificationTime(item.createdAt)}</span>
                         <span className="capitalize">{item.type}</span>
                         {item.actionUrl ? (
@@ -241,7 +249,7 @@ export function NotificationCenter() {
                           type="button"
                           size="icon"
                           variant="ghost"
-                          className="h-8 w-8"
+                          className="h-9 w-9 rounded-xl"
                           onClick={() => onMarkRead(item.id)}
                           aria-label="Mark notification as read"
                         >
@@ -252,7 +260,7 @@ export function NotificationCenter() {
                         type="button"
                         size="icon"
                         variant="ghost"
-                        className="h-8 w-8"
+                        className="h-9 w-9 rounded-xl"
                         onClick={() => onArchive(item.id)}
                         aria-label="Archive notification"
                       >
@@ -263,17 +271,17 @@ export function NotificationCenter() {
                 </article>
               ))
             ) : (
-              <div className="grid h-36 place-items-center rounded-md border border-dashed text-center">
+              <div className="grid min-h-[220px] place-items-center rounded-xl border border-dashed border-[#cfdbe5] text-center">
                 <div>
-                  <Inbox className="mx-auto h-5 w-5 text-muted-foreground" aria-hidden="true" />
-                  <p className="mt-2 text-sm text-muted-foreground">No notifications yet.</p>
+                  <Inbox className="mx-auto h-5 w-5 text-[#667381]" aria-hidden="true" />
+                  <p className="mt-2 text-sm text-[#667381]">No notifications yet.</p>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="border-t p-2">
-            <Button asChild variant="ghost" className="w-full justify-center" onClick={() => setOpen(false)}>
+          <div className="border-t border-[#d9e3eb] p-2">
+            <Button asChild variant="ghost" className="h-10 w-full justify-center rounded-xl" onClick={() => setOpen(false)}>
               <Link href="/notifications">View notification inbox</Link>
             </Button>
           </div>

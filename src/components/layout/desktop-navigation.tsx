@@ -8,7 +8,6 @@ import {
   Bot,
   Boxes,
   BrainCircuit,
-  ChevronDown,
   CircleUserRound,
   FileStack,
   Globe2,
@@ -31,7 +30,7 @@ type ShellProfile = {
 const sections = [
   {
     label: "Command",
-    items: [{ href: "/dashboard", label: "AI Operations", icon: Globe2, activeGroup: true }],
+    items: [{ href: "/dashboard", label: "AI Operations", icon: Globe2 }],
   },
   {
     label: "Model operations",
@@ -114,9 +113,6 @@ export function DesktopNavigation({ profile }: { profile: ShellProfile }) {
                         <item.icon className="h-4 w-4 text-[#5f6975]" aria-hidden="true" />
                         {item.label}
                       </span>
-                      {"activeGroup" in item && item.activeGroup ? (
-                        <ChevronDown className="h-3.5 w-3.5 text-[#5f6975]" aria-hidden="true" />
-                      ) : null}
                     </Link>
                   );
                 })}

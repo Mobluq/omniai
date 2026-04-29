@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { AppAssistant } from "@/components/assistant/app-assistant";
 import { AppProviders } from "@/components/providers/app-providers";
 import "./globals.css";
 
@@ -12,7 +13,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <AppProviders>{children}</AppProviders>
+        <AppProviders>
+          {children}
+          <AppAssistant />
+        </AppProviders>
       </body>
     </html>
   );

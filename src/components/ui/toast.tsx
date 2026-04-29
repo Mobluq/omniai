@@ -20,6 +20,13 @@ import { cn } from "@/lib/utils";
 
 type ToastVariant = "success" | "error" | "warning" | "info";
 
+export const OMNIAI_ERROR_EVENT = "omniai:error";
+
+export type OmniAIErrorEventDetail = {
+  title: string;
+  description?: string;
+};
+
 export type ToastInput = {
   title: string;
   description?: string;
@@ -86,6 +93,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     };
 
     setToasts((current) => [record, ...current].slice(0, 5));
+
+    if (record.variant === "error" && typeof window !== "undefined") {
+      window.dispatchEvent(
+        new CustomEvent<OmniAIErrorEventDetail>(OMNIAI_ERROR_EVENT, {
+          detail: {
+            title: record.title,
+            description: record.description,
+          },
+        }),
+      );
+    }
+
     return id;
   }, []);
 
@@ -95,7 +114,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={value}>
       {children}
       <div
-        className="fixed right-4 top-4 z-[100] grid w-[min(92vw,420px)] gap-3"
+        className="fixed left-3 right-3 top-3 z-[100] grid gap-3 sm:left-auto sm:right-4 sm:top-4 sm:w-[min(92vw,420px)]"
         role="region"
         aria-label="Notifications"
       >
@@ -128,7 +147,7 @@ function ToastItem({
   return (
     <div
       className={cn(
-        "flex items-start gap-3 rounded-lg border p-4 shadow-xl",
+        "flex items-start gap-3 rounded-2xl border p-4 shadow-[0_18px_60px_rgba(17,20,24,0.14)]",
         "animate-in fade-in slide-in-from-top-2",
         variantClasses[item.variant],
       )}

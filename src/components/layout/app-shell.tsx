@@ -9,15 +9,6 @@ import { GlobalSearch } from "@/components/layout/global-search";
 import { getCurrentUser } from "@/lib/auth/session";
 import { WorkspaceService } from "@/modules/workspace/workspace-service";
 
-const topNavItems = [
-  { href: "/dashboard", label: "Command Center" },
-  { href: "/chat", label: "Chat" },
-  { href: "/knowledge", label: "Knowledge" },
-  { href: "/routing", label: "Automation" },
-  { href: "/settings", label: "Providers" },
-  { href: "/usage", label: "Reports" },
-];
-
 function OmniMark() {
   return (
     <span
@@ -69,37 +60,26 @@ export async function AppShell({ children }: { children: ReactNode }) {
             <MobileNavigation profile={profile} />
             <Link href="/dashboard" className="flex shrink-0 items-center gap-3">
               <OmniMark />
-              <span className="text-[1.05rem] font-semibold tracking-[-0.03em]">OMNIAI</span>
+              <span className="hidden text-[1.05rem] font-semibold tracking-[-0.03em] sm:inline">OMNIAI</span>
             </Link>
           </div>
 
-          <nav className="hidden items-center gap-12 text-sm font-medium text-[#111418] lg:flex">
-            {topNavItems.map((item) => (
-              <Link key={item.href} href={item.href} className="transition hover:text-[#2f7cf6]">
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <div className="hidden w-[min(32vw,360px)] xl:block">
+          <div className="flex min-w-0 items-center justify-end gap-2">
+            <div className="w-10 md:w-[min(34vw,380px)]">
               <GlobalSearch />
             </div>
+            <NotificationCenter />
             <Button
               asChild
               variant="outline"
               size="sm"
-              className="hidden h-9 rounded-xl border-[#d9e3eb] bg-white md:inline-flex"
+              className="inline-flex h-10 w-10 rounded-xl border-[#d9e3eb] bg-white px-0 md:w-auto md:px-3"
             >
-              <Link href="/chat">
+              <Link href="/chat" aria-label="New chat">
                 <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
-                New chat
+                <span className="hidden md:inline">New chat</span>
               </Link>
             </Button>
-            <div className="w-10 md:w-[260px] xl:hidden">
-              <GlobalSearch />
-            </div>
-            <NotificationCenter />
             <Button
               asChild
               variant="ghost"
