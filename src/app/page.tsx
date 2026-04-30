@@ -1,13 +1,13 @@
 import Link from "next/link";
 import {
   ArrowRight,
-  Bot,
   CheckCircle2,
   Database,
   Lock,
   Route,
   Sparkles,
 } from "@/components/ui/huge-icons";
+import { AppLogo } from "@/components/brand/app-logo";
 import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,10 +35,7 @@ export default function LandingPage() {
       <header className="fixed inset-x-0 top-0 z-30 border-b border-border/70 bg-background/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-8">
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold">
-            <span className="flex h-9 w-9 items-center justify-center rounded-md bg-foreground text-background">
-              <Bot className="h-5 w-5" aria-hidden="true" />
-            </span>
-            OmniAI
+            <AppLogo markClassName="h-9 w-9 rounded-md" />
           </Link>
           <nav className="flex items-center gap-3">
             <Link

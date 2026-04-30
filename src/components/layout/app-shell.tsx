@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { MessageSquarePlus } from "@/components/ui/huge-icons";
+import { AppLogo } from "@/components/brand/app-logo";
 import { Button } from "@/components/ui/button";
 import { NotificationCenter } from "@/components/notifications/notification-center";
 import { MobileNavigation } from "@/components/layout/mobile-navigation";
@@ -8,17 +9,6 @@ import { DesktopNavigation } from "@/components/layout/desktop-navigation";
 import { GlobalSearch } from "@/components/layout/global-search";
 import { getCurrentUser } from "@/lib/auth/session";
 import { WorkspaceService } from "@/modules/workspace/workspace-service";
-
-function OmniMark() {
-  return (
-    <span
-      className="relative h-5 w-10 overflow-hidden rounded-[0.15rem] bg-[#171314]"
-      aria-hidden="true"
-    >
-      <span className="absolute -bottom-5 left-1/2 h-9 w-9 -translate-x-1/2 rounded-full bg-white" />
-    </span>
-  );
-}
 
 function getInitials(name?: string | null, email?: string | null) {
   const source = name?.trim() || email?.split("@")[0] || "OmniAI";
@@ -59,10 +49,10 @@ export async function AppShell({ children }: { children: ReactNode }) {
           <div className="flex min-w-0 items-center gap-4">
             <MobileNavigation profile={profile} />
             <Link href="/dashboard" className="flex shrink-0 items-center gap-3">
-              <OmniMark />
-              <span className="hidden text-[1.05rem] font-semibold tracking-[-0.03em] sm:inline">
-                OMNIAI
-              </span>
+              <AppLogo
+                markClassName="h-9 w-9"
+                wordmarkClassName="hidden text-[1.05rem] uppercase sm:inline"
+              />
             </Link>
           </div>
 

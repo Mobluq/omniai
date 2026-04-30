@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bot, Menu, X } from "@/components/ui/huge-icons";
+import { Menu, X } from "@/components/ui/huge-icons";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { AppLogo } from "@/components/brand/app-logo";
 import { Button } from "@/components/ui/button";
 import { navItems } from "@/components/layout/nav-items";
 import { cn } from "@/lib/utils";
@@ -63,10 +64,7 @@ export function MobileNavigation({ profile }: { profile: ShellProfile }) {
             className="flex items-center gap-2 text-base font-semibold"
             onClick={() => setOpen(false)}
           >
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#171314] text-white">
-              <Bot className="h-5 w-5" aria-hidden="true" />
-            </span>
-            OmniAI
+            <AppLogo markClassName="h-9 w-9 rounded-xl" />
           </Link>
           <Button
             type="button"

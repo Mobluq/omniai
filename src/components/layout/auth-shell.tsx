@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Bot, BrainCircuit, CheckCircle2, LockKeyhole, Route } from "@/components/ui/huge-icons";
+import { BrainCircuit, CheckCircle2, LockKeyhole, Route } from "@/components/ui/huge-icons";
+import { AppLogo } from "@/components/brand/app-logo";
 
 export function AuthShell({ children, title }: { children: ReactNode; title: string }) {
   return (
@@ -11,10 +12,7 @@ export function AuthShell({ children, title }: { children: ReactNode; title: str
             href="/"
             className="inline-flex items-center gap-3 text-lg font-semibold tracking-tight"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-[#171314] shadow-line">
-              <Bot className="h-5 w-5" aria-hidden="true" />
-            </span>
-            OmniAI
+            <AppLogo markClassName="h-10 w-10 rounded-xl shadow-line" />
           </Link>
 
           <div className="mt-16 max-w-xl">
@@ -151,10 +149,7 @@ export function AuthShell({ children, title }: { children: ReactNode; title: str
 
         <section className="flex min-h-[100%] flex-col justify-center p-5 sm:p-8 lg:p-10">
           <Link href="/" className="mb-8 flex items-center gap-2 text-lg font-semibold lg:hidden">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-foreground text-background">
-              <Bot className="h-5 w-5" aria-hidden="true" />
-            </span>
-            OmniAI
+            <AppLogo markClassName="h-9 w-9" />
           </Link>
           <div className="mx-auto w-full max-w-md">
             <p className="page-kicker">Secure access</p>

@@ -2,15 +2,9 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import {
-  AlertTriangle,
-  Bot,
-  HelpCircle,
-  SendHorizontal,
-  Sparkles,
-  X,
-} from "@/components/ui/huge-icons";
+import { AlertTriangle, HelpCircle, SendHorizontal, Sparkles, X } from "@/components/ui/huge-icons";
 import { gsap } from "gsap";
+import { AppLogo } from "@/components/brand/app-logo";
 import { OMNIAI_ERROR_EVENT, type OmniAIErrorEventDetail } from "@/components/ui/toast";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -231,7 +225,7 @@ export function AppAssistant() {
                 {hasErrorContext ? (
                   <AlertTriangle className="h-5 w-5" aria-hidden="true" />
                 ) : (
-                  <Bot className="h-5 w-5" aria-hidden="true" />
+                  <AppLogo showWordmark={false} markClassName="h-10 w-10 rounded-xl" />
                 )}
               </span>
               <div className="min-w-0">
