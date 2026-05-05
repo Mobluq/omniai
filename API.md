@@ -219,11 +219,11 @@ Requires sign-in. The signed-in user's email must match the invited email addres
 
 `GET /api/providers?workspaceId=...`
 
-Returns provider connection status, model options, and required environment variable names. It never returns API keys.
+Returns provider connection status, model options, the workspace AI access mode, and required managed environment variable names. It never returns API keys.
 
 `PUT /api/providers`
 
-Requires workspace admin access.
+Requires workspace admin access. This is mainly for BYOK and Hybrid workspaces; Managed Credit workspaces use OmniAI server-side provider credentials.
 
 ```json
 {
@@ -236,7 +236,7 @@ Requires workspace admin access.
 
 `POST /api/providers/test`
 
-Checks whether a provider has server-side credentials available without exposing keys.
+Checks whether a provider has credentials available under the workspace access mode without exposing keys.
 
 ```json
 {
@@ -426,6 +426,23 @@ Returns request count, success/failure totals, estimated tokens, estimated cost,
 Requires workspace membership. Searches conversations, messages, projects, knowledge sources, document chunks, and artifacts inside the selected workspace.
 
 ## Billing
+
+## Onboarding
+
+`POST /api/onboarding`
+
+Requires workspace admin access. Saves the workspace AI access preference and marks first-run onboarding complete.
+
+```json
+{
+  "workspaceId": "workspace_id",
+  "aiAccountMode": "managed",
+  "defaultRoutingMode": "suggest",
+  "memoryEnabled": true
+}
+```
+
+`aiAccountMode` can be `managed`, `byok`, or `hybrid`.
 
 `POST /api/billing/checkout`
 

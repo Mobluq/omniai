@@ -22,6 +22,26 @@ export class BillingService {
     });
   }
 
+  async getWorkspacePlan(workspaceId: string) {
+    const subscription = await this.getWorkspaceSubscription(workspaceId);
+
+    if (subscription?.plan) {
+      return {
+        plan: subscription.plan,
+        subscriptionStatus: subscription.status,
+      };
+    }
+
+    const plan = await prisma.plan.findUniqueOrThrow({
+      where: { code: "free" },
+    });
+
+    return {
+      plan,
+      subscriptionStatus: "trialing" as const,
+    };
+  }
+
   async createCheckoutSession(input: {
     workspaceId: string;
     userId: string;
@@ -46,7 +66,9 @@ export class BillingService {
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: existingSubscription?.stripeCustomerId ?? undefined,
-      customer_email: existingSubscription?.stripeCustomerId ? undefined : input.userEmail ?? undefined,
+      customer_email: existingSubscription?.stripeCustomerId
+        ? undefined
+        : (input.userEmail ?? undefined),
       line_items: [
         {
           quantity: 1,
@@ -56,7 +78,7 @@ export class BillingService {
             recurring: { interval: plan.interval },
             product_data: {
               name: `OmniAI ${plan.name}`,
-              description: plan.description,
+              description: `${plan.description} Includes managed AI credits where supported; BYOK usage remains provider-billed.`,
             },
           },
         },

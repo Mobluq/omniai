@@ -198,11 +198,11 @@ export function DesktopNavigation({ profile }: { profile: ShellProfile }) {
               )}
             >
               <Bot className="h-4 w-4 text-[#c93a29]" aria-hidden="true" />
-              {!collapsed ? "Provider mesh" : <span className="sr-only">Provider mesh</span>}
+              {!collapsed ? "AI access" : <span className="sr-only">AI access</span>}
             </div>
             {!collapsed ? (
               <p className="mt-2 text-xs leading-5 text-[#627177]">
-                OpenAI, Claude, Gemini, Mistral, Stability, and Bedrock keys stay server-side.
+                Managed credits by default, with BYOK controls when a workspace needs them.
               </p>
             ) : null}
           </Link>

@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 const features = [
   {
     title: "Unified model access",
-    text: "One workspace for OpenAI, Claude, Gemini, Mistral, Stability AI, and future providers.",
+    text: "One subscription can include access to OpenAI, Claude, Gemini, Mistral, Stability AI, and future providers.",
   },
   {
     title: "Recommendation layer",
@@ -103,14 +103,15 @@ export default function LandingPage() {
         </div>
         <div className="mx-auto flex min-h-[calc(100dvh-11rem)] max-w-7xl flex-col justify-center">
           <Badge className="w-fit border-primary/30 bg-primary/10 text-primary">
-            Multi-model AI orchestration
+            Managed AI credits + multi-model orchestration
           </Badge>
           <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-none tracking-tight text-foreground md:text-7xl">
             OmniAI
           </h1>
           <p className="mt-6 max-w-2xl text-lg leading-8 text-muted-foreground">
-            One secure workspace for ChatGPT, Claude, Gemini, Mistral, Stability, Amazon Bedrock,
-            routing recommendations, memory, usage, and team controls.
+            One secure subscription for ChatGPT, Claude, Gemini, Mistral, Stability, Amazon Bedrock,
+            routing recommendations, memory, usage, and team controls. BYOK remains available when
+            teams need provider-direct billing.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="default">

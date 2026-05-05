@@ -64,6 +64,7 @@ type RecentRecommendation = {
 
 type OmniTemplateDashboardProps = {
   workspaceName: string;
+  aiAccountMode: "managed" | "byok" | "hybrid";
   conversationsCount: number;
   requestCount: number;
   successCount: number;
@@ -689,15 +690,15 @@ function ActionQueue({
   const actions = [
     connectedProviderCount === 0
       ? {
-          title: "Connect a provider key",
-          body: "Routing cannot call real models until at least one provider is connected.",
+          title: "Confirm AI access",
+          body: "Managed credits need server-side provider access, while BYOK workspaces need at least one saved key.",
           href: "/settings",
           icon: LockKeyhole,
           tone: "urgent",
         }
       : {
-          title: "Provider mesh online",
-          body: `${connectedProviderCount} of ${providerCount} providers can receive requests.`,
+          title: "Model access online",
+          body: `${connectedProviderCount} of ${providerCount} providers can receive requests through the active access mode.`,
           href: "/settings",
           icon: CheckCircle2,
           tone: "good",
@@ -802,6 +803,7 @@ function ActionQueue({
 
 export function OmniTemplateDashboard({
   workspaceName,
+  aiAccountMode,
   conversationsCount,
   requestCount,
   successCount,
@@ -895,8 +897,8 @@ export function OmniTemplateDashboard({
               {workspaceName}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[#56666b]">
-              A control center for model readiness, routing decisions, usage, memory, and the next
-              action your workspace should take.
+              A control center for subscription-backed model access, routing decisions, usage,
+              memory, and the next action your workspace should take.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -912,7 +914,7 @@ export function OmniTemplateDashboard({
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#c9d8dc] bg-white px-4 text-sm font-semibold transition hover:bg-[#edf7f9] active:translate-y-px"
             >
               <Settings2 className="h-4 w-4" aria-hidden="true" />
-              Connect provider
+              AI access settings
             </Link>
           </div>
         </div>
@@ -938,9 +940,13 @@ export function OmniTemplateDashboard({
               "/routing",
             ],
             [
-              "Connected providers",
-              `${connectedProviderCount}/${providers.length || 0}`,
-              "Server-side model access.",
+              "AI access",
+              aiAccountMode === "byok" ? "BYOK" : aiAccountMode === "hybrid" ? "Hybrid" : "Managed",
+              aiAccountMode === "managed"
+                ? "One subscription with managed credits."
+                : aiAccountMode === "hybrid"
+                  ? "Managed credits plus optional keys."
+                  : "Provider keys bill outside OmniAI.",
               "/settings",
             ],
             [
@@ -1018,9 +1024,9 @@ export function OmniTemplateDashboard({
           <section className="dashboard-panel p-5 sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h2 className="text-base font-semibold tracking-[-0.02em]">Provider Readiness</h2>
+                <h2 className="text-base font-semibold tracking-[-0.02em]">Model Access</h2>
                 <p className="mt-1 text-sm text-[#56666b]">
-                  Every row opens the provider settings.
+                  Managed providers and optional BYOK connections route from the same workspace.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">

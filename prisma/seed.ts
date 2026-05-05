@@ -18,7 +18,7 @@ async function seedPlans() {
     create: {
       code: "free",
       name: "Free",
-      description: "Limited personal access for evaluation.",
+      description: "Limited managed AI credits for evaluation.",
       priceCents: 0,
       includedCredits: 100,
       usageLimits: {
@@ -33,7 +33,7 @@ async function seedPlans() {
     create: {
       code: "pro",
       name: "Pro",
-      description: "Multi-model access for power users.",
+      description: "Managed multi-model credits for power users.",
       priceCents: 2900,
       includedCredits: 2000,
       usageLimits: {
@@ -48,7 +48,7 @@ async function seedPlans() {
     create: {
       code: "team",
       name: "Team",
-      description: "Shared workspace, collaboration, and centralized usage controls.",
+      description: "Shared managed credits, collaboration, and centralized usage controls.",
       priceCents: 9900,
       includedCredits: 10000,
       maxSeats: 25,
@@ -61,7 +61,8 @@ async function seedPlans() {
     create: {
       code: "enterprise",
       name: "Enterprise",
-      description: "Custom routing, security controls, and private deployment options.",
+      description:
+        "Custom credits, BYOK policy, security controls, and private deployment options.",
       priceCents: 0,
       includedCredits: 0,
     },
@@ -75,7 +76,9 @@ async function seedAdminUser() {
   const workspaceName = process.env.ADMIN_WORKSPACE_NAME?.trim() || "OmniAI Admin Workspace";
 
   if (!email || !password) {
-    console.log("Admin seed skipped. Set ADMIN_EMAIL and ADMIN_PASSWORD to create an owner account.");
+    console.log(
+      "Admin seed skipped. Set ADMIN_EMAIL and ADMIN_PASSWORD to create an owner account.",
+    );
     return;
   }
 

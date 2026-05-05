@@ -1,8 +1,10 @@
-import type { RoutingMode } from "@prisma/client";
+import type { AIAccountMode, RoutingMode } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { assertWorkspaceAccess } from "@/lib/security/workspace-authorization";
 
 export type UpdateWorkspaceSettingsInput = {
+  aiAccountMode?: AIAccountMode;
+  onboardingCompleted?: boolean;
   defaultRoutingMode?: RoutingMode;
   defaultModelId?: string;
   memoryEnabled?: boolean;
@@ -20,6 +22,8 @@ export class SettingsService {
     return prisma.workspace.update({
       where: { id: workspaceId },
       data: {
+        aiAccountMode: input.aiAccountMode,
+        onboardingCompletedAt: input.onboardingCompleted ? new Date() : undefined,
         defaultRoutingMode: input.defaultRoutingMode,
         defaultModelId: input.defaultModelId,
         memoryEnabled: input.memoryEnabled,

@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, KeyRound, Loader2, Save, ShieldCheck } from "@/components/ui/huge-icons";
+import {
+  CheckCircle2,
+  KeyRound,
+  Loader2,
+  Route,
+  Save,
+  ShieldCheck,
+  Sparkles,
+} from "@/components/ui/huge-icons";
 import { ProviderLogo } from "@/components/integrations/provider-logo";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,6 +25,8 @@ import { TeamMembers } from "@/components/settings/team-members";
 type Workspace = {
   id: string;
   name: string;
+  aiAccountMode: "managed" | "byok" | "hybrid";
+  onboardingCompletedAt: string | null;
   defaultRoutingMode: "manual" | "suggest" | "auto";
   defaultModelId: string | null;
   memoryEnabled: boolean;
@@ -28,6 +38,8 @@ type ProviderConnection = {
   displayName: string;
   keyLabel: string;
   envKeys: string[];
+  aiAccountMode: "managed" | "byok" | "hybrid";
+  managedConfigured: boolean;
   envConfigured: boolean;
   workspaceConfigured: boolean;
   isEnabled: boolean;
@@ -45,6 +57,7 @@ export function SettingsWorkspace() {
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [providers, setProviders] = useState<ProviderConnection[]>([]);
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
+  const [aiAccountMode, setAiAccountMode] = useState<Workspace["aiAccountMode"]>("managed");
   const [defaultRoutingMode, setDefaultRoutingMode] =
     useState<Workspace["defaultRoutingMode"]>("suggest");
   const [defaultModelId, setDefaultModelId] = useState("openai-chat-primary");
@@ -57,11 +70,19 @@ export function SettingsWorkspace() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const providerSummary = useMemo(() => {
-    const connected = providers.filter(
-      (provider) => provider.envConfigured || provider.workspaceConfigured,
-    ).length;
-    return `${connected}/${providers.length || 6} connected`;
-  }, [providers]);
+    const connectedKeys = providers.filter((provider) => provider.workspaceConfigured).length;
+    const managed = providers.filter((provider) => provider.managedConfigured).length;
+
+    if (aiAccountMode === "managed") {
+      return `${managed}/${providers.length || 6} managed`;
+    }
+
+    if (aiAccountMode === "hybrid") {
+      return `${managed} managed, ${connectedKeys} BYOK`;
+    }
+
+    return `${connectedKeys}/${providers.length || 6} keys connected`;
+  }, [aiAccountMode, providers]);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,6 +104,7 @@ export function SettingsWorkspace() {
 
       if (!cancelled) {
         setWorkspace(activeWorkspace);
+        setAiAccountMode(activeWorkspace.aiAccountMode);
         setDefaultRoutingMode(activeWorkspace.defaultRoutingMode);
         setDefaultModelId(activeWorkspace.defaultModelId ?? "openai-chat-primary");
         setRetentionDays(activeWorkspace.retentionDays);
@@ -160,6 +182,7 @@ export function SettingsWorkspace() {
           body: JSON.stringify({
             defaultRoutingMode,
             defaultModelId,
+            aiAccountMode,
             memoryEnabled,
             dataRetentionDays: retentionDays,
           }),
@@ -234,25 +257,27 @@ export function SettingsWorkspace() {
         <div className="grid gap-5 border-b border-white/10 p-5 md:grid-cols-[minmax(0,1fr)_360px] md:p-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50">
-              Provider vault
+              AI access model
             </p>
             <h2 className="mt-2 text-lg font-semibold tracking-[-0.02em]">
-              Keys, routing defaults, memory, and team controls
+              One subscription first, provider keys when the workspace chooses them
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-white/60">
-              Provider credentials remain server-side, workspace settings drive routing behavior,
-              and access is scoped by role before protected data is returned.
+              Managed Credits lets OmniAI pay provider invoices and meter usage in one place. BYOK
+              remains available for teams with existing provider commitments or dedicated limits.
             </p>
           </div>
           <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-white/10 bg-white/10 text-center">
             {[
-              ["Providers", providers.length.toString()],
               [
-                "Connected",
-                providers
-                  .filter((provider) => provider.envConfigured || provider.workspaceConfigured)
-                  .length.toString(),
+                "Access",
+                aiAccountMode === "byok"
+                  ? "BYOK"
+                  : aiAccountMode === "hybrid"
+                    ? "Hybrid"
+                    : "Managed",
               ],
+              ["Providers", providerSummary],
               ["Memory", memoryEnabled ? "on" : "off"],
             ].map(([label, value]) => (
               <div key={label} className="border-r border-white/10 p-4 last:border-r-0">
@@ -266,13 +291,59 @@ export function SettingsWorkspace() {
 
       <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
         <section className="grid gap-6">
+          <Card className="rounded-[1.25rem]">
+            <CardHeader>
+              <CardTitle>AI subscription preference</CardTitle>
+              <CardDescription>
+                Choose how this workspace gets model access. You can switch this any time.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3 lg:grid-cols-3">
+              {[
+                {
+                  id: "managed",
+                  title: "Managed Credits",
+                  body: "OmniAI subscription covers supported AI services.",
+                  icon: Sparkles,
+                },
+                {
+                  id: "hybrid",
+                  title: "Hybrid",
+                  body: "Use managed credits with connected keys as needed.",
+                  icon: Route,
+                },
+                {
+                  id: "byok",
+                  title: "Bring keys",
+                  body: "Use provider API keys and pay providers directly.",
+                  icon: KeyRound,
+                },
+              ].map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setAiAccountMode(option.id as Workspace["aiAccountMode"])}
+                  className={`rounded-2xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#c93a29]/15 ${
+                    aiAccountMode === option.id
+                      ? "border-[#c93a29] bg-[#f6ded9]"
+                      : "border-[#c9d8dc] bg-white hover:bg-[#edf7f9]"
+                  }`}
+                >
+                  <option.icon className="h-5 w-5 text-[#c93a29]" aria-hidden="true" />
+                  <p className="mt-4 text-sm font-semibold">{option.title}</p>
+                  <p className="mt-1 text-xs leading-5 text-[#56666b]">{option.body}</p>
+                </button>
+              ))}
+            </CardContent>
+          </Card>
+
           <div>
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-base font-semibold">AI provider connections</h2>
+                <h2 className="text-base font-semibold">Provider access controls</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Add workspace keys for ChatGPT, Claude, Gemini, Mistral, Stability, and Amazon
-                  Bedrock.
+                  Managed mode uses OmniAI credits. Hybrid and BYOK can also store workspace keys
+                  for ChatGPT, Claude, Gemini, Mistral, Stability, and Amazon Bedrock.
                 </p>
               </div>
               <Badge className="bg-muted">{providerSummary}</Badge>
@@ -280,6 +351,7 @@ export function SettingsWorkspace() {
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
               {providers.map((provider) => {
                 const connected = provider.envConfigured || provider.workspaceConfigured;
+                const byokDisabled = aiAccountMode === "managed";
                 return (
                   <Card
                     key={provider.provider}
@@ -292,7 +364,13 @@ export function SettingsWorkspace() {
                           <div>
                             <CardTitle className="text-base">{provider.displayName}</CardTitle>
                             <CardDescription>
-                              {connected ? "Ready for routing" : "Needs a server or workspace key"}
+                              {aiAccountMode === "managed"
+                                ? provider.managedConfigured
+                                  ? "Included in managed routing"
+                                  : "Not configured in managed pool"
+                                : connected
+                                  ? "Ready for routing"
+                                  : "Needs a workspace key"}
                             </CardDescription>
                           </div>
                         </div>
@@ -303,7 +381,13 @@ export function SettingsWorkspace() {
                               : undefined
                           }
                         >
-                          {connected && provider.isEnabled ? "Connected" : "Not connected"}
+                          {aiAccountMode === "managed"
+                            ? provider.managedConfigured
+                              ? "Managed"
+                              : "Unavailable"
+                            : connected && provider.isEnabled
+                              ? "Connected"
+                              : "Not connected"}
                         </Badge>
                       </div>
                     </CardHeader>
@@ -320,6 +404,7 @@ export function SettingsWorkspace() {
                               : provider.envKeys.join(", ")
                           }
                           value={apiKeys[provider.provider] ?? ""}
+                          disabled={byokDisabled}
                           onChange={(event) =>
                             setApiKeys((current) => ({
                               ...current,
@@ -327,6 +412,12 @@ export function SettingsWorkspace() {
                             }))
                           }
                         />
+                        {byokDisabled ? (
+                          <p className="text-xs leading-5 text-muted-foreground">
+                            Workspace keys are optional. Switch to Hybrid or BYOK above to connect
+                            your own provider account.
+                          </p>
+                        ) : null}
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {provider.models.map((model) => (
@@ -340,7 +431,7 @@ export function SettingsWorkspace() {
                           size="sm"
                           className="w-full sm:w-auto"
                           onClick={() => saveProvider(provider, true)}
-                          disabled={savingProvider === provider.provider}
+                          disabled={byokDisabled || savingProvider === provider.provider}
                         >
                           {savingProvider === provider.provider ? (
                             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -354,7 +445,7 @@ export function SettingsWorkspace() {
                           variant="outline"
                           className="w-full sm:w-auto"
                           onClick={() => saveProvider(provider, false)}
-                          disabled={savingProvider === provider.provider}
+                          disabled={byokDisabled || savingProvider === provider.provider}
                         >
                           Disable
                         </Button>

@@ -48,8 +48,9 @@ OmniAI should behave like an operating workspace for AI work. The user should no
    - Saved prompts
 
 6. Settings
-   - Provider connections
-   - Workspace API keys
+   - AI subscription preference
+   - Managed Credits / BYOK / Hybrid mode
+   - Workspace API keys when BYOK or Hybrid is enabled
    - Routing defaults
    - Memory controls
    - Retention
@@ -59,27 +60,36 @@ OmniAI should behave like an operating workspace for AI work. The user should no
 
 1. User signs up with invite code.
 2. App creates a workspace.
-3. Dashboard asks the user to complete setup:
-   - Connect at least one provider.
+3. Onboarding explains how OmniAI access works:
+   - Managed Credits: one OmniAI subscription covers supported AI services.
+   - Bring Your Own Keys: user connects existing provider API accounts and pays providers directly.
+   - Hybrid: managed credits first, workspace keys when needed.
+4. User chooses an AI access mode, routing behavior, and memory preference.
+5. Dashboard asks the user to complete setup:
    - Create first project.
    - Add knowledge.
    - Start first task.
-4. User can skip setup and use safe placeholder adapters.
+6. BYOK or Hybrid users can connect provider keys from Settings.
 
 ## Provider Setup Flow
 
 1. User opens Settings.
-2. User sees provider cards:
+2. User first sees AI subscription preference:
+   - Managed Credits
+   - Hybrid
+   - Bring Your Own Keys
+3. User sees provider cards:
    - OpenAI / ChatGPT
    - Claude
    - Gemini
    - Mistral
    - Stability AI
    - Amazon Bedrock
-3. User adds a key or uses deployment env keys.
-4. App stores workspace keys encrypted.
-5. Provider appears as connected.
-6. Future enhancement: add Test Connection and model sync.
+4. In Managed mode, provider access comes from OmniAI's server-side managed pool.
+5. In BYOK or Hybrid mode, user can add a workspace key.
+6. App stores workspace keys encrypted.
+7. Provider appears as managed, BYOK connected, or unavailable.
+8. Future enhancement: provider health, credit pricing, and model sync.
 
 ## Project Flow
 
@@ -149,6 +159,7 @@ Future work:
 
 - A user should always know where a response came from.
 - A user should always know why a model was recommended.
+- A user should always know whether usage is paid through OmniAI credits or their provider account.
 - Provider keys should never appear after saving.
 - Empty states should tell the user the next useful action.
 - Chat history should be persistent and recoverable.
@@ -160,7 +171,8 @@ Future work:
 
 ### Now Implemented
 
-- Provider hub with encrypted workspace keys.
+- AI access onboarding with Managed Credits, BYOK, and Hybrid modes.
+- Provider hub with encrypted workspace keys for BYOK and Hybrid workspaces.
 - Persistent chat history.
 - Recommendation pause and continuation.
 - Project data model and UI.

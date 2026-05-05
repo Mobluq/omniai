@@ -87,13 +87,15 @@ The scaffold includes:
 - Global workspace search across conversations, messages, projects, knowledge, and artifacts
 - Knowledge source ingestion for notes, URLs, and file text
 - Automatic artifact capture for valuable generated outputs
-- Server-side provider connection settings with encrypted workspace API keys
+- First-run AI access onboarding for Managed Credits, Bring Your Own Keys, or Hybrid mode
+- Managed Credits-first subscription architecture with BYOK as an advanced workspace option
+- Server-side provider connection settings with encrypted workspace API keys for BYOK/Hybrid workspaces
 - Isolated provider adapters with live-call paths and safe no-key fallbacks
 - Model registry with capability metadata
 - Rule-based recommendation engine with transparent score breakdowns, designed for future LLM classification
 - Manual, suggest, and auto routing foundation
 - Memory/knowledge architecture prepared for vector search
-- Usage by provider, model, request type, token estimate, and cost estimate
+- Usage by provider, model, request type, token estimate, credit estimate, and provider cost estimate
 - Stripe checkout/customer portal routes, billing models, audit logs, and usage-limit enforcement
 
 See `UX_FLOW.md`, `ROUTING_INTELLIGENCE.md`, `ARCHITECTURE.md`, `SECURITY.md`, `ENVIRONMENT.md`, `API.md`, and `DEPLOYMENT.md` for more detail.

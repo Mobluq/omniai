@@ -26,8 +26,8 @@ Next.js UI
 - `knowledge` / `memory`: text sanitization, chunking, retrieval, and context injection boundary
 - `artifact`: durable generated outputs such as images, code, research, proposals, and long documents
 - `notification`: in-app notification inbox for security, usage, provider, billing, routing, workspace, and system events
-- `usage`: request, token, model, provider, and cost metering
-- `billing`: Stripe-ready plan/subscription models
+- `usage`: request, token, model, provider, credit, and cost metering
+- `billing`: Stripe-ready plan/subscription models with Managed Credits as the default access model
 - `audit`: audit event persistence
 - `settings`: workspace-level settings update foundation
 
@@ -41,7 +41,7 @@ generateImage?(input): Promise<ImageGenerationOutput>
 embedText?(input): Promise<EmbeddingOutput>
 ```
 
-Adapters are isolated behind the provider interface. OpenAI, Anthropic, Gemini, Mistral, Stability AI, and Amazon Bedrock have server-side adapter implementations with safe no-key fallbacks. Workspace keys are resolved through the provider configuration service before falling back to deployment environment variables.
+Adapters are isolated behind the provider interface. OpenAI, Anthropic, Gemini, Mistral, Stability AI, and Amazon Bedrock have server-side adapter implementations with safe no-key fallbacks. Workspaces choose an AI access mode: Managed Credits uses OmniAI server-side provider credentials, BYOK uses encrypted workspace keys, and Hybrid can use both based on policy. The provider configuration service resolves credentials according to that workspace mode before a provider call is attempted.
 
 ## Recommendation Engine
 

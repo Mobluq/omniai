@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db/prisma";
 import { requireUser } from "@/lib/auth/session";
 import { AppShell } from "@/components/layout/app-shell";
@@ -13,6 +14,11 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const workspaces = await new WorkspaceService().listForUser(user.id);
   const workspace = workspaces[0];
+
+  if (workspace && !workspace.onboardingCompletedAt) {
+    redirect("/onboarding");
+  }
+
   const conversations = workspace
     ? await new ConversationService().list(user.id, workspace.id)
     : [];
@@ -59,6 +65,7 @@ export default async function DashboardPage() {
     <AppShell>
       <OmniTemplateDashboard
         workspaceName={workspace?.name ?? "OmniAI Workspace"}
+        aiAccountMode={workspace?.aiAccountMode ?? "managed"}
         conversationsCount={conversations.length}
         requestCount={usage.requestCount}
         successCount={usage.successCount}

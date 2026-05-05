@@ -61,6 +61,9 @@ export function BillingActions({ workspaceId }: { workspaceId: string }) {
 
   return (
     <div className="grid gap-2">
+      <div className="rounded-xl border border-[#c9d8dc] bg-[#edf7f9] p-3 text-sm leading-6 text-[#56666b]">
+        Plans include managed AI credits. BYOK usage is still billed by the connected provider.
+      </div>
       <Button
         onClick={() => openCheckout("pro")}
         disabled={Boolean(loading)}
@@ -71,7 +74,7 @@ export function BillingActions({ workspaceId }: { workspaceId: string }) {
         ) : (
           <CreditCard className="h-4 w-4" aria-hidden="true" />
         )}
-        Upgrade to Pro
+        Upgrade to Pro credits
       </Button>
       <Button
         variant="outline"
@@ -84,7 +87,7 @@ export function BillingActions({ workspaceId }: { workspaceId: string }) {
         ) : (
           <CreditCard className="h-4 w-4" aria-hidden="true" />
         )}
-        Upgrade to Team
+        Upgrade to Team credits
       </Button>
       <Button
         variant="ghost"

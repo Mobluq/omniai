@@ -1,7 +1,15 @@
 import { z } from "zod";
 
 export const routingModeSchema = z.enum(["manual", "suggest", "auto"]);
-export const providerIdSchema = z.enum(["openai", "anthropic", "google", "stability", "mistral", "amazon"]);
+export const aiAccountModeSchema = z.enum(["managed", "byok", "hybrid"]);
+export const providerIdSchema = z.enum([
+  "openai",
+  "anthropic",
+  "google",
+  "stability",
+  "mistral",
+  "amazon",
+]);
 
 export const createWorkspaceSchema = z.object({
   name: z.string().min(2).max(80),
@@ -67,10 +75,19 @@ export const providerTestSchema = z.object({
 });
 
 export const settingsUpdateSchema = z.object({
+  aiAccountMode: aiAccountModeSchema.optional(),
+  onboardingCompleted: z.boolean().optional(),
   defaultRoutingMode: routingModeSchema.optional(),
   defaultModelId: z.string().min(1).optional(),
   memoryEnabled: z.boolean().optional(),
   dataRetentionDays: z.number().int().min(1).max(3650).optional(),
+});
+
+export const onboardingPreferenceSchema = z.object({
+  workspaceId: z.string().min(1),
+  aiAccountMode: aiAccountModeSchema,
+  defaultRoutingMode: routingModeSchema.default("suggest"),
+  memoryEnabled: z.boolean().default(true),
 });
 
 export const workspaceInviteCreateSchema = z.object({
@@ -161,7 +178,9 @@ export const createArtifactSchema = z.object({
   projectId: z.string().min(1).optional(),
   conversationId: z.string().min(1).optional(),
   messageId: z.string().min(1).optional(),
-  type: z.enum(["document", "image", "code", "research", "proposal", "prompt", "other"]).default("other"),
+  type: z
+    .enum(["document", "image", "code", "research", "proposal", "prompt", "other"])
+    .default("other"),
   title: z.string().min(2).max(160),
   content: z.string().min(1).max(100000),
   provider: z.string().min(1).optional(),

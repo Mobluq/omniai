@@ -2,7 +2,7 @@
 
 ## Secret Management
 
-Provider keys, database credentials, Auth.js secrets, Stripe keys, and Sentry DSNs must come from environment variables. No provider key is exposed to the frontend.
+Managed provider keys, database credentials, Auth.js secrets, Stripe keys, and Sentry DSNs must come from environment variables. BYOK workspace provider keys are encrypted before storage. No provider key is exposed to the frontend.
 
 ## Authentication
 
@@ -32,7 +32,7 @@ API routes use a database-backed limiter in the `RateLimitBucket` table. It stor
 
 ## API Key Handling
 
-`AIProviderConfig` stores encrypted key material only. Workspace provider keys are encrypted with AES-256-GCM using `APP_ENCRYPTION_KEY` or, as a local fallback, `NEXTAUTH_SECRET`. Production should keep `APP_ENCRYPTION_KEY` stable and separate from session secrets; larger deployments should move this to managed KMS envelope encryption.
+`AIProviderConfig` stores encrypted key material only. Workspace provider keys are encrypted with AES-256-GCM using `APP_ENCRYPTION_KEY` or, as a local fallback, `NEXTAUTH_SECRET`. Managed Credits should use deployment-level or secret-manager provider credentials controlled by OmniAI. Production should keep `APP_ENCRYPTION_KEY` stable and separate from session secrets; larger deployments should move this to managed KMS envelope encryption.
 
 ## Prompt Injection
 

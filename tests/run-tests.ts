@@ -3,6 +3,7 @@ import { ModelRegistryService } from "@/modules/ai/registry/model-registry";
 import { OpenAIProvider } from "@/modules/ai/providers/openai-provider";
 import { RecommendationEngine } from "@/modules/ai/recommendation/recommendation-engine";
 import { RoutingEngine } from "@/modules/ai/routing/routing-engine";
+import { createProvider } from "@/modules/ai/providers/provider-factory";
 
 async function run() {
   process.env.DATABASE_URL ??= "postgresql://postgres:postgres@localhost:5432/omniai";
@@ -39,7 +40,9 @@ async function run() {
     prompt: "Debug this React component and explain the bug",
   });
   assert.equal(debuggingRecommendation.detectedIntent, "debugging");
-  assert.ok(["openai", "anthropic", "mistral"].includes(debuggingRecommendation.recommendedProvider));
+  assert.ok(
+    ["openai", "anthropic", "mistral"].includes(debuggingRecommendation.recommendedProvider),
+  );
 
   const documentRecommendation = recommendations.evaluate({
     prompt: "Summarize this long board document",
@@ -94,6 +97,15 @@ async function run() {
     /not connected or enabled/,
   );
 
+  process.env.OPENAI_API_KEY = "env-key-that-should-not-be-used";
+  const byokOnlyProvider = createProvider("openai", { useEnvironmentFallback: false });
+  const byokOnlyOutput = await byokOnlyProvider.generateText({
+    prompt: "Say OK",
+    modelId: "openai-chat-primary",
+    maxOutputTokens: 16,
+  });
+  assert.match(byokOnlyOutput.content, /no live credential/i);
+
   const originalFetch = globalThis.fetch;
   const requestedModels: string[] = [];
   globalThis.fetch = (async (_url: string | URL | Request, init?: RequestInit) => {
@@ -102,7 +114,9 @@ async function run() {
 
     if (requestedModels.length === 1) {
       return new Response(
-        JSON.stringify({ error: { message: "The model does not exist or you do not have access." } }),
+        JSON.stringify({
+          error: { message: "The model does not exist or you do not have access." },
+        }),
         { status: 404, headers: { "Content-Type": "application/json" } },
       );
     }

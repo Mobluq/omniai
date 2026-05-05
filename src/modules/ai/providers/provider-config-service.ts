@@ -1,5 +1,5 @@
 import "server-only";
-import type { ModelCapability } from "@prisma/client";
+import type { AIAccountMode, ModelCapability } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { getServerEnv } from "@/lib/env/server";
 import { badRequest } from "@/lib/errors/app-error";
@@ -59,6 +59,8 @@ export type ProviderConnection = {
   displayName: string;
   keyLabel: string;
   envKeys: string[];
+  aiAccountMode: AIAccountMode;
+  managedConfigured: boolean;
   envConfigured: boolean;
   workspaceConfigured: boolean;
   isEnabled: boolean;
@@ -109,14 +111,32 @@ function envProviderConfigured(provider: ProviderId) {
 export class ProviderConfigurationService {
   private readonly registry = new ModelRegistryService();
 
-  async listWorkspaceConnections(userId: string, workspaceId: string): Promise<ProviderConnection[]> {
+  async listWorkspaceConnections(
+    userId: string,
+    workspaceId: string,
+  ): Promise<ProviderConnection[]> {
     await assertWorkspaceAccess(userId, workspaceId);
-    const configs = await prisma.aIProviderConfig.findMany({
-      where: { workspaceId },
-    });
+    const [workspace, configs] = await Promise.all([
+      prisma.workspace.findUniqueOrThrow({
+        where: { id: workspaceId },
+        select: { aiAccountMode: true },
+      }),
+      prisma.aIProviderConfig.findMany({
+        where: { workspaceId },
+      }),
+    ]);
 
     return providerCatalog.map((provider) => {
       const config = configs.find((item) => item.provider === provider.id);
+      const managedConfigured =
+        workspace.aiAccountMode !== "byok" && envProviderConfigured(provider.id);
+      const workspaceConfigured = Boolean(config?.encryptedApiKey);
+      const runnable =
+        workspace.aiAccountMode === "managed"
+          ? managedConfigured
+          : workspace.aiAccountMode === "byok"
+            ? workspaceConfigured
+            : managedConfigured || workspaceConfigured;
       const models = this.registry
         .list()
         .filter((model) => model.provider === provider.id)
@@ -132,19 +152,18 @@ export class ProviderConfigurationService {
         displayName: provider.displayName,
         keyLabel: provider.keyLabel,
         envKeys: provider.envKeys,
-        envConfigured: envProviderConfigured(provider.id),
-        workspaceConfigured: Boolean(config?.encryptedApiKey),
-        isEnabled: config?.isEnabled ?? envProviderConfigured(provider.id),
-        status: config?.status ?? (envProviderConfigured(provider.id) ? "available" : "disabled"),
+        aiAccountMode: workspace.aiAccountMode,
+        managedConfigured,
+        envConfigured: managedConfigured,
+        workspaceConfigured,
+        isEnabled: config?.isEnabled ?? runnable,
+        status: config?.status ?? (runnable ? "available" : "disabled"),
         models,
       };
     });
   }
 
-  async upsertWorkspaceConfiguration(
-    userId: string,
-    input: UpsertProviderConfigurationInput,
-  ) {
+  async upsertWorkspaceConfiguration(userId: string, input: UpsertProviderConfigurationInput) {
     await assertWorkspaceAccess(userId, input.workspaceId, "admin");
 
     if (!isProviderId(input.provider)) {
@@ -152,7 +171,9 @@ export class ProviderConfigurationService {
     }
 
     const provider = providerCatalog.find((item) => item.id === input.provider)!;
-    const registryModels = this.registry.list().filter((model) => model.provider === input.provider);
+    const registryModels = this.registry
+      .list()
+      .filter((model) => model.provider === input.provider);
     const allowedCapabilities = [
       ...new Set(registryModels.flatMap((model) => model.capabilities)),
     ] as ModelCapability[];
@@ -169,9 +190,7 @@ export class ProviderConfigurationService {
         isEnabled: input.isEnabled,
         status: input.isEnabled ? "available" : "disabled",
         allowedCapabilities,
-        ...(input.apiKey?.trim()
-          ? { encryptedApiKey: encryptSecret(input.apiKey.trim()) }
-          : {}),
+        ...(input.apiKey?.trim() ? { encryptedApiKey: encryptSecret(input.apiKey.trim()) } : {}),
       },
       create: {
         workspaceId: input.workspaceId,
@@ -209,7 +228,15 @@ export class ProviderConfigurationService {
     workspaceId?: string;
     provider: ProviderId;
   }): Promise<ProviderConfig> {
-    if (input.userId && input.workspaceId) {
+    const workspace = input.workspaceId
+      ? await prisma.workspace.findUnique({
+          where: { id: input.workspaceId },
+          select: { aiAccountMode: true },
+        })
+      : null;
+    const mode = workspace?.aiAccountMode ?? "managed";
+
+    if (input.userId && input.workspaceId && mode !== "managed") {
       const config = await prisma.aIProviderConfig.findFirst({
         where: {
           workspaceId: input.workspaceId,
@@ -221,8 +248,15 @@ export class ProviderConfigurationService {
       });
 
       if (config?.encryptedApiKey) {
-        return { apiKey: decryptSecret(config.encryptedApiKey) };
+        return {
+          apiKey: decryptSecret(config.encryptedApiKey),
+          useEnvironmentFallback: mode === "hybrid",
+        };
       }
+    }
+
+    if (mode === "byok") {
+      return { useEnvironmentFallback: false };
     }
 
     const env = getServerEnv();
@@ -236,10 +270,11 @@ export class ProviderConfigurationService {
           sessionToken: env.AWS_SESSION_TOKEN,
           modelId: env.AWS_BEDROCK_MODEL_ID,
         },
+        useEnvironmentFallback: true,
       };
     }
 
-    return {};
+    return { useEnvironmentFallback: true };
   }
 
   async listRunnableProviderIds(userId: string, workspaceId: string): Promise<ProviderId[]> {
@@ -277,7 +312,10 @@ export class ProviderConfigurationService {
         configured: false,
         live: false,
         status: "missing_credentials",
-        message: "Add a workspace key or configure the provider environment variables.",
+        message:
+          connection.aiAccountMode === "managed"
+            ? "This provider is not available in the managed credit pool yet. Enable OmniAI server credentials or switch to Hybrid/BYOK and add a workspace key."
+            : "Add a workspace key or switch to Managed Credits if this provider is included in the OmniAI subscription.",
       };
     }
 

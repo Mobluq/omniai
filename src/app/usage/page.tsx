@@ -27,6 +27,7 @@ import {
   usageRequestTypes,
 } from "@/modules/usage/usage-service";
 import { WorkspaceService } from "@/modules/workspace/workspace-service";
+import { BillingService } from "@/modules/billing/billing-service";
 
 type UsagePageProps = {
   searchParams?:
@@ -151,6 +152,7 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
   }
 
   const usageService = new UsageService();
+  const billing = await new BillingService().getWorkspacePlan(workspace.id);
   const baseSummary = await usageService.summarize(workspace.id, { days });
   const summary = hasNarrowFilters
     ? await usageService.summarize(workspace.id, {
@@ -162,6 +164,8 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
       })
     : baseSummary;
   const totalTokens = summary.tokenInputEstimate + summary.tokenOutputEstimate;
+  const creditLimit = billing.plan.includedCredits;
+  const estimatedCreditsUsed = summary.requestCount;
 
   return (
     <AppShell>
@@ -178,11 +182,11 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
               Dashboard
             </Link>
             <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-            <span className="font-medium text-[#171314]">Usage & Cost</span>
+            <span className="font-medium text-[#171314]">Usage & Credits</span>
           </nav>
           <p className="page-kicker">Metering</p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            <h1 className="page-title">Usage</h1>
+            <h1 className="page-title">Usage & Credits</h1>
             {activeFilterCount ? (
               <Badge className="bg-[#f6ded9] text-[#8f2a20]">
                 {activeFilterCount} active filter{activeFilterCount === 1 ? "" : "s"}
@@ -190,11 +194,12 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
             ) : null}
           </div>
           <p className="page-copy">
-            Provider, model, request type, token, and cost estimates for {workspace.name}.
+            Track model requests, credit consumption, and provider cost estimates behind the
+            workspace subscription for {workspace.name}.
           </p>
         </div>
         <Button asChild variant="outline">
-          <Link href="/settings">Manage providers</Link>
+          <Link href="/settings">Manage AI access</Link>
         </Button>
       </div>
 
@@ -206,7 +211,9 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
               Usage filters
             </div>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Scope the dashboard by billing window, provider, model, request type, and outcome.
+              Scope the dashboard by billing window, provider, model, request type, and outcome. In
+              managed mode, provider costs roll up into OmniAI credits instead of separate user
+              invoices.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -339,12 +346,20 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card className="rounded-[1.25rem]">
           <CardHeader>
-            <CardDescription>Requests</CardDescription>
-            <CardTitle className="text-2xl">{formatNumber(summary.requestCount)}</CardTitle>
+            <CardDescription>Managed credits</CardDescription>
+            <CardTitle className="text-2xl">
+              {formatNumber(estimatedCreditsUsed)}
+              {creditLimit ? (
+                <span className="text-base text-muted-foreground">
+                  {" "}
+                  / {formatNumber(creditLimit)}
+                </span>
+              ) : null}
+            </CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
             <Activity className="h-4 w-4" aria-hidden="true" />
-            Last {summary.windowDays} days
+            {billing.plan.name} plan, last {summary.windowDays} days
           </CardContent>
         </Card>
         <Card className="rounded-[1.25rem]">
@@ -359,12 +374,12 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
         </Card>
         <Card className="rounded-[1.25rem]">
           <CardHeader>
-            <CardDescription>Estimated cost</CardDescription>
+            <CardDescription>Credit spend estimate</CardDescription>
             <CardTitle className="text-2xl">{formatCurrency(summary.costEstimate)}</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-2 text-sm text-muted-foreground">
             <CircleDollarSign className="h-4 w-4" aria-hidden="true" />
-            Provider estimate
+            Provider cost behind credits
           </CardContent>
         </Card>
         <Card className="rounded-[1.25rem]">
@@ -483,8 +498,10 @@ export default async function UsagePage({ searchParams }: UsagePageProps) {
         <aside className="grid content-start gap-6">
           <Card className="rounded-[1.25rem]">
             <CardHeader>
-              <CardTitle>Billing</CardTitle>
-              <CardDescription>Upgrade plans or open the Stripe customer portal.</CardDescription>
+              <CardTitle>Managed Credits & Billing</CardTitle>
+              <CardDescription>
+                Upgrade plans, manage the subscription, or review included monthly credits.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <BillingActions workspaceId={workspace.id} />

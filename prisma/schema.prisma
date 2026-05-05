@@ -20,6 +20,12 @@ enum WorkspaceType {
   enterprise
 }
 
+enum AIAccountMode {
+  managed
+  byok
+  hybrid
+}
+
 enum MessageRole {
   user
   assistant
@@ -119,42 +125,42 @@ enum NotificationType {
 }
 
 model User {
-  id                  String                @id @default(cuid())
-  name                String?
-  email               String?               @unique
-  emailVerified       DateTime?
-  image               String?
-  passwordHash        String?
-  jobTitle            String?
-  companyName         String?
-  timezone            String                @default("UTC")
-  locale              String                @default("en")
-  defaultRoutingMode  RoutingMode           @default(suggest)
-  defaultModelId      String?
-  dataRetentionDays   Int                   @default(365)
-  memoryEnabled       Boolean               @default(true)
-  twoFactorEnabled    Boolean               @default(false)
-  twoFactorSecretEncrypted String?           @db.Text
-  twoFactorConfirmedAt DateTime?
-  twoFactorRecoveryCodesEncrypted String?    @db.Text
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  accounts            Account[]
-  sessions            Session[]
-  notificationPreference NotificationPreference?
-  notifications       Notification[]
-  memberships         WorkspaceMember[]
-  workspaceInvitesCreated WorkspaceInvite[] @relation("WorkspaceInvitesCreated")
-  workspaceInvitesAccepted WorkspaceInvite[] @relation("WorkspaceInvitesAccepted")
-  conversations       Conversation[]
-  messages            Message[]
-  providerConfigs     AIProviderConfig[]
-  recommendationLogs  RecommendationLog[]
-  usageLogs           UsageLog[]
-  auditLogs           AuditLog[]
-  conversationMemory  ConversationMemory[]
-  projects            Project[]
-  artifacts           Artifact[]
+  id                              String                  @id @default(cuid())
+  name                            String?
+  email                           String?                 @unique
+  emailVerified                   DateTime?
+  image                           String?
+  passwordHash                    String?
+  jobTitle                        String?
+  companyName                     String?
+  timezone                        String                  @default("UTC")
+  locale                          String                  @default("en")
+  defaultRoutingMode              RoutingMode             @default(suggest)
+  defaultModelId                  String?
+  dataRetentionDays               Int                     @default(365)
+  memoryEnabled                   Boolean                 @default(true)
+  twoFactorEnabled                Boolean                 @default(false)
+  twoFactorSecretEncrypted        String?                 @db.Text
+  twoFactorConfirmedAt            DateTime?
+  twoFactorRecoveryCodesEncrypted String?                 @db.Text
+  createdAt                       DateTime                @default(now())
+  updatedAt                       DateTime                @updatedAt
+  accounts                        Account[]
+  sessions                        Session[]
+  notificationPreference          NotificationPreference?
+  notifications                   Notification[]
+  memberships                     WorkspaceMember[]
+  workspaceInvitesCreated         WorkspaceInvite[]       @relation("WorkspaceInvitesCreated")
+  workspaceInvitesAccepted        WorkspaceInvite[]       @relation("WorkspaceInvitesAccepted")
+  conversations                   Conversation[]
+  messages                        Message[]
+  providerConfigs                 AIProviderConfig[]
+  recommendationLogs              RecommendationLog[]
+  usageLogs                       UsageLog[]
+  auditLogs                       AuditLog[]
+  conversationMemory              ConversationMemory[]
+  projects                        Project[]
+  artifacts                       Artifact[]
 
   @@index([email])
 }
@@ -208,29 +214,31 @@ model VerificationToken {
 }
 
 model Workspace {
-  id                 String              @id @default(cuid())
-  name               String
-  slug               String              @unique
-  type               WorkspaceType       @default(personal)
-  defaultRoutingMode RoutingMode         @default(suggest)
-  defaultModelId     String?
-  memoryEnabled      Boolean             @default(true)
-  retentionDays      Int                 @default(365)
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  members            WorkspaceMember[]
-  invites            WorkspaceInvite[]
-  conversations      Conversation[]
-  providerConfigs    AIProviderConfig[]
-  recommendationLogs RecommendationLog[]
-  usageLogs          UsageLog[]
-  knowledgeSources   KnowledgeSource[]
-  subscriptions      Subscription[]
-  auditLogs          AuditLog[]
-  conversationMemory ConversationMemory[]
-  projects           Project[]
-  artifacts          Artifact[]
-  notifications      Notification[]
+  id                    String               @id @default(cuid())
+  name                  String
+  slug                  String               @unique
+  type                  WorkspaceType        @default(personal)
+  aiAccountMode         AIAccountMode        @default(managed)
+  onboardingCompletedAt DateTime?
+  defaultRoutingMode    RoutingMode          @default(suggest)
+  defaultModelId        String?
+  memoryEnabled         Boolean              @default(true)
+  retentionDays         Int                  @default(365)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  members               WorkspaceMember[]
+  invites               WorkspaceInvite[]
+  conversations         Conversation[]
+  providerConfigs       AIProviderConfig[]
+  recommendationLogs    RecommendationLog[]
+  usageLogs             UsageLog[]
+  knowledgeSources      KnowledgeSource[]
+  subscriptions         Subscription[]
+  auditLogs             AuditLog[]
+  conversationMemory    ConversationMemory[]
+  projects              Project[]
+  artifacts             Artifact[]
+  notifications         Notification[]
 
   @@index([slug])
 }
@@ -293,20 +301,20 @@ model WorkspaceInvite {
 }
 
 model Conversation {
-  id             String      @id @default(cuid())
+  id             String               @id @default(cuid())
   workspaceId    String
   projectId      String?
   createdById    String
   title          String
   activeProvider String?
   activeModelId  String?
-  routingMode    RoutingMode @default(suggest)
+  routingMode    RoutingMode          @default(suggest)
   archivedAt     DateTime?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  workspace      Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  project        Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  createdBy      User        @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  workspace      Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project        Project?             @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdBy      User                 @relation(fields: [createdById], references: [id], onDelete: Restrict)
   messages       Message[]
   memories       ConversationMemory[]
   artifacts      Artifact[]
@@ -339,19 +347,19 @@ model Message {
 }
 
 model AIProviderConfig {
-  id                  String         @id @default(cuid())
-  workspaceId          String?
-  userId               String?
-  provider             String
-  displayName          String
-  encryptedApiKey      String?        @db.Text
-  isEnabled            Boolean        @default(false)
-  allowedCapabilities  ModelCapability[]
-  status               ProviderStatus @default(disabled)
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
-  workspace            Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  user                 User?          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String            @id @default(cuid())
+  workspaceId         String?
+  userId              String?
+  provider            String
+  displayName         String
+  encryptedApiKey     String?           @db.Text
+  isEnabled           Boolean           @default(false)
+  allowedCapabilities ModelCapability[]
+  status              ProviderStatus    @default(disabled)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  workspace           Workspace?        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user                User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceId, provider])
   @@index([workspaceId, provider])
@@ -403,21 +411,21 @@ model RecommendationLog {
 }
 
 model UsageLog {
-  id                 String      @id @default(cuid())
-  userId             String
-  workspaceId        String
-  conversationId     String?
-  provider           String
-  modelId            String
-  requestType        RequestType
-  tokenInputEstimate Int         @default(0)
-  tokenOutputEstimate Int        @default(0)
-  costEstimate       Decimal     @default(0) @db.Decimal(12, 6)
-  success            Boolean
-  errorCode          String?
-  createdAt          DateTime    @default(now())
-  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace          Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  id                  String      @id @default(cuid())
+  userId              String
+  workspaceId         String
+  conversationId      String?
+  provider            String
+  modelId             String
+  requestType         RequestType
+  tokenInputEstimate  Int         @default(0)
+  tokenOutputEstimate Int         @default(0)
+  costEstimate        Decimal     @default(0) @db.Decimal(12, 6)
+  success             Boolean
+  errorCode           String?
+  createdAt           DateTime    @default(now())
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace           Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, createdAt])
   @@index([userId, createdAt])
@@ -443,21 +451,21 @@ model KnowledgeSource {
 }
 
 model Project {
-  id                 String          @id @default(cuid())
+  id                 String            @id @default(cuid())
   workspaceId        String
   createdById        String
   name               String
   slug               String
-  description        String?         @db.Text
-  instructions       String?         @db.Text
-  defaultRoutingMode RoutingMode     @default(suggest)
+  description        String?           @db.Text
+  instructions       String?           @db.Text
+  defaultRoutingMode RoutingMode       @default(suggest)
   defaultProvider    String?
   defaultModelId     String?
-  status             ProjectStatus   @default(active)
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
-  workspace          Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  createdBy          User            @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  status             ProjectStatus     @default(active)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  workspace          Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy          User              @relation(fields: [createdById], references: [id], onDelete: Restrict)
   conversations      Conversation[]
   knowledgeSources   KnowledgeSource[]
   artifacts          Artifact[]
@@ -468,24 +476,24 @@ model Project {
 }
 
 model Artifact {
-  id             String       @id @default(cuid())
+  id             String        @id @default(cuid())
   workspaceId    String
   projectId      String?
   conversationId String?
   messageId      String?
   createdById    String?
-  type           ArtifactType @default(other)
+  type           ArtifactType  @default(other)
   title          String
-  content        String       @db.Text
+  content        String        @db.Text
   provider       String?
   modelId        String?
   metadata       Json?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  workspace      Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  project        Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project        Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
   conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
-  createdBy      User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy      User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([workspaceId, createdAt])
   @@index([projectId, createdAt])
@@ -527,15 +535,15 @@ model DocumentChunk {
 }
 
 model EmbeddingRecord {
-  id              String         @id @default(cuid())
+  id              String                 @id @default(cuid())
   workspaceId     String
   documentChunkId String
   provider        String
   modelId         String
   embedding       Unsupported("vector")?
   dimensions      Int
-  createdAt       DateTime       @default(now())
-  documentChunk   DocumentChunk  @relation(fields: [documentChunkId], references: [id], onDelete: Cascade)
+  createdAt       DateTime               @default(now())
+  documentChunk   DocumentChunk          @relation(fields: [documentChunkId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, provider, modelId])
   @@index([documentChunkId])
@@ -558,69 +566,69 @@ model ConversationMemory {
 }
 
 model Plan {
-  id             String          @id @default(cuid())
-  code           String          @unique
-  name           String
-  description    String
-  priceCents     Int             @default(0)
-  currency       String          @default("usd")
-  interval       BillingInterval @default(month)
-  includedCredits Int            @default(0)
-  maxSeats       Int?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  subscriptions  Subscription[]
-  usageLimits    UsageLimit[]
+  id              String          @id @default(cuid())
+  code            String          @unique
+  name            String
+  description     String
+  priceCents      Int             @default(0)
+  currency        String          @default("usd")
+  interval        BillingInterval @default(month)
+  includedCredits Int             @default(0)
+  maxSeats        Int?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  subscriptions   Subscription[]
+  usageLimits     UsageLimit[]
 }
 
 model Subscription {
   id                   String             @id @default(cuid())
-  workspaceId           String
-  planId                String
-  status                SubscriptionStatus @default(incomplete)
-  stripeCustomerId      String?
-  stripeSubscriptionId  String?
-  currentPeriodStart    DateTime?
-  currentPeriodEnd      DateTime?
-  cancelAtPeriodEnd     Boolean            @default(false)
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
-  workspace             Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  plan                  Plan               @relation(fields: [planId], references: [id], onDelete: Restrict)
-  billingEvents         BillingEvent[]
+  workspaceId          String
+  planId               String
+  status               SubscriptionStatus @default(incomplete)
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  workspace            Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  plan                 Plan               @relation(fields: [planId], references: [id], onDelete: Restrict)
+  billingEvents        BillingEvent[]
 
   @@index([workspaceId, status])
   @@index([stripeCustomerId])
 }
 
 model UsageLimit {
-  id          String   @id @default(cuid())
-  planId      String
-  metric      String
-  limit       Int
-  period      String   @default("month")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  plan        Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  planId    String
+  metric    String
+  limit     Int
+  period    String   @default("month")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  plan      Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@unique([planId, metric, period])
 }
 
 model BillingEvent {
-  id             String       @id @default(cuid())
+  id             String        @id @default(cuid())
   subscriptionId String?
-  stripeEventId  String?      @unique
+  stripeEventId  String?       @unique
   eventType      String
   payload        Json?
   processedAt    DateTime?
-  createdAt      DateTime     @default(now())
+  createdAt      DateTime      @default(now())
   subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
 
   @@index([eventType, createdAt])
 }
 
 model AuditLog {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   userId      String?
   workspaceId String?
   action      String
@@ -629,8 +637,8 @@ model AuditLog {
   ipAddress   String?
   userAgent   String?
   metadata    Json?
-  createdAt   DateTime  @default(now())
-  user        User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt   DateTime   @default(now())
+  user        User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
   workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, createdAt])

@@ -20,13 +20,13 @@ const starterMessages: WorkerMessage[] = [
   {
     id: "welcome",
     role: "worker",
-    body: "I can explain OmniAI, help you connect providers, troubleshoot chat errors, and point you to the right section of the app.",
+    body: "I can explain OmniAI managed credits, provider access modes, chat errors, routing, history, and where to adjust workspace settings.",
   },
 ];
 
 const quickQuestions = [
   "Why did chat fail?",
-  "How do I connect OpenAI or Claude?",
+  "How do managed credits work?",
   "How does routing pick the best model?",
   "Where is my chat history?",
   "What should I test before launch?",
@@ -45,8 +45,19 @@ function getWorkerAnswer(question: string) {
 
   if (normalized.includes("chat") || normalized.includes("fail") || normalized.includes("error")) {
     return [
-      "Chat errors usually come from one of four places: no enabled provider in Settings, an invalid provider key, the selected model not being available for that key, or provider billing/rate limits.",
-      "Open Settings > AI provider connections, test the provider, then return to Chat and make sure the selected model belongs to a connected provider. OmniAI keeps provider keys server-side and logs failed provider attempts for review.",
+      "Chat errors usually come from one of five places: the managed credit pool does not include that provider yet, a BYOK key is missing or invalid, the selected model is unavailable, the workspace hit a usage limit, or the upstream provider is temporarily failing.",
+      "Open Settings > AI subscription preference first. Managed mode should work through OmniAI credits. Hybrid or BYOK mode needs workspace provider keys saved and tested before chat can route through that account.",
+    ].join(" ");
+  }
+
+  if (
+    normalized.includes("managed") ||
+    normalized.includes("credit") ||
+    normalized.includes("subscription")
+  ) {
+    return [
+      "Managed Credits means OmniAI pays supported AI providers and meters usage inside your OmniAI subscription, so users do not need separate provider billing just to start.",
+      "You can switch to Hybrid or BYOK in Settings when a workspace needs its own provider account, procurement controls, custom quotas, or direct provider billing.",
     ].join(" ");
   }
 
@@ -63,8 +74,8 @@ function getWorkerAnswer(question: string) {
     normalized.includes("key")
   ) {
     return [
-      "Provider setup lives in Settings > AI providers. Add the provider key there, keep it enabled, run the test action, and set a workspace default model if you want chat to use it first.",
-      "OpenAI, Anthropic Claude, Gemini, Mistral, Stability, and Amazon Bedrock should all stay on the server. Do not place keys in browser code or public environment variables.",
+      "OpenAI, Claude, Gemini, Mistral, Stability, and Bedrock can be accessed through Managed Credits when OmniAI has them configured server-side.",
+      "If you prefer your existing provider billing account, switch the workspace to Hybrid or BYOK in Settings, then add the provider key there. Keys stay encrypted server-side and are never exposed to the browser.",
     ].join(" ");
   }
 
@@ -92,7 +103,7 @@ function getWorkerAnswer(question: string) {
 
   if (normalized.includes("usage") || normalized.includes("cost") || normalized.includes("bill")) {
     return [
-      "Usage is tracked by workspace, user, provider, model, request type, token estimate, cost estimate, and success state. The Usage page shows model/provider breakdowns, and billing enforcement can be layered on top of those logs.",
+      "Usage is tracked by workspace, user, provider, model, request type, token estimate, credit/cost estimate, and success state. In Managed mode, those provider costs roll up into OmniAI subscription credits instead of separate user invoices.",
     ].join(" ");
   }
 

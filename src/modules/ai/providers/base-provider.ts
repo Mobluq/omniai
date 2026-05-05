@@ -10,6 +10,7 @@ import type {
 
 export type ProviderConfig = {
   apiKey?: string;
+  useEnvironmentFallback?: boolean;
   aws?: {
     region?: string;
     accessKeyId?: string;
@@ -77,7 +78,7 @@ export abstract class BaseProvider {
 
   protected placeholderTextOutput(input: TextGenerationInput): TextGenerationOutput {
     return {
-      content: `${this.name} is connected in OmniAI, but no live credential is available for this request. Add the provider key in Settings or configure the matching server environment variable, then send the prompt again.`,
+      content: `${this.name} is selected in OmniAI, but no live credential is available for this request. If this workspace uses Managed Credits, make sure this provider is included in the managed pool. If it uses BYOK or Hybrid mode, add the provider key in Settings and send the prompt again.`,
       modelId: input.modelId,
       provider: this.id,
       tokenInputEstimate: estimateTokens(input.prompt),

@@ -17,7 +17,7 @@ Generate a local secret with:
 openssl rand -base64 32
 ```
 
-## Optional provider keys
+## Managed provider keys
 
 ```bash
 OPENAI_API_KEY=""
@@ -27,7 +27,9 @@ MISTRAL_API_KEY=""
 STABILITY_API_KEY=""
 ```
 
-Provider keys can also be saved per workspace in Settings. Saved workspace keys are encrypted before storage and never returned to the browser.
+These environment variables power OmniAI Managed Credits. They are controlled by the platform and are never sent to the browser.
+
+Provider keys can also be saved per workspace in Settings when the workspace chooses BYOK or Hybrid mode. Saved workspace keys are encrypted before storage and never returned to the browser.
 
 Optional model overrides:
 
