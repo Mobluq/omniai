@@ -1,0 +1,33 @@
+name: Feature request
+description: Propose a product capability or workflow.
+title: "[Feature]: "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or business problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: users
+    attributes:
+      label: Users and workflows
+      description: Who uses this, when, and what are they trying to finish?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Proposed scope
+      description: What should be included in the first version, and what should wait?
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and dependencies
+      description: Include data, security, integration, billing, or migration concerns.
+    validations:
+      required: false

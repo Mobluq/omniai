@@ -59,3 +59,7 @@ Audit events are modeled for user, workspace, entity, action, IP address, user a
 2FA setup, enable, disable, and login outcomes are included in account security activity.
 
 Security-sensitive account changes also create in-app notifications. Notification bodies must avoid secrets, API keys, raw prompts, and provider payloads.
+
+## Long-Term Security Baseline
+
+Team security expectations are documented in `docs/foundation/SECURITY_BASELINE.md`. Update that baseline when the project adds new auth modes, regulated data, external integrations, webhook flows, file processing, billing behavior, or operational incident requirements.

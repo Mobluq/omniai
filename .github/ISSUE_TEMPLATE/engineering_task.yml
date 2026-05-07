@@ -1,0 +1,36 @@
+name: Engineering task
+description: Track technical work that is not directly a user-facing feature.
+title: "[Engineering]: "
+labels: ["engineering"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What needs to be changed and why?
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Likely areas
+      description: Mention modules, routes, database models, workflows, or docs that may be touched.
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What must be true before this task is done?
+      placeholder: |
+        - ...
+        - ...
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Which tests, checks, or manual flows should prove the work?
+    validations:
+      required: true

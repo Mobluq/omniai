@@ -60,6 +60,14 @@ npm run dev
 ## Validation
 
 ```bash
+npm run validate
+npm run build
+```
+
+Or run the individual checks:
+
+```bash
+npm run db:validate
 npm run typecheck
 npm run lint
 npm test
@@ -99,3 +107,9 @@ The scaffold includes:
 - Stripe checkout/customer portal routes, billing models, audit logs, and usage-limit enforcement
 
 See `UX_FLOW.md`, `ROUTING_INTELLIGENCE.md`, `ARCHITECTURE.md`, `SECURITY.md`, `ENVIRONMENT.md`, `API.md`, and `DEPLOYMENT.md` for more detail.
+
+## Team Foundation
+
+For long-term handoff and future product planning, start with `TEAM_HANDOFF.md` and `docs/README.md`.
+
+The foundation docs cover engineering standards, naming conventions, database change rules, security expectations, CI/CD practice, ADRs, and the product brief template to fill in before major buildout starts.

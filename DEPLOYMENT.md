@@ -83,6 +83,8 @@ For Vercel, run these from a secure local terminal or CI job with the same produ
 ## Production checklist
 
 - GitHub repository exists and is private until launch.
+- Branch protection requires pull requests, passing CI, resolved conversations, and CODEOWNERS review for protected areas.
+- Dependabot is enabled for npm and GitHub Actions updates.
 - Vercel environment variables are configured for production and preview.
 - Hosted PostgreSQL is reachable from Vercel.
 - `npm run db:deploy` has completed successfully.
@@ -91,3 +93,5 @@ For Vercel, run these from a secure local terminal or CI job with the same produ
 - `NEXTAUTH_URL` exactly matches the production domain.
 - A generated `NEXTAUTH_SECRET` is set.
 - Signup/login, dashboard, chat, and `/api/health` are verified after deployment.
+
+See `docs/foundation/CI_CD_PLAYBOOK.md` for release, migration, and rollback standards.

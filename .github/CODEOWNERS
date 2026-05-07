@@ -1,0 +1,7 @@
+# Replace or expand these owners when the project moves into a team GitHub org.
+* @Mobluq
+
+/prisma/ @Mobluq
+/src/lib/security/ @Mobluq
+/.github/ @Mobluq
+/SECURITY.md @Mobluq

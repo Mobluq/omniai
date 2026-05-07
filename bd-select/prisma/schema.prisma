@@ -1,0 +1,878 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  buyer
+  seller
+  authenticator
+  admin
+  super_admin
+}
+
+enum KycStatus {
+  not_started
+  pending
+  verified
+  rejected
+  expired
+}
+
+enum OtpPurpose {
+  sign_in
+  email_verify
+  phone_verify
+  password_reset
+}
+
+enum BrandTier {
+  luxury
+  contemporary
+  streetwear
+  designer
+  heritage
+}
+
+enum ListingCondition {
+  new_with_tags
+  new_without_tags
+  excellent
+  good
+  fair
+}
+
+enum ListingStatus {
+  draft
+  in_review
+  needs_more_info
+  rejected
+  live
+  reserved
+  barter_locked
+  sold
+  removed
+}
+
+enum PhotoRole {
+  front
+  back
+  label
+  defect
+  sole
+  packaging
+  receipt
+  serial
+  other
+}
+
+enum MediaAssetStatus {
+  ticketed
+  uploaded
+  attached
+  rejected
+  deleted
+}
+
+enum ReviewQueueStatus {
+  queued
+  assigned
+  in_review
+  needs_more_info
+  escalated
+  decided
+  cancelled
+}
+
+enum ReviewDecision {
+  approve
+  reject
+  request_more_photos
+  escalate
+}
+
+enum OrderStatus {
+  pending_payment
+  paid
+  shipped
+  delivered
+  completed
+  disputed
+  refunded
+  cancelled
+}
+
+enum EscrowState {
+  not_started
+  collecting
+  held
+  release_pending
+  released
+  refunded
+  chargeback
+}
+
+enum PaymentProcessor {
+  paystack
+  flutterwave
+  manual
+}
+
+enum PaymentStatus {
+  pending
+  authorized
+  paid
+  failed
+  refunded
+  cancelled
+}
+
+enum PaymentChannel {
+  card
+  transfer
+  ussd
+  bank
+  apple_pay
+  google_pay
+}
+
+enum PayoutStatus {
+  pending
+  queued
+  processing
+  paid
+  failed
+  cancelled
+}
+
+enum ShipmentCourier {
+  gig
+  sendbox
+  topship
+  kwik
+  dhl
+  manual
+}
+
+enum ShipmentStatus {
+  label_created
+  pickup_scheduled
+  in_transit
+  delivered
+  failed
+  returned
+  cancelled
+}
+
+enum DisputeReason {
+  fake
+  damaged
+  not_as_described
+  wrong_item
+  never_arrived
+  off_platform
+  other
+}
+
+enum DisputeStatus {
+  open
+  under_review
+  awaiting_evidence
+  resolved_refund
+  resolved_partial
+  resolved_return
+  rejected
+  closed
+}
+
+enum BarterProposalStatus {
+  proposed
+  accepted
+  both_shipped
+  in_review
+  approved_for_release
+  completed
+  dispute
+  rejected
+  expired
+  cancelled
+  blocked
+}
+
+enum ThreadParticipantRole {
+  buyer
+  seller
+  initiator
+  recipient
+  support
+  authenticator
+}
+
+enum MessageThreadStatus {
+  open
+  locked
+  archived
+}
+
+enum NotificationType {
+  system
+  security
+  listing
+  order
+  dispute
+  barter
+  payout
+  review
+  authentication
+}
+
+enum SubscriptionTier {
+  tier_1
+  tier_2
+  tier_3
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  cancelled
+  expired
+}
+
+enum PromotionType {
+  bump
+  featured
+  drop
+}
+
+enum PromotionStatus {
+  scheduled
+  active
+  expired
+  cancelled
+}
+
+model User {
+  id                    String                     @id @default(cuid())
+  name                  String?
+  email                 String?                    @unique
+  emailVerified         DateTime?
+  phone                 String?                    @unique
+  phoneVerifiedAt       DateTime?
+  image                 String?
+  passwordHash          String?
+  role                  UserRole                   @default(buyer)
+  kycStatus             KycStatus                  @default(not_started)
+  sellerScore           Float                      @default(0)
+  timezone              String                     @default("Africa/Lagos")
+  locale                String                     @default("en-NG")
+  lastLoginAt           DateTime?
+  deletedAt             DateTime?
+  createdAt             DateTime                   @default(now())
+  updatedAt             DateTime                   @updatedAt
+  accounts              Account[]
+  sessions              Session[]
+  otpChallenges         OtpChallenge[]
+  mediaAssets           MediaAsset[]               @relation("OwnedMediaAssets")
+  sellerProfile         SellerProfile?
+  kycVerifications      KycVerification[]
+  listings              Listing[]                  @relation("SellerListings")
+  assignedReviews       ReviewQueueItem[]          @relation("AssignedReviewItems")
+  decidedReviews        ReviewQueueItem[]          @relation("DecidedReviewItems")
+  buyerOrders           Order[]                    @relation("BuyerOrders")
+  sellerOrders          Order[]                    @relation("SellerOrders")
+  payouts               Payout[]                   @relation("SellerPayouts")
+  shipmentsSent         Shipment[]                 @relation("ShipmentShipper")
+  shipmentsReceived     Shipment[]                 @relation("ShipmentRecipient")
+  raisedDisputes        Dispute[]                  @relation("RaisedDisputes")
+  resolvedDisputes      Dispute[]                  @relation("ResolvedDisputes")
+  threadParticipants    MessageThreadParticipant[]
+  messages              Message[]                  @relation("MessageSender")
+  reviewsAuthored       Review[]                   @relation("ReviewAuthor")
+  reviewsReceived       Review[]                   @relation("ReviewTarget")
+  initiatedBarters      BarterProposal[]           @relation("InitiatedBarters")
+  receivedBarters       BarterProposal[]           @relation("ReceivedBarters")
+  barterTopUps          BarterProposal[]           @relation("BarterTopUpPayer")
+  barterListingsOffered BarterProposalListing[]    @relation("BarterOfferedBy")
+  notifications         Notification[]
+  auditLogs             AuditLog[]                 @relation("ActorAuditLogs")
+
+  @@index([email])
+  @@index([phone])
+  @@index([role, kycStatus])
+  @@index([createdAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model OtpChallenge {
+  id          String     @id @default(cuid())
+  userId      String?
+  identifier  String
+  purpose     OtpPurpose @default(sign_in)
+  codeHash    String
+  attempts    Int        @default(0)
+  maxAttempts Int        @default(5)
+  expiresAt   DateTime
+  consumedAt  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([identifier, purpose, expiresAt])
+  @@index([userId, purpose])
+  @@index([consumedAt])
+}
+
+model SellerProfile {
+  id                 String            @id @default(cuid())
+  userId             String            @unique
+  storeName          String
+  storeSlug          String            @unique
+  bio                String?           @db.Text
+  proApprovedAt      DateTime?
+  listingLimit       Int?
+  payoutToken        String?
+  defaultHubCode     String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  proSubscriptions   ProSubscription[]
+
+  @@index([storeSlug])
+}
+
+model ProSubscription {
+  id                  String             @id @default(cuid())
+  sellerProfileId     String
+  tier                SubscriptionTier
+  status              SubscriptionStatus @default(active)
+  priceNgn            Int
+  startsAt            DateTime           @default(now())
+  endsAt              DateTime?
+  cancelledAt         DateTime?
+  processorReference  String?
+  metadata            Json?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  sellerProfile       SellerProfile      @relation(fields: [sellerProfileId], references: [id], onDelete: Cascade)
+
+  @@index([sellerProfileId, status])
+  @@index([tier, status])
+}
+
+model KycVerification {
+  id                String    @id @default(cuid())
+  userId            String
+  provider          String
+  verificationType  String
+  providerReference String    @unique
+  identityToken     String?
+  status            KycStatus @default(pending)
+  rejectionReason   String?
+  evidence          Json?
+  verifiedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([provider, providerReference])
+}
+
+model Brand {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  tier        BrandTier
+  restricted  Boolean   @default(false)
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  listings    Listing[]
+
+  @@index([slug])
+  @@index([tier, restricted])
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  name      String
+  slug      String     @unique
+  parentId  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  parent    Category?  @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[] @relation("CategoryTree")
+  listings  Listing[]
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model Listing {
+  id                   String                  @id @default(cuid())
+  sellerId             String
+  brandId              String?
+  categoryId           String?
+  title                String
+  slug                 String
+  description          String?                 @db.Text
+  size                 String?
+  condition            ListingCondition
+  currency             String                  @default("NGN")
+  priceNgn             Int
+  status               ListingStatus           @default(draft)
+  aiAuthenticityScore  Int?
+  aiPriceScore         Int?
+  fairPriceMinNgn      Int?
+  fairPriceMaxNgn      Int?
+  submittedAt          DateTime?
+  approvedAt           DateTime?
+  rejectedAt           DateTime?
+  soldAt               DateTime?
+  removedAt            DateTime?
+  metadata             Json?
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  seller               User                    @relation("SellerListings", fields: [sellerId], references: [id], onDelete: Restrict)
+  brand                Brand?                  @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  category             Category?               @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  photos               ListingPhoto[]
+  mediaAssets          MediaAsset[]
+  reviewQueueItems     ReviewQueueItem[]
+  order                Order?
+  promotions           ListingPromotion[]
+  targetBarterOffers   BarterProposal[]        @relation("TargetBarterListing")
+  offeredInBarters     BarterProposalListing[]
+
+  @@unique([sellerId, slug])
+  @@index([sellerId, status])
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([status, approvedAt])
+  @@index([priceNgn])
+}
+
+model ListingPhoto {
+  id           String    @id @default(cuid())
+  listingId    String
+  mediaAssetId String?   @unique
+  url          String
+  storageKey   String?
+  role         PhotoRole
+  qualityScore Int?
+  sortOrder    Int       @default(0)
+  metadata     Json?
+  createdAt    DateTime  @default(now())
+  listing      Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  mediaAsset   MediaAsset? @relation(fields: [mediaAssetId], references: [id], onDelete: SetNull)
+
+  @@index([listingId, role])
+}
+
+model MediaAsset {
+  id             String           @id @default(cuid())
+  ownerId        String
+  listingId      String?
+  status         MediaAssetStatus @default(ticketed)
+  role           PhotoRole?
+  storageKey     String           @unique
+  uploadUrl      String?
+  publicUrl      String
+  contentType    String
+  byteSize       Int?
+  checksumSha256 String?
+  width          Int?
+  height         Int?
+  qualityScore   Int?
+  metadata       Json?
+  expiresAt      DateTime?
+  uploadedAt     DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  owner          User             @relation("OwnedMediaAssets", fields: [ownerId], references: [id], onDelete: Cascade)
+  listing        Listing?         @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  listingPhoto   ListingPhoto?
+
+  @@index([ownerId, status])
+  @@index([listingId])
+  @@index([storageKey])
+  @@index([expiresAt])
+}
+
+model ReviewQueueItem {
+  id             String             @id @default(cuid())
+  listingId      String
+  assignedToId   String?
+  decidedById    String?
+  status         ReviewQueueStatus  @default(queued)
+  aiSignals      Json?
+  decision       ReviewDecision?
+  decisionReason String?            @db.Text
+  slaDueAt       DateTime?
+  decidedAt      DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  listing        Listing            @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  assignedTo     User?              @relation("AssignedReviewItems", fields: [assignedToId], references: [id], onDelete: SetNull)
+  decidedBy      User?              @relation("DecidedReviewItems", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  @@index([listingId])
+  @@index([assignedToId, status])
+  @@index([status, slaDueAt])
+  @@index([decision])
+}
+
+model Order {
+  id                   String          @id @default(cuid())
+  buyerId              String
+  sellerId             String
+  listingId            String          @unique
+  grossNgn             Int
+  buyerFeeNgn          Int             @default(0)
+  sellerFeeNgn         Int             @default(0)
+  authenticationFeeNgn Int             @default(0)
+  paymentFeeNgn        Int             @default(0)
+  shippingFeeNgn       Int             @default(0)
+  payoutNgn            Int
+  status               OrderStatus     @default(pending_payment)
+  escrowState          EscrowState     @default(not_started)
+  paidAt               DateTime?
+  shippedAt            DateTime?
+  deliveredAt          DateTime?
+  completedAt          DateTime?
+  cancelledAt          DateTime?
+  autoConfirmAt        DateTime?
+  metadata             Json?
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  buyer                User            @relation("BuyerOrders", fields: [buyerId], references: [id], onDelete: Restrict)
+  seller               User            @relation("SellerOrders", fields: [sellerId], references: [id], onDelete: Restrict)
+  listing              Listing         @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  payments             Payment[]
+  payout               Payout?
+  shipments            Shipment[]
+  disputes             Dispute[]
+  messageThreads       MessageThread[]
+  reviews              Review[]
+
+  @@index([buyerId, status])
+  @@index([sellerId, status])
+  @@index([status, createdAt])
+  @@index([escrowState])
+}
+
+model Payment {
+  id                  String           @id @default(cuid())
+  orderId             String?
+  barterProposalId    String?
+  processor           PaymentProcessor
+  reference           String           @unique
+  amountNgn           Int
+  status              PaymentStatus    @default(pending)
+  channel             PaymentChannel
+  paidAt              DateTime?
+  metadata            Json?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  order               Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  barterProposal      BarterProposal?  @relation(fields: [barterProposalId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([barterProposalId])
+  @@index([processor, status])
+  @@index([reference])
+}
+
+model Payout {
+  id                 String       @id @default(cuid())
+  sellerId           String
+  orderId            String       @unique
+  bankAccountToken   String
+  amountNgn          Int
+  status             PayoutStatus @default(pending)
+  processorReference String?      @unique
+  releasedAt         DateTime?
+  metadata           Json?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  seller             User         @relation("SellerPayouts", fields: [sellerId], references: [id], onDelete: Restrict)
+  order              Order        @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@index([sellerId, status])
+  @@index([status, createdAt])
+}
+
+model Shipment {
+  id                String              @id @default(cuid())
+  orderId           String?
+  barterProposalId  String?
+  shipperId         String?
+  recipientId       String?
+  courier           ShipmentCourier
+  labelUrl          String?
+  trackingNumber    String?
+  status            ShipmentStatus      @default(label_created)
+  hubCode           String?
+  events            Json?
+  insuredValueNgn   Int?
+  deliveredAt       DateTime?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  order             Order?              @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  barterProposal    BarterProposal?     @relation(fields: [barterProposalId], references: [id], onDelete: SetNull)
+  shipper           User?               @relation("ShipmentShipper", fields: [shipperId], references: [id], onDelete: SetNull)
+  recipient         User?               @relation("ShipmentRecipient", fields: [recipientId], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([barterProposalId])
+  @@index([shipperId])
+  @@index([recipientId])
+  @@index([courier, status])
+  @@index([trackingNumber])
+}
+
+model Dispute {
+  id                String          @id @default(cuid())
+  orderId           String?
+  barterProposalId  String?
+  raisedById        String
+  reasonCode        DisputeReason
+  evidence          Json?
+  status            DisputeStatus   @default(open)
+  resolution        String?         @db.Text
+  resolvedById      String?
+  resolvedAt        DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  order             Order?          @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  barterProposal    BarterProposal? @relation(fields: [barterProposalId], references: [id], onDelete: SetNull)
+  raisedBy          User            @relation("RaisedDisputes", fields: [raisedById], references: [id], onDelete: Restrict)
+  resolvedBy        User?           @relation("ResolvedDisputes", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([orderId])
+  @@index([barterProposalId])
+  @@index([raisedById, status])
+  @@index([status, createdAt])
+}
+
+model MessageThread {
+  id                String                     @id @default(cuid())
+  orderId           String?
+  barterProposalId  String?
+  status            MessageThreadStatus        @default(open)
+  metadata          Json?
+  createdAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
+  order             Order?                     @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  barterProposal    BarterProposal?            @relation(fields: [barterProposalId], references: [id], onDelete: SetNull)
+  participants      MessageThreadParticipant[]
+  messages          Message[]
+
+  @@index([orderId])
+  @@index([barterProposalId])
+  @@index([status, updatedAt])
+}
+
+model MessageThreadParticipant {
+  id          String                @id @default(cuid())
+  threadId    String
+  userId      String
+  role        ThreadParticipantRole
+  lastReadAt  DateTime?
+  createdAt   DateTime              @default(now())
+  thread      MessageThread         @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, userId])
+  @@index([userId])
+}
+
+model Message {
+  id           String        @id @default(cuid())
+  threadId     String
+  senderId     String
+  body         String        @db.Text
+  redactedBody String        @db.Text
+  redactions   Json?
+  metadata     Json?
+  createdAt    DateTime      @default(now())
+  thread       MessageThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  sender       User          @relation("MessageSender", fields: [senderId], references: [id], onDelete: Restrict)
+
+  @@index([threadId, createdAt])
+  @@index([senderId, createdAt])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  orderId    String
+  authorId   String
+  targetId   String
+  stars      Int
+  body       String?  @db.Text
+  createdAt  DateTime @default(now())
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  author     User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  target     User     @relation("ReviewTarget", fields: [targetId], references: [id], onDelete: Restrict)
+
+  @@unique([orderId, authorId, targetId])
+  @@index([targetId, createdAt])
+}
+
+model BarterProposal {
+  id                 String                  @id @default(cuid())
+  initiatorId        String
+  recipientId        String
+  targetListingId    String
+  topUpNgn           Int                     @default(0)
+  topUpPayerId       String?
+  status             BarterProposalStatus    @default(proposed)
+  valuationSnapshot  Json?
+  expiresAt          DateTime
+  acceptedAt         DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  initiator          User                    @relation("InitiatedBarters", fields: [initiatorId], references: [id], onDelete: Restrict)
+  recipient          User                    @relation("ReceivedBarters", fields: [recipientId], references: [id], onDelete: Restrict)
+  targetListing      Listing                 @relation("TargetBarterListing", fields: [targetListingId], references: [id], onDelete: Restrict)
+  topUpPayer         User?                   @relation("BarterTopUpPayer", fields: [topUpPayerId], references: [id], onDelete: SetNull)
+  offeredListings    BarterProposalListing[]
+  payments           Payment[]
+  shipments          Shipment[]
+  disputes           Dispute[]
+  messageThreads     MessageThread[]
+
+  @@index([initiatorId, status])
+  @@index([recipientId, status])
+  @@index([targetListingId])
+  @@index([status, expiresAt])
+}
+
+model BarterProposalListing {
+  proposalId  String
+  listingId   String
+  offeredById String
+  createdAt   DateTime       @default(now())
+  proposal    BarterProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  listing     Listing        @relation(fields: [listingId], references: [id], onDelete: Restrict)
+  offeredBy   User           @relation("BarterOfferedBy", fields: [offeredById], references: [id], onDelete: Restrict)
+
+  @@id([proposalId, listingId])
+  @@index([listingId])
+  @@index([offeredById])
+}
+
+model ListingPromotion {
+  id          String          @id @default(cuid())
+  listingId   String
+  type        PromotionType
+  status      PromotionStatus @default(scheduled)
+  priceNgn    Int
+  startsAt    DateTime
+  endsAt      DateTime
+  metadata    Json?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  listing     Listing         @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId, status])
+  @@index([type, status, startsAt])
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String
+  type        NotificationType @default(system)
+  title       String
+  body        String           @db.Text
+  actionUrl   String?
+  readAt      DateTime?
+  archivedAt  DateTime?
+  metadata    Json?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([type, createdAt])
+}
+
+model AuditLog {
+  id                String   @id @default(cuid())
+  actorId           String?
+  action            String
+  entity            String   @default("System")
+  entityId          String?
+  beforeState       Json?
+  afterState        Json?
+  ipAddress         String?
+  userAgent         String?
+  requestId         String?
+  metadata          Json?
+  signature         String?
+  signatureVersion  String?
+  createdAt         DateTime @default(now())
+  actor             User?    @relation("ActorAuditLogs", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId, createdAt])
+  @@index([entity, entityId])
+  @@index([action])
+  @@index([requestId])
+}
+
+model RateLimitBucket {
+  id           String    @id @default(cuid())
+  keyHash      String    @unique
+  scope        String
+  count        Int       @default(0)
+  resetAt      DateTime
+  blockedUntil DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([scope, resetAt])
+  @@index([blockedUntil])
+}
